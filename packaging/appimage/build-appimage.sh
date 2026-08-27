@@ -9,7 +9,7 @@ BUILD_DIR=${BUILD_DIR:-"$PROJECT_ROOT/build"}
 WORK_DIR=${WORK_DIR:-"$PROJECT_ROOT/dist/appimage-work"}
 APPDIR="$WORK_DIR/Vellum.AppDir"
 STAGE_DIR="$WORK_DIR/stage"
-VERSION=${VERSION:-"1.0.0"}
+VERSION=${VERSION:-"1.0.1"}
 OUTPUT=${OUTPUT:-"$PROJECT_ROOT/dist/vellum-$VERSION-amd64.AppImage"}
 APPIMAGETOOL=${APPIMAGETOOL:-appimagetool}
 

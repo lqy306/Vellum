@@ -24,6 +24,15 @@
     <name>Vellum contributors</name>
   </developer>
   <releases>
+    <release version="1.0.1" date="2026-08-27">
+      <description>
+        <p>Fix AI inline completion ghost text not disappearing on accept or reject.</p>
+        <p>Restrict automatic AI completion to code documents to avoid chat-like suggestions.</p>
+        <p>Make auto-pair brackets work in both normal and Vi insert mode, with a new preference toggle.</p>
+        <p>Add Vi mode yy (yank line), cc (change line) and p (paste).</p>
+        <p>Clean up draft snapshots on discard, snapshot on exit, and skip empty drafts.</p>
+      </description>
+    </release>
     <release version="1.0.0" date="2026-08-27">
       <description>
         <p>Unify the application display name as vellum in all languages.</p>

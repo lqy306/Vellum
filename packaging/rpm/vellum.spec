@@ -3,7 +3,7 @@
 # 在 Debian 系上需要 --define '_libdir /usr/lib/x86_64-linux-gnu'（RHEL/Fedora 自动使用 /usr/lib64）。
 
 Name:           vellum
-Version:        1.0.0
+Version:        1.0.1
 Release:        1%{?dist}
 Summary:        A focused GTK4 text editor
 License:        BSD-2-Clause
@@ -57,5 +57,9 @@ meson install -C build --destdir %{buildroot}
 %{_datadir}/locale/zh_CN/LC_MESSAGES/vellum.mo
 
 %changelog
+* Thu Aug 27 2026 Leo Lee <lqy.work.learning@gmail.com> - 1.0.1-1
+- Fix AI ghost text not disappearing and make auto-pair brackets work
+- Restrict automatic AI completion to code documents
+
 * Thu Aug 27 2026 Leo Lee <lqy.work.learning@gmail.com> - 1.0.0-1
 - Initial release
