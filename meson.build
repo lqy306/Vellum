@@ -10,7 +10,12 @@ project(
   ]
 )
 
-vellum_version = meson.project_version()
+# 构建日期版本（YYYY.MM.DD），仅用于“关于 → 检查更新”的比较，不对外展示。
+date_cmd = run_command('date', '+%Y.%m.%d', check : false)
+vellum_version = date_cmd.stdout().strip()
+if vellum_version == ''
+  vellum_version = '0'
+endif
 vellum_gettext_package = 'vellum'
 vellum_datadir = join_paths(get_option('prefix'), get_option('datadir'))
 vellum_localedir = join_paths(vellum_datadir, 'locale')
@@ -18,6 +23,7 @@ vellum_plugin_dir = join_paths(get_option('prefix'), get_option('libdir'), 'vell
 
 add_project_arguments(
   '-DGETTEXT_PACKAGE="' + vellum_gettext_package + '"',
+  '-DVELLUM_VERSION="' + vellum_version + '"',
   '-DLOCALEDIR="' + vellum_localedir + '"',
   '-DVELLUM_PLUGIN_DIR="' + vellum_plugin_dir + '"',
   language : 'c'

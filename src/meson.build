@@ -25,7 +25,7 @@ vellum_executable = executable(
   'vellum',
   files('main.c'),
   vellum_core_sources,
-  dependencies : [gtk_dep, adw_dep, sourceview_dep, spelling_dep, gio_dep, gmodule_dep, zlib_dep],
+  dependencies : [gtk_dep, adw_dep, sourceview_dep, spelling_dep, gio_dep, gmodule_dep, soup_dep, json_dep, zlib_dep],
   install : true
 )
 
@@ -33,7 +33,7 @@ vellum_tui_debug_executable = executable(
   'vellum-tui-debug',
   files('mt-tui-debug.c'),
   vellum_core_sources,
-  dependencies : [gtk_dep, adw_dep, sourceview_dep, spelling_dep, gio_dep, gmodule_dep, json_dep, zlib_dep],
+  dependencies : [gtk_dep, adw_dep, sourceview_dep, spelling_dep, gio_dep, gmodule_dep, soup_dep, json_dep, zlib_dep],
   install : true
 )
 
