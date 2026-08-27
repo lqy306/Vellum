@@ -239,7 +239,9 @@ test_inline_completion_overlay_lifecycle(void)
     second_document = mt_window_get_current_document(window);
     g_assert_nonnull(second_document);
     g_assert_true(second_document != first_document);
-    g_assert_null(first_document->inline_completion_label);
+    /* 覆盖层采用“隐藏复用”：切换文档后旧 label 隐藏而非销毁。 */
+    g_assert_nonnull(first_document->inline_completion_label);
+    g_assert_false(gtk_widget_get_visible(first_document->inline_completion_label));
     g_assert_null(window->inline_completion_document);
 
     mt_window_show_inline_completion(window, "next candidate");
@@ -247,7 +249,8 @@ test_inline_completion_overlay_lifecycle(void)
     g_assert_nonnull(second_document->inline_completion_label);
     g_assert_true(window->inline_completion_document == second_document);
     mt_window_clear_inline_completion(window);
-    g_assert_null(second_document->inline_completion_label);
+    g_assert_nonnull(second_document->inline_completion_label);
+    g_assert_false(gtk_widget_get_visible(second_document->inline_completion_label));
     g_assert_null(window->inline_completion_document);
 
     gtk_window_destroy(GTK_WINDOW(window->window));
@@ -461,4 +464,3 @@ main(int argc, char **argv)
 
     return g_test_run();
 }
-

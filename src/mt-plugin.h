@@ -54,7 +54,10 @@ typedef enum
     MT_PLUGIN_EDITOR_SAVE,
     MT_PLUGIN_EDITOR_SAVE_AND_CLOSE,
     MT_PLUGIN_EDITOR_CLOSE,
-    MT_PLUGIN_EDITOR_FORCE_CLOSE
+    MT_PLUGIN_EDITOR_FORCE_CLOSE,
+    MT_PLUGIN_EDITOR_YANK_LINE,
+    MT_PLUGIN_EDITOR_CHANGE_LINE,
+    MT_PLUGIN_EDITOR_PASTE
 } MtPluginEditorCommand;
 
 struct _MtPluginHost
@@ -103,6 +106,8 @@ struct _MtPluginHost
                                       MtPluginPreferenceSetFunc set_callback,
                                       gpointer user_data,
                                       GDestroyNotify destroy_notify);
+    /* 当前活动文档是否已识别为代码语言；自动补全等仅限代码的功能依赖它。 */
+    gboolean (*get_is_code_document)(MtPluginHost *host);
 };
 
 struct _MtPluginInfo

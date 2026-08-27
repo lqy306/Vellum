@@ -336,6 +336,24 @@ mt_plugin_manager_get_parent_window(MtPluginHost *host)
     return window != NULL ? mt_window_get_gtk_window(window) : NULL;
 }
 
+static gboolean
+mt_plugin_manager_get_is_code_document(MtPluginHost *host)
+{
+    MtPluginManager *manager;
+    MtWindow *window;
+    MtDocument *document;
+
+    manager = host->private_data;
+    window = mt_application_get_active_window(manager->application);
+    if (window == NULL)
+    {
+        return FALSE;
+    }
+    document = mt_window_get_current_document(window);
+    return document != NULL &&
+           gtk_source_buffer_get_language(mt_document_get_buffer(document)) != NULL;
+}
+
 static void
 mt_plugin_manager_set_panel(MtPluginHost *host,
                             const gchar *id,
@@ -897,6 +915,7 @@ mt_plugin_manager_new(MtApplication *application)
     manager->host.clear_inline_completion = mt_plugin_manager_clear_inline_completion;
     manager->host.request_plugin_removal = mt_plugin_manager_request_plugin_removal;
     manager->host.add_preference_switch = mt_plugin_manager_add_preference_switch;
+    manager->host.get_is_code_document = mt_plugin_manager_get_is_code_document;
 
     if (!g_module_supported())
     {

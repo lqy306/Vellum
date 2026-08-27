@@ -37,7 +37,8 @@ mt_document_insert_pair(MtDocument *document, gunichar opening)
     gint opening_length;
     gint closing_length;
 
-    if (!mt_document_is_code_buffer(document) ||
+    if (!document->auto_pair_brackets ||
+        !mt_document_is_code_buffer(document) ||
         gtk_text_buffer_get_selection_bounds(GTK_TEXT_BUFFER(document->buffer), &start, &end))
     {
         return FALSE;
@@ -238,6 +239,7 @@ mt_document_new(void)
     document->display_name = g_strdup(_("Untitled"));
     document->draft_path = mt_document_make_draft_path();
     document->is_draft = TRUE;
+    document->auto_pair_brackets = TRUE;
 
     source_view = GTK_SOURCE_VIEW(gtk_source_view_new_with_buffer(document->buffer));
     document->view = GTK_WIDGET(source_view);
@@ -259,6 +261,9 @@ mt_document_new(void)
     gtk_widget_set_hexpand(document->view, TRUE);
     key_controller = gtk_event_controller_key_new();
     g_object_set_data(G_OBJECT(key_controller), "vellum-smart-pair-controller", GINT_TO_POINTER(1));
+    /* 文本视图自身的按键处理在 BUBBLE 阶段先插入可打印字符并返回 TRUE，
+     * 智能配对必须用 CAPTURE 阶段抢先拿到按键，否则永远不触发。 */
+    gtk_event_controller_set_propagation_phase(key_controller, GTK_PHASE_CAPTURE);
     g_signal_connect(key_controller,
                      "key-pressed",
                      G_CALLBACK(mt_document_key_pressed),
@@ -309,16 +314,8 @@ mt_document_free(MtDocument *document)
     }
     if (document->inline_completion_label != NULL)
     {
-        if (GTK_IS_TEXT_VIEW(document->view) &&
-            gtk_widget_get_parent(document->inline_completion_label) == document->view)
-        {
-            gtk_text_view_remove(GTK_TEXT_VIEW(document->view),
-                                 document->inline_completion_label);
-        }
-        else if (gtk_widget_get_parent(document->inline_completion_label) != NULL)
-        {
-            gtk_widget_unparent(document->inline_completion_label);
-        }
+        /* 幽灵 label 始终作为 text view 的 overlay 子项挂载，
+         * 视图销毁时由 GtkTextViewChild 的 dispose 统一清理，这里只解除引用。 */
         document->inline_completion_label = NULL;
     }
     g_clear_object(&document->file_monitor);
@@ -370,6 +367,7 @@ mt_document_apply_editor_settings(MtDocument *document, MtSettings *settings)
         spelling_text_buffer_adapter_set_enabled(document->spell_adapter,
                                                  mt_settings_get_spell_check(settings));
     }
+    document->auto_pair_brackets = mt_settings_get_auto_pair_brackets(settings);
 }
 
 void

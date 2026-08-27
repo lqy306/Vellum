@@ -687,6 +687,14 @@ msgstr "Automatic word wrap"
 msgid "Automatic indentation"
 msgstr "Automatic indentation"
 
+#: src/mt-window.c:4511
+msgid "Auto-pair brackets"
+msgstr "Auto-pair brackets"
+
+#: src/mt-window.c:4512
+msgid "Typing an opening bracket, quote or angle bracket in code documents inserts its closing pair and keeps the cursor inside"
+msgstr "Typing an opening bracket, quote or angle bracket in code documents inserts its closing pair and keeps the cursor inside"
+
 #: src/mt-window.c:4514
 msgid "Indent width"
 msgstr "Indent width"
@@ -1143,8 +1151,8 @@ msgid "Vi: Insert mode"
 msgstr "Vi: Insert mode"
 
 #: src/plugins/vim-mode-plugin.c:95
-msgid "Vi commands: :w, :wq, :x, :q, :q!, :help"
-msgstr "Vi commands: :w, :wq, :x, :q, :q!, :help"
+msgid "Vi commands: :w, :wq, :x, :q, :q!, :help; normal keys: h j k l w b 0 $ G gg i a o x d d d y y c c p u"
+msgstr "Vi commands: :w, :wq, :x, :q, :q!, :help; normal keys: h j k l w b 0 $ G gg i a o x dd yy cc p u"
 
 #: src/plugins/vim-mode-plugin.c:101
 #, c-format

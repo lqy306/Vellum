@@ -1246,16 +1246,14 @@ mt_window_update_header_title(MtWindow *window)
 }
 
 static gboolean
-mt_window_snapshot_all_cb(gpointer user_data)
+mt_window_snapshot_all(MtWindow *window)
 {
-    MtWindow *window;
     gint count;
     gint index;
 
-    window = user_data;
     if (window == NULL || window->disposed || !ADW_IS_TAB_VIEW(window->tab_view))
     {
-        return G_SOURCE_REMOVE;
+        return FALSE;
     }
     count = adw_tab_view_get_n_pages(window->tab_view);
 
@@ -1272,6 +1270,17 @@ mt_window_snapshot_all_cb(gpointer user_data)
             mt_document_snapshot(document);
         }
     }
+
+    return TRUE;
+}
+
+static gboolean
+mt_window_snapshot_all_cb(gpointer user_data)
+{
+    MtWindow *window;
+
+    window = user_data;
+    mt_window_snapshot_all(window);
 
     window->snapshot_source_id = 0;
 
@@ -1314,6 +1323,20 @@ mt_window_buffer_modified_changed(GtkTextBuffer *buffer, gpointer user_data)
 }
 
 static void
+mt_window_editor_scrolled(GtkAdjustment *adjustment, gpointer user_data)
+{
+    MtWindow *window;
+
+    (void)adjustment;
+    window = user_data;
+    if (window != NULL && !window->disposed &&
+        window->inline_completion_document != NULL)
+    {
+        mt_window_clear_inline_completion(window);
+    }
+}
+
+static void
 mt_window_cursor_moved(GtkTextBuffer *buffer,
                        GtkTextIter *new_location,
                        GtkTextMark *mark,
@@ -1321,14 +1344,19 @@ mt_window_cursor_moved(GtkTextBuffer *buffer,
 {
     MtWindow *window;
 
-    (void)buffer;
     (void)new_location;
-    (void)mark;
 
     window = user_data;
     if (window == NULL || window->disposed)
     {
         return;
+    }
+    if (mark == gtk_text_buffer_get_insert(buffer) &&
+        window->inline_completion_document != NULL)
+    {
+        /* 光标移动表示用户主动导航或编辑，幽灵补全不再与当前位置对应，
+         * 必须立即移除，否则会像残影一样挂在旧坐标上。 */
+        mt_window_clear_inline_completion(window);
     }
     mt_window_update_position(window);
 }
@@ -1706,6 +1734,8 @@ mt_window_close_dialog_response(AdwMessageDialog *dialog,
 
     if (g_strcmp0(response, "discard") == 0)
     {
+        /* 丢弃未保存内容时同步删除草稿，避免同一篇草稿每次启动都被恢复。 */
+        mt_document_remove_snapshot(request->document);
         adw_tab_view_close_page_finish(request->window->tab_view, request->page, TRUE);
         mt_close_request_free(request);
     }
@@ -4523,6 +4553,8 @@ mt_window_destroyed(GtkWidget *widget, gpointer user_data)
         g_source_remove(window->snapshot_source_id);
         window->snapshot_source_id = 0;
     }
+    /* 退出前把每个未保存文档的最新内容写入草稿，保证“加载上次的”。 */
+    mt_window_snapshot_all(window);
     if (window->language_source_id != 0)
     {
         g_source_remove(window->language_source_id);
@@ -4725,6 +4757,29 @@ mt_window_add_document(MtWindow *window, MtDocument *document)
                      "mark-set",
                      G_CALLBACK(mt_window_cursor_moved),
                      window);
+    {
+        GtkAdjustment *vadjustment;
+        GtkAdjustment *hadjustment;
+
+        /* 幽灵补全的覆盖层锚定在固定坐标：滚动后位置必然错位，
+         * 必须立即移除，否则就像残影一样留在原来的行上。 */
+        vadjustment = gtk_scrollable_get_vadjustment(GTK_SCROLLABLE(mt_document_get_view(document)));
+        if (vadjustment != NULL)
+        {
+            g_signal_connect(vadjustment,
+                             "value-changed",
+                             G_CALLBACK(mt_window_editor_scrolled),
+                             window);
+        }
+        hadjustment = gtk_scrollable_get_hadjustment(GTK_SCROLLABLE(mt_document_get_view(document)));
+        if (hadjustment != NULL)
+        {
+            g_signal_connect(hadjustment,
+                             "value-changed",
+                             G_CALLBACK(mt_window_editor_scrolled),
+                             window);
+        }
+    }
     gtk_widget_grab_focus(mt_document_get_view(document));
     mt_window_apply_source_scheme(window);
     mt_window_apply_editor_preferences(window);
@@ -4795,10 +4850,25 @@ mt_window_restore_snapshots(MtWindow *window)
 
         if (mt_document_restore_snapshot(document, path, &error))
         {
-            g_free(document->draft_path);
-            document->draft_path = g_strdup(path);
-            mt_window_add_document(window, document);
-            restored++;
+            GtkTextBuffer *buffer;
+            GtkTextIter start;
+            GtkTextIter end;
+
+            buffer = GTK_TEXT_BUFFER(mt_document_get_buffer(document));
+            gtk_text_buffer_get_bounds(buffer, &start, &end);
+            if (gtk_text_iter_equal(&start, &end))
+            {
+                /* 空草稿没有恢复价值：删除文件并跳过，避免残留垃圾。 */
+                g_remove(path);
+                mt_document_free(document);
+            }
+            else
+            {
+                g_free(document->draft_path);
+                document->draft_path = g_strdup(path);
+                mt_window_add_document(window, document);
+                restored++;
+            }
         }
         else
         {
@@ -4876,7 +4946,6 @@ void
 mt_window_clear_inline_completion(MtWindow *window)
 {
     MtDocument *document;
-    GtkWidget *view;
 
     if (window == NULL || window->disposed)
     {
@@ -4890,18 +4959,11 @@ mt_window_clear_inline_completion(MtWindow *window)
         return;
     }
 
-    view = mt_document_get_view(document);
-    if (GTK_IS_TEXT_VIEW(view) &&
-        gtk_widget_get_parent(document->inline_completion_label) == view)
-    {
-        /*
-         * 必须用 gtk_text_view_remove 移除覆盖层子项；
-         * 直接 unparent 会绕过文本视图内部的 overlay 记账，
-         * 之后滚动/重排快照时触发 snapshot_child 断言。
-         */
-        gtk_text_view_remove(GTK_TEXT_VIEW(view), document->inline_completion_label);
-    }
-    document->inline_completion_label = NULL;
+    /* GTK 4.22 中 gtk_text_view_add_overlay 添加的子项没有公开的移除 API：
+     * gtk_text_view_remove 只处理 anchored children，直接 unparent 会留下
+     * center_child 内部 overlays 队列的悬挂条目，重排时触发 snapshot_child
+     * 断言。因此“清除”= 隐藏并复用同一个 label，视图销毁时自动释放。 */
+    gtk_widget_set_visible(document->inline_completion_label, FALSE);
 }
 
 void
@@ -4957,14 +5019,26 @@ mt_window_show_inline_completion(MtWindow *window, const gchar *text)
                                           rectangle.y,
                                           &x,
                                           &y);
-    document->inline_completion_label = gtk_label_new(preview);
-    gtk_widget_add_css_class(document->inline_completion_label,
-                             "vellum-inline-completion");
-    gtk_label_set_xalign(GTK_LABEL(document->inline_completion_label), 0.0f);
-    gtk_text_view_add_overlay(GTK_TEXT_VIEW(view),
-                               document->inline_completion_label,
-                               x + rectangle.width,
-                               y);
+    if (document->inline_completion_label == NULL)
+    {
+        document->inline_completion_label = gtk_label_new(preview);
+        gtk_widget_add_css_class(document->inline_completion_label,
+                                 "vellum-inline-completion");
+        gtk_label_set_xalign(GTK_LABEL(document->inline_completion_label), 0.0f);
+        gtk_text_view_add_overlay(GTK_TEXT_VIEW(view),
+                                   document->inline_completion_label,
+                                   x + rectangle.width,
+                                   y);
+    }
+    else
+    {
+        gtk_label_set_text(GTK_LABEL(document->inline_completion_label), preview);
+        gtk_text_view_move_overlay(GTK_TEXT_VIEW(view),
+                                   document->inline_completion_label,
+                                   x + rectangle.width,
+                                   y);
+        gtk_widget_set_visible(document->inline_completion_label, TRUE);
+    }
     window->inline_completion_document = document;
     g_free(preview);
 }
@@ -5076,6 +5150,24 @@ mt_window_save_and_close_finished(GObject *source,
     mt_file_request_free(request);
 }
 
+static void
+mt_window_paste_finished(GObject *source, GAsyncResult *result, gpointer user_data)
+{
+    MtWindow *window;
+    gchar *text;
+    GError *error;
+
+    window = user_data;
+    error = NULL;
+    text = gdk_clipboard_read_text_finish(GDK_CLIPBOARD(source), result, &error);
+    if (text != NULL && *text != '\0')
+    {
+        mt_window_insert_text(window, text);
+    }
+    g_free(text);
+    g_clear_error(&error);
+}
+
 gboolean
 mt_window_run_editor_command(MtWindow *window,
                              MtPluginEditorCommand command)
@@ -5150,6 +5242,48 @@ mt_window_run_editor_command(MtWindow *window,
             }
             gtk_text_buffer_delete(buffer, &cursor, &target);
             return TRUE;
+        case MT_PLUGIN_EDITOR_YANK_LINE:
+        {
+            GtkTextIter line_start;
+            GtkTextIter line_end;
+            gchar *line_text;
+            GdkClipboard *clipboard;
+
+            gtk_text_iter_set_line_offset(&cursor, 0);
+            line_start = cursor;
+            line_end = line_start;
+            gtk_text_iter_forward_to_line_end(&line_end);
+            line_text = gtk_text_buffer_get_text(buffer, &line_start, &line_end, FALSE);
+            clipboard = gdk_display_get_clipboard(window->display);
+            gdk_clipboard_set_text(clipboard, line_text);
+            g_free(line_text);
+            return TRUE;
+        }
+        case MT_PLUGIN_EDITOR_CHANGE_LINE:
+        {
+            GtkTextIter line_start;
+            GtkTextIter line_end;
+
+            gtk_text_iter_set_line_offset(&cursor, 0);
+            line_start = cursor;
+            line_end = line_start;
+            gtk_text_iter_forward_to_line_end(&line_end);
+            gtk_text_buffer_begin_user_action(buffer);
+            gtk_text_buffer_delete(buffer, &line_start, &line_end);
+            gtk_text_buffer_end_user_action(buffer);
+            return TRUE;
+        }
+        case MT_PLUGIN_EDITOR_PASTE:
+        {
+            GdkClipboard *clipboard;
+
+            clipboard = gdk_display_get_clipboard(window->display);
+            gdk_clipboard_read_text_async(clipboard,
+                                          NULL,
+                                          mt_window_paste_finished,
+                                          window);
+            return TRUE;
+        }
         case MT_PLUGIN_EDITOR_UNDO:
             if (gtk_text_buffer_get_can_undo(buffer))
             {
@@ -5692,6 +5826,7 @@ enum
     MT_EDITOR_SETTING_RIGHT_MARGIN,
     MT_EDITOR_SETTING_WORD_WRAP,
     MT_EDITOR_SETTING_AUTO_INDENT,
+    MT_EDITOR_SETTING_AUTO_PAIR_BRACKETS,
     MT_EDITOR_SETTING_RESTORE_SESSION,
     MT_EDITOR_SETTING_EXTENSIONS_ENABLED,
     MT_EDITOR_SETTING_AUTO_CHECK_UPDATES
@@ -5733,6 +5868,9 @@ mt_window_editor_switch_changed(GObject *object,
             break;
         case MT_EDITOR_SETTING_AUTO_INDENT:
             mt_settings_set_auto_indent(window->settings, enabled);
+            break;
+        case MT_EDITOR_SETTING_AUTO_PAIR_BRACKETS:
+            mt_settings_set_auto_pair_brackets(window->settings, enabled);
             break;
         case MT_EDITOR_SETTING_RESTORE_SESSION:
             mt_settings_set_restore_session(window->settings, enabled);
@@ -5972,6 +6110,12 @@ mt_window_action_preferences(GSimpleAction *action, GVariant *parameter, gpointe
                                 NULL,
                                 MT_EDITOR_SETTING_AUTO_INDENT,
                                 mt_settings_get_auto_indent(window->settings),
+                                window);
+    mt_window_add_editor_switch(wrap_group,
+                                _("Auto-pair brackets"),
+                                _("Typing an opening bracket, quote or angle bracket in code documents inserts its closing pair and keeps the cursor inside"),
+                                MT_EDITOR_SETTING_AUTO_PAIR_BRACKETS,
+                                mt_settings_get_auto_pair_brackets(window->settings),
                                 window);
     indent_width_row = ADW_SPIN_ROW(adw_spin_row_new_with_range(1.0, 16.0, 1.0));
     adw_preferences_row_set_title(ADW_PREFERENCES_ROW(indent_width_row), _("Indent width"));

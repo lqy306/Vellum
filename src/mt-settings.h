@@ -36,6 +36,8 @@ struct _MtSettings
     gboolean show_right_margin;
     gboolean word_wrap;
     gboolean auto_indent;
+    /* 代码文档中自动配对括号/引号，输入后光标停在括号内侧。 */
+    gboolean auto_pair_brackets;
     gboolean restore_session;
     /* 关闭时仅运行核心编辑器；重新启动后生效。 */
     gboolean extensions_enabled;
@@ -79,6 +81,8 @@ gboolean mt_settings_get_word_wrap(MtSettings *settings);
 void mt_settings_set_word_wrap(MtSettings *settings, gboolean enabled);
 gboolean mt_settings_get_auto_indent(MtSettings *settings);
 void mt_settings_set_auto_indent(MtSettings *settings, gboolean enabled);
+gboolean mt_settings_get_auto_pair_brackets(MtSettings *settings);
+void mt_settings_set_auto_pair_brackets(MtSettings *settings, gboolean enabled);
 gboolean mt_settings_get_restore_session(MtSettings *settings);
 void mt_settings_set_restore_session(MtSettings *settings, gboolean enabled);
 gboolean mt_settings_get_extensions_enabled(MtSettings *settings);

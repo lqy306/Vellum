@@ -16,6 +16,8 @@ struct _VimMode
     MtPluginHost *host;
     gboolean insert_mode;
     gboolean pending_delete;
+    gboolean pending_yank;
+    gboolean pending_change;
     gboolean pending_goto;
     GtkWindow *command_window;
     GtkEntry *command_entry;
@@ -26,7 +28,7 @@ static const MtPluginInfo vim_mode_plugin_info = {
     "io.github.vellum.vim-mode",
     "Vi Mode",
     "A lightweight Vi-compatible modal editor with normal, insert and command input states",
-    "0.1.0"
+    "0.2.0"
 };
 
 static VimMode *vim_mode;
@@ -36,6 +38,8 @@ vim_mode_set_normal(VimMode *mode)
 {
     mode->insert_mode = FALSE;
     mode->pending_delete = FALSE;
+    mode->pending_yank = FALSE;
+    mode->pending_change = FALSE;
     mode->pending_goto = FALSE;
     mode->host->show_toast(mode->host, _("Vi: Normal mode"));
 }
@@ -45,6 +49,8 @@ vim_mode_set_insert(VimMode *mode)
 {
     mode->insert_mode = TRUE;
     mode->pending_delete = FALSE;
+    mode->pending_yank = FALSE;
+    mode->pending_change = FALSE;
     mode->pending_goto = FALSE;
     mode->host->show_toast(mode->host, _("Vi: Insert mode"));
 }
@@ -92,7 +98,8 @@ vim_mode_command_activate(GtkEntry *entry, gpointer user_data)
     }
     else if (g_strcmp0(command, "help") == 0)
     {
-        mode->host->show_toast(mode->host, _("Vi commands: :w, :wq, :x, :q, :q!, :help"));
+        mode->host->show_toast(mode->host,
+                               _("Vi commands: :w, :wq, :x, :q, :q!, :help; normal keys: h j k l w b 0 $ G gg i a o x d d d y y c c p u"));
     }
     else
     {
@@ -218,6 +225,8 @@ vim_mode_handle_key(MtPluginHost *host,
     if (keyval == GDK_KEY_Escape)
     {
         mode->pending_delete = FALSE;
+        mode->pending_yank = FALSE;
+        mode->pending_change = FALSE;
         mode->pending_goto = FALSE;
         return TRUE;
     }
@@ -234,6 +243,25 @@ vim_mode_handle_key(MtPluginHost *host,
         if (character == 'd')
         {
             vim_mode_run(mode, MT_PLUGIN_EDITOR_DELETE_CURRENT_LINE);
+        }
+        return TRUE;
+    }
+    if (mode->pending_yank)
+    {
+        mode->pending_yank = FALSE;
+        if (character == 'y')
+        {
+            vim_mode_run(mode, MT_PLUGIN_EDITOR_YANK_LINE);
+        }
+        return TRUE;
+    }
+    if (mode->pending_change)
+    {
+        mode->pending_change = FALSE;
+        if (character == 'c')
+        {
+            vim_mode_run(mode, MT_PLUGIN_EDITOR_CHANGE_LINE);
+            vim_mode_set_insert(mode);
         }
         return TRUE;
     }
@@ -299,6 +327,15 @@ vim_mode_handle_key(MtPluginHost *host,
             return TRUE;
         case 'd':
             mode->pending_delete = TRUE;
+            return TRUE;
+        case 'y':
+            mode->pending_yank = TRUE;
+            return TRUE;
+        case 'c':
+            mode->pending_change = TRUE;
+            return TRUE;
+        case 'p':
+            vim_mode_run(mode, MT_PLUGIN_EDITOR_PASTE);
             return TRUE;
         case 'u':
             vim_mode_run(mode, MT_PLUGIN_EDITOR_UNDO);

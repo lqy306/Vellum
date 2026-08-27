@@ -17,6 +17,10 @@
 #define AI_CONTEXT_LIMIT 8000
 #define AI_SUFFIX_LIMIT 2000
 #define AI_AUTO_DELAY_MILLISECONDS 1000
+/* 候选在屏幕上停留的最长时间；超时后自动消失，避免“鬼影长存”。 */
+#define AI_CANDIDATE_TIMEOUT_SECONDS 15
+/* 用户用其他文本拒绝候选后，这段时间内不再自动弹出补全。 */
+#define AI_REJECT_SUPPRESS_MILLISECONDS 2000
 
 typedef struct _AiRequest AiRequest;
 typedef struct _AiConfigWidgets AiConfigWidgets;
@@ -63,6 +67,10 @@ static struct _AiCandidate ai_candidate;
 static guint ai_generation;
 /* 输入停顿后自动补全的防抖源；停用插件时必须移除。 */
 static guint ai_auto_source_id;
+/* 候选显示的自动过期计时器；任何清除候选的路径都必须移除它。 */
+static guint ai_candidate_timeout_source_id;
+/* 用户拒绝候选的时刻（单调时钟微秒），用于抑制紧接着的自动补全。 */
+static gint64 ai_reject_until_us;
 static gboolean ai_auto_context_loaded;
 static gchar *ai_auto_context;
 static gboolean ai_request_in_flight;
@@ -346,14 +354,15 @@ ai_completion_build_body(const gchar *model, const gchar *prefix, const gchar *s
     if (suffix != NULL && *suffix != '\0')
     {
         /* 与真实补全工具一致的 fill-in-the-middle 思路：同时给出光标前后文，
-         * 让模型只补中间段；聊天模型用标记符描述前缀与后缀。 */
-        prompt = g_strdup_printf("Complete the text at the cursor. The document text before the cursor is between <fim_prefix> and <fim_suffix>, and the text after the cursor follows <fim_suffix>. Return only the continuation that leads from the prefix toward the suffix, without markdown, explanation, fences, or repeating the existing text.\n\n<fim_prefix>\n%s\n<fim_suffix>\n%s\n<fim_middle>\n",
+         * 让模型只补中间段；聊天模型用标记符描述前缀与后缀。指令刻意强调
+         * “不是对话”：聊天模型常把“你好”当开场白接一句问候。 */
+        prompt = g_strdup_printf("This is not a chat. Continue the code or prose at the cursor. The text before the cursor is between <fim_prefix> and <fim_suffix>; the text after the cursor follows <fim_suffix>. Output only the missing middle that flows from the prefix toward the suffix. Never greet, never answer a question, never explain, never use Markdown or fences, never repeat text that already exists.\n\n<fim_prefix>\n%s\n<fim_suffix>\n%s\n<fim_middle>\n",
                                  prefix,
                                  suffix);
     }
     else
     {
-        prompt = g_strdup_printf("Complete the text at the cursor. Return only the continuation, without markdown, explanation, fences, or repetition of the existing text.\n\n%s",
+        prompt = g_strdup_printf("This is not a chat. Continue the code or prose at the cursor. Output only the characters that should immediately follow the cursor, as if the file keeps going. Never greet, never answer a question, never explain, never use Markdown or fences, never repeat text that already exists.\n\n%s",
                                  prefix);
     }
     builder = json_builder_new();
@@ -366,7 +375,10 @@ ai_completion_build_body(const gchar *model, const gchar *prefix, const gchar *s
     json_builder_set_member_name(builder, "role");
     json_builder_add_string_value(builder, "system");
     json_builder_set_member_name(builder, "content");
-    json_builder_add_string_value(builder, "You are an inline text completion engine.");
+    json_builder_add_string_value(builder,
+                                  "You are an inline text completion engine inside a text editor, not a chat assistant. "
+                                  "Your only output is the immediate continuation at the cursor: raw characters, no dialogue, "
+                                  "no greetings, no question answering, no commentary, no Markdown, no repetition.");
     json_builder_end_object(builder);
     json_builder_begin_object(builder);
     json_builder_set_member_name(builder, "role");
@@ -598,6 +610,11 @@ ai_completion_prepare_inline_candidate(const gchar *completion)
 static void
 ai_completion_clear_candidate(void)
 {
+    if (ai_candidate_timeout_source_id != 0)
+    {
+        g_source_remove(ai_candidate_timeout_source_id);
+        ai_candidate_timeout_source_id = 0;
+    }
     if (ai_candidate.host != NULL && ai_candidate.host->clear_inline_completion != NULL)
     {
         ai_candidate.host->clear_inline_completion(ai_candidate.host);
@@ -609,6 +626,13 @@ ai_completion_clear_candidate(void)
 }
 
 static void
+ai_completion_reject_suppress(void)
+{
+    ai_reject_until_us = g_get_monotonic_time() +
+                         AI_REJECT_SUPPRESS_MILLISECONDS * 1000;
+}
+
+static void
 ai_completion_auto_cancel(void)
 {
     if (ai_auto_source_id != 0)
@@ -616,6 +640,20 @@ ai_completion_auto_cancel(void)
         g_source_remove(ai_auto_source_id);
         ai_auto_source_id = 0;
     }
+}
+
+static gboolean
+ai_completion_candidate_timeout(gpointer user_data)
+{
+    MtPluginHost *host;
+
+    host = user_data;
+    ai_candidate_timeout_source_id = 0;
+    if (ai_candidate.host == host)
+    {
+        ai_completion_clear_candidate();
+    }
+    return G_SOURCE_REMOVE;
 }
 
 static void
@@ -658,6 +696,17 @@ ai_completion_auto_cb(gpointer user_data)
 static void
 ai_completion_auto_schedule(MtPluginHost *host)
 {
+    if (g_get_monotonic_time() < ai_reject_until_us)
+    {
+        /* 用户刚拒绝过候选：短时间内不再自动弹出，避免“阴魂不散”。 */
+        return;
+    }
+    if (host->get_is_code_document != NULL && !host->get_is_code_document(host))
+    {
+        /* 自动补全只服务代码文档：纯文本或对话里不主动弹，
+         * 否则模型会把“你好”续成一句问候，看起来像阴魂不散的聊天。 */
+        return;
+    }
     if (ai_auto_source_id != 0)
     {
         g_source_remove(ai_auto_source_id);
@@ -699,11 +748,13 @@ ai_completion_handle_key(MtPluginHost *host,
             if (keyval == GDK_KEY_Escape && state == 0)
             {
                 g_free(current_context);
+                ai_completion_reject_suppress();
                 ai_completion_clear_candidate();
                 return TRUE;
             }
         }
         g_free(current_context);
+        ai_completion_reject_suppress();
         ai_completion_clear_candidate();
     }
 
@@ -817,6 +868,14 @@ ai_completion_request_finished(GObject *source, GAsyncResult *result, gpointer u
             ai_candidate.text = inline_candidate;
             ai_candidate.context = g_strdup(request->context);
             ai_candidate.suffix = g_strdup(request->suffix);
+            if (ai_candidate_timeout_source_id != 0)
+            {
+                g_source_remove(ai_candidate_timeout_source_id);
+            }
+            ai_candidate_timeout_source_id =
+                g_timeout_add_seconds(AI_CANDIDATE_TIMEOUT_SECONDS,
+                                      ai_completion_candidate_timeout,
+                                      request->host);
             request->host->show_inline_completion(request->host, ai_candidate.text);
             if (!request->automatic)
             {
@@ -866,6 +925,12 @@ ai_completion_request_start(MtPluginHost *host, gboolean automatic)
     if (automatic && !ai_auto_enabled)
     {
         /* 自动补全已在“偏好设置”中关闭，忽略迟到的防抖回调。 */
+        return;
+    }
+    if (automatic && host->get_is_code_document != NULL &&
+        !host->get_is_code_document(host))
+    {
+        /* 迟到的自动补全回调发现文档已不是代码，放弃本次请求。 */
         return;
     }
 

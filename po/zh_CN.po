@@ -684,6 +684,14 @@ msgstr "自动折行"
 msgid "Automatic indentation"
 msgstr "自动缩进"
 
+#: src/mt-window.c:4511
+msgid "Auto-pair brackets"
+msgstr "自动配对括号"
+
+#: src/mt-window.c:4512
+msgid "Typing an opening bracket, quote or angle bracket in code documents inserts its closing pair and keeps the cursor inside"
+msgstr "在代码文档中，输入开括号、引号或尖括号时自动补全另一半，光标停在括号内侧"
+
 #: src/mt-window.c:4514
 msgid "Indent width"
 msgstr "缩进宽度"
@@ -1139,8 +1147,8 @@ msgid "Vi: Insert mode"
 msgstr "Vi：插入模式"
 
 #: src/plugins/vim-mode-plugin.c:95
-msgid "Vi commands: :w, :wq, :x, :q, :q!, :help"
-msgstr "Vi 命令：:w、:wq、:x、:q、:q!、:help"
+msgid "Vi commands: :w, :wq, :x, :q, :q!, :help; normal keys: h j k l w b 0 $ G gg i a o x d d d y y c c p u"
+msgstr "Vi 命令：:w、:wq、:x、:q、:q!、:help；普通模式键：h j k l w b 0 $ G gg i a o x dd yy cc p u"
 
 #: src/plugins/vim-mode-plugin.c:101
 #, c-format

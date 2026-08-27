@@ -36,6 +36,8 @@ struct _MtDocument
     guint analysis_source_id;
     gboolean is_draft;
     gboolean saving;
+    /* 是否在代码文档中自动配对括号/引号（由“首选项 → 行为”同步）。 */
+    gboolean auto_pair_brackets;
 };
 
 MtDocument *mt_document_new(void);

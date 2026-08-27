@@ -98,6 +98,7 @@ mt_settings_new(void)
     settings->show_right_margin = FALSE;
     settings->word_wrap = TRUE;
     settings->auto_indent = TRUE;
+    settings->auto_pair_brackets = TRUE;
     settings->restore_session = TRUE;
     settings->extensions_enabled = TRUE;
     settings->auto_check_updates = TRUE;
@@ -178,6 +179,7 @@ mt_settings_new(void)
     settings->show_right_margin = mt_settings_get_boolean_or_default(key_file, "Editor", "show-right-margin", settings->show_right_margin);
     settings->word_wrap = mt_settings_get_boolean_or_default(key_file, "Editor", "word-wrap", settings->word_wrap);
     settings->auto_indent = mt_settings_get_boolean_or_default(key_file, "Editor", "auto-indent", settings->auto_indent);
+    settings->auto_pair_brackets = mt_settings_get_boolean_or_default(key_file, "Editor", "auto-pair-brackets", settings->auto_pair_brackets);
     settings->restore_session = mt_settings_get_boolean_or_default(key_file, "Editor", "restore-session", settings->restore_session);
     settings->extensions_enabled = mt_settings_get_boolean_or_default(key_file, "Interface", "extensions-enabled", settings->extensions_enabled);
     settings->auto_check_updates = mt_settings_get_boolean_or_default(key_file, "Interface", "auto-check-updates", settings->auto_check_updates);
@@ -256,6 +258,7 @@ mt_settings_save(MtSettings *settings)
     g_key_file_set_boolean(key_file, "Editor", "show-right-margin", settings->show_right_margin);
     g_key_file_set_boolean(key_file, "Editor", "word-wrap", settings->word_wrap);
     g_key_file_set_boolean(key_file, "Editor", "auto-indent", settings->auto_indent);
+    g_key_file_set_boolean(key_file, "Editor", "auto-pair-brackets", settings->auto_pair_brackets);
     g_key_file_set_boolean(key_file, "Editor", "restore-session", settings->restore_session);
     g_key_file_set_boolean(key_file, "Editor", "custom-font", settings->custom_font);
     g_key_file_set_boolean(key_file, "Editor", "insert-spaces", settings->insert_spaces);
@@ -415,6 +418,7 @@ MT_SETTINGS_BOOLEAN_ACCESSORS(spell_check, spell_check)
 MT_SETTINGS_BOOLEAN_ACCESSORS(show_right_margin, show_right_margin)
 MT_SETTINGS_BOOLEAN_ACCESSORS(word_wrap, word_wrap)
 MT_SETTINGS_BOOLEAN_ACCESSORS(auto_indent, auto_indent)
+MT_SETTINGS_BOOLEAN_ACCESSORS(auto_pair_brackets, auto_pair_brackets)
 MT_SETTINGS_BOOLEAN_ACCESSORS(restore_session, restore_session)
 MT_SETTINGS_BOOLEAN_ACCESSORS(extensions_enabled, extensions_enabled)
 MT_SETTINGS_BOOLEAN_ACCESSORS(auto_check_updates, auto_check_updates)
