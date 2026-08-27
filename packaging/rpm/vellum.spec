@@ -3,7 +3,7 @@
 # 在 Debian 系上需要 --define '_libdir /usr/lib/x86_64-linux-gnu'（RHEL/Fedora 自动使用 /usr/lib64）。
 
 Name:           vellum
-Version:        1.0.1
+Version:        1.0.2
 Release:        1%{?dist}
 Summary:        A focused GTK4 text editor
 License:        BSD-2-Clause
@@ -57,6 +57,13 @@ meson install -C build --destdir %{buildroot}
 %{_datadir}/locale/zh_CN/LC_MESSAGES/vellum.mo
 
 %changelog
+* Thu Aug 27 2026 Leo Lee <lqy.work.learning@gmail.com> - 1.0.2-1
+- Add AI code summary by file type (source/script/web/data), with Ctrl+Alt+S shortcut
+- Add overview map component with draggable viewport rectangle
+- Redesign welcome guide extension selection to use AdwActionRow + GtkSwitch
+- Fix bug: unchecked extensions in welcome guide now actually removed instead of only disabled
+- Increase welcome guide minimum width to 600px to prevent switch misalignment
+
 * Thu Aug 27 2026 Leo Lee <lqy.work.learning@gmail.com> - 1.0.1-1
 - Fix AI ghost text not disappearing and make auto-pair brackets work
 - Restrict automatic AI completion to code documents

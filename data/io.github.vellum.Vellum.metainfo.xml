@@ -24,7 +24,7 @@
     <name>Vellum contributors</name>
   </developer>
   <releases>
-    <release version="1.0.1" date="2026-08-27">
+    <release version="1.0.2" date="2026-08-27">
       <description>
         <p>Fix AI inline completion ghost text not disappearing on accept or reject.</p>
         <p>Restrict automatic AI completion to code documents to avoid chat-like suggestions.</p>

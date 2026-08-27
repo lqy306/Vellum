@@ -11,7 +11,7 @@ project(
 )
 
 # 语义化版本：1.0.0 起使用固定版本号；仅用于“关于 → 检查更新”的比较。
-vellum_version = '1.0.1'
+vellum_version = '1.0.2'
 vellum_gettext_package = 'vellum'
 vellum_datadir = join_paths(get_option('prefix'), get_option('datadir'))
 vellum_localedir = join_paths(vellum_datadir, 'locale')
