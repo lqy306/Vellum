@@ -4,7 +4,7 @@
  * 此程序默认使用临时配置且不加载扩展，绝不执行 shell 命令。
  */
 
-#include "mt-window.h"
+#include "mt-window-private.h"
 
 #include <adwaita.h>
 #include <json-glib/json-glib.h>

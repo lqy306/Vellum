@@ -15,8 +15,10 @@ typedef struct _TestHost TestHost;
 struct _TestHost
 {
     MtPluginHost host;
-    MtPluginActionCallback action;
-    gpointer action_data;
+    MtPluginActionCallback completion_action;
+    gpointer completion_action_data;
+    MtPluginActionCallback summary_action;
+    gpointer summary_action_data;
     MtPluginKeyCallback key_handler;
     gchar *context;
     gchar *suffix;
@@ -34,11 +36,18 @@ host_add_action(MtPluginHost *host,
 {
     TestHost *test;
 
-    (void)name;
     (void)destroy_notify;
     test = host->private_data;
-    test->action = callback;
-    test->action_data = user_data;
+    if (g_str_equal(name, "ai-complete"))
+    {
+        test->completion_action = callback;
+        test->completion_action_data = user_data;
+    }
+    else if (g_str_equal(name, "ai-summarize"))
+    {
+        test->summary_action = callback;
+        test->summary_action_data = user_data;
+    }
     return TRUE;
 }
 
@@ -299,9 +308,10 @@ main(void)
     error = NULL;
     g_assert_true(activate(&test.host, &error));
     g_assert_no_error(error);
-    g_assert_nonnull(test.action);
+    g_assert_nonnull(test.completion_action);
+    g_assert_nonnull(test.summary_action);
 
-    test.action(NULL, NULL, test.action_data);
+    test.completion_action(NULL, NULL, test.completion_action_data);
     if (live_service)
     {
         wait_for_candidate(&test, 28000);
@@ -325,7 +335,7 @@ main(void)
 
     if (!live_service)
     {
-        test.action(NULL, NULL, test.action_data);
+        test.completion_action(NULL, NULL, test.completion_action_data);
     }
     if (deactivate != NULL)
     {

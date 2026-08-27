@@ -3,7 +3,8 @@
  * 以 Adwaita 标题栏、标签和 Toast 组织极简编辑器的主要交互。
  */
 
-#include "mt-window.h"
+#include "mt-window-private.h"
+#include "mt-overview-map.h"
 #include "mt-vut-package.h"
 #include "mt-plugin-manager.h"
 
@@ -63,7 +64,6 @@ typedef struct _MtFontRequest MtFontRequest;
 typedef struct _MtExtensionFileRequest MtExtensionFileRequest;
 typedef struct _MtExtensionDeleteRequest MtExtensionDeleteRequest;
 typedef struct _MtThemeChooser MtThemeChooser;
-typedef struct _MtShortcutRequest MtShortcutRequest;
 typedef struct _MtPropertiesPanel MtPropertiesPanel;
 typedef struct _MtAutoUpdateCheck MtAutoUpdateCheck;
 
@@ -121,14 +121,6 @@ struct _MtThemeChooser
     MtWindow *window;
     AdwActionRow *row;
     GtkFlowBox *flow_box;
-    GtkWindow *dialog;
-};
-
-struct _MtShortcutRequest
-{
-    MtWindow *window;
-    gchar *detailed_action_name;
-    GtkButton *button;
     GtkWindow *dialog;
 };
 
@@ -240,8 +232,8 @@ static void mt_window_update_header_title(MtWindow *window);
 static void mt_window_apply_editor_style(MtWindow *window);
 static void mt_window_apply_source_scheme(MtWindow *window);
 static void mt_window_update_menu_theme_buttons(MtWindow *window);
-static void mt_window_update_menu_zoom_label(MtWindow *window);
-static void mt_window_apply_editor_preferences(MtWindow *window);
+void mt_window_update_menu_zoom_label(MtWindow *window);
+void mt_window_apply_editor_preferences(MtWindow *window);
 static void mt_window_update_language_label(MtWindow *window);
 void mt_window_show_toast(MtWindow *window, const gchar *message);
 static void mt_window_schedule_language_update(MtWindow *window);
@@ -257,9 +249,6 @@ static void mt_window_document_load_finished(GObject *source,
 static void mt_window_save_and_close_finished(GObject *source,
                                               GAsyncResult *result,
                                               gpointer user_data);
-static void mt_window_preference_switch_active_changed(GObject *object,
-                                                         GParamSpec *pspec,
-                                                         gpointer user_data);
 static PangoAttrList *mt_window_statusbar_attrs(void);
 static void mt_window_properties_refresh(MtWindow *window);
 static void mt_window_properties_refresh_metadata(MtPropertiesPanel *panel);
@@ -407,7 +396,7 @@ mt_window_font_dialog_finished(GObject *source,
     mt_font_request_free(request);
 }
 
-static void
+void
 mt_window_choose_font_clicked(GtkButton *button, gpointer user_data)
 {
     MtWindow *window;
@@ -1012,7 +1001,7 @@ mt_window_apply_source_scheme(MtWindow *window)
     state->source_id = g_idle_add(mt_scheme_apply_tick, window);
 }
 
-static void
+void
 mt_window_apply_editor_preferences(MtWindow *window)
 {
     gint count;
@@ -1081,6 +1070,7 @@ mt_window_apply_editor_style(MtWindow *window)
          "box.vellum-external-change button.suggested-action { font-weight: 700; } "
          "row.vellum-destructive label.title { color: @error_color; font-weight: 600; } "
          "row.vellum-destructive label.subtitle { color: alpha(@error_color, .82); } "
+         "frame.vellum-onboarding-target { border: 2px solid #e01b24; border-radius: 10px; background: alpha(#e01b24, .06); box-shadow: 0 0 0 4px alpha(#e01b24, .12); } "
          "button.vellum-properties-toggle { min-width: 24px; padding-left: 2px; padding-right: 2px; } "
          "preferencespage.vellum-properties > scrolledwindow > viewport > clamp > box { margin: 4px 8px 8px 8px; border-spacing: 10px; } "
          "stack.vellum-auxiliary { min-width: 0; } "
@@ -1174,6 +1164,69 @@ mt_window_buffer_changed(GtkTextBuffer *buffer, gpointer user_data)
     }
 }
 
+static guint
+mt_window_count_changed_lines(const gchar *text, gint length)
+{
+    guint lines;
+    gint index;
+
+    lines = 1;
+    for (index = 0; index < length; index++)
+    {
+        if (text[index] == '\n')
+        {
+            lines++;
+        }
+    }
+
+    return lines;
+}
+
+static void
+mt_window_notify_document_change(GtkTextBuffer *buffer,
+                                 MtDocument *document,
+                                 guint changed_lines)
+{
+    MtWindow *window;
+
+    window = g_object_get_data(G_OBJECT(buffer), "vellum-window");
+    if (window == NULL || window->disposed || window->plugin_manager == NULL ||
+        document == NULL || document->loader != NULL || document->saving ||
+        document != mt_window_get_current_document(window) ||
+        gtk_source_buffer_get_language(document->buffer) == NULL)
+    {
+        return;
+    }
+
+    mt_plugin_manager_notify_document_changed((MtPluginManager *)window->plugin_manager,
+                                              MAX(changed_lines, 1));
+}
+
+static void
+mt_window_buffer_inserted(GtkTextBuffer *buffer,
+                          GtkTextIter *location,
+                          gchar *text,
+                          gint length,
+                          gpointer user_data)
+{
+    (void)location;
+    mt_window_notify_document_change(buffer,
+                                     user_data,
+                                     mt_window_count_changed_lines(text, length));
+}
+
+static void
+mt_window_buffer_deleted(GtkTextBuffer *buffer,
+                         GtkTextIter *start,
+                         GtkTextIter *end,
+                         gpointer user_data)
+{
+    guint lines;
+
+    lines = (guint)(ABS(gtk_text_iter_get_line(end) - gtk_text_iter_get_line(start)) + 1);
+    mt_window_notify_document_change(buffer, user_data, lines);
+}
+
 static void
 mt_window_update_document_title(MtDocument *document)
 {
@@ -1213,7 +1266,7 @@ mt_window_update_header_title(MtWindow *window)
     document = mt_window_get_current_document(window);
     if (document == NULL)
     {
-        gtk_label_set_text(window->header_title_label, "vellum");
+        gtk_label_set_text(window->header_title_label, "Vellum");
         gtk_label_set_text(window->header_subtitle_label, "");
         if (window->header_modified_indicator != NULL)
         {
@@ -2110,7 +2163,7 @@ mt_window_show_find_bar(MtWindow *window, gboolean replace_mode)
     gtk_widget_grab_focus(GTK_WIDGET(window->find_entry));
 }
 
-static void
+void
 mt_window_apply_font_scale(MtWindow *window)
 {
     mt_window_apply_editor_style(window);
@@ -2138,7 +2191,7 @@ mt_window_system_dark_changed(AdwStyleManager *manager,
     }
 }
 
-static void
+void
 mt_window_appearance_selected(GObject *object,
                               GParamSpec *pspec,
                               gpointer user_data)
@@ -2157,7 +2210,7 @@ mt_window_appearance_selected(GObject *object,
     mt_settings_save(window->settings);
 }
 
-static const gchar *
+const gchar *
 mt_window_theme_label(const gchar *style_scheme)
 {
     if (g_strcmp0(style_scheme, "adwaita") == 0)
@@ -2340,7 +2393,7 @@ mt_window_theme_chooser_free(MtThemeChooser *chooser)
     g_free(chooser);
 }
 
-static void
+void
 mt_window_show_theme_chooser(GtkButton *button, gpointer user_data)
 {
     static const gchar * const themes[] = {
@@ -2444,7 +2497,7 @@ mt_window_show_theme_chooser(GtkButton *button, gpointer user_data)
     gtk_window_present(chooser->dialog);
 }
 
-static void
+void
 mt_window_language_selected(GObject *object,
                             GParamSpec *pspec,
                             gpointer user_data)
@@ -2464,7 +2517,7 @@ mt_window_language_selected(GObject *object,
     mt_window_show_toast(window, _("Language will apply after restart"));
 }
 
-static void
+void
 mt_window_tab_width_changed(AdwSpinRow *row, gpointer user_data)
 {
     MtWindow *window;
@@ -2476,7 +2529,7 @@ mt_window_tab_width_changed(AdwSpinRow *row, gpointer user_data)
     mt_settings_save(window->settings);
 }
 
-static void
+void
 mt_window_font_scale_changed(AdwSpinRow *row, gpointer user_data)
 {
     MtWindow *window;
@@ -3735,7 +3788,7 @@ mt_window_update_menu_theme_buttons(MtWindow *window)
     gtk_check_button_set_active(window->menu_theme_dark, appearance == MT_APPEARANCE_DARK);
 }
 
-static void
+void
 mt_window_update_menu_zoom_label(MtWindow *window)
 {
     gchar *text;
@@ -3919,7 +3972,7 @@ mt_window_build_primary_menu(MtWindow *window)
     item = g_menu_item_new(_("_Extensions"), "win.extensions");
     g_menu_append_item(section, item);
     g_object_unref(item);
-    item = g_menu_item_new(_("_About vellum"), "win.about");
+    item = g_menu_item_new(_("_About Vellum"), "win.about");
     g_menu_append_item(section, item);
     g_object_unref(item);
     g_menu_append_section(menu, NULL, G_MENU_MODEL(section));
@@ -4041,7 +4094,7 @@ mt_window_clear_history_response(AdwAlertDialog *dialog,
     }
 }
 
-static void
+void
 mt_window_clear_history_clicked(AdwActionRow *row, gpointer user_data)
 {
     MtWindow *window;
@@ -4076,7 +4129,7 @@ mt_window_clear_history_clicked(AdwActionRow *row, gpointer user_data)
 
 /* ---------- 首选项：自定义字体开关 ---------- */
 
-static void
+void
 mt_window_custom_font_toggled(GObject *object, GParamSpec *pspec, gpointer user_data)
 {
     MtWindow *window;
@@ -4174,7 +4227,7 @@ mt_window_new(AdwApplication *application, MtSettings *settings)
     gtk_widget_set_size_request(GTK_WIDGET(window->window),
                                 MT_MIN_WINDOW_WIDTH,
                                 MT_MIN_WINDOW_HEIGHT);
-    gtk_window_set_title(GTK_WINDOW(window->window), "vellum");
+    gtk_window_set_title(GTK_WINDOW(window->window), "Vellum");
     adw_tab_bar_set_view(window->tab_bar, window->tab_view);
     adw_tab_view_set_menu_model(window->tab_view, NULL);
 
@@ -4223,7 +4276,7 @@ mt_window_new(AdwApplication *application, MtSettings *settings)
     header_subtitle_row = gtk_center_box_new();
     header_title_center = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 4);
     window->header_modified_indicator = gtk_label_new("•");
-    window->header_title_label = GTK_LABEL(gtk_label_new("vellum"));
+    window->header_title_label = GTK_LABEL(gtk_label_new("Vellum"));
     window->header_subtitle_label = GTK_LABEL(gtk_label_new(""));
     gtk_widget_add_css_class(header_title_box, "vellum-header-title");
     gtk_widget_add_css_class(GTK_WIDGET(window->header_title_label), "title");
@@ -4722,12 +4775,8 @@ mt_window_add_document(MtWindow *window, MtDocument *document)
     content = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
     gtk_widget_set_hexpand(scroll, TRUE);
     gtk_box_append(GTK_BOX(content), scroll);
-    document->overview = gtk_source_map_new();
-    gtk_source_map_set_view(GTK_SOURCE_MAP(document->overview),
-                            GTK_SOURCE_VIEW(mt_document_get_view(document)));
-    /* GtkSourceMap 原生提供半透明的当前视口与拖动导航；补齐边距和背景，令其与编辑器配色融合。 */
-    gtk_text_view_set_top_margin(GTK_TEXT_VIEW(document->overview), 5);
-    gtk_text_view_set_bottom_margin(GTK_TEXT_VIEW(document->overview), 5);
+    /* 独立组件在 GtkSourceMap 上绘制半透明可视区域，并把点击/拖拽映射到编辑器滚动位置。 */
+    document->overview = mt_overview_map_new(GTK_SOURCE_VIEW(mt_document_get_view(document)));
     gtk_widget_set_overflow(document->overview, GTK_OVERFLOW_VISIBLE);
     gtk_widget_set_size_request(document->overview, MT_OVERVIEW_MAP_WIDTH, -1);
     gtk_widget_add_css_class(document->overview, "vellum-overview-map");
@@ -4752,6 +4801,14 @@ mt_window_add_document(MtWindow *window, MtDocument *document)
     g_signal_connect(mt_document_get_buffer(document),
                      "changed",
                      G_CALLBACK(mt_window_buffer_changed),
+                     document);
+    g_signal_connect(mt_document_get_buffer(document),
+                     "insert-text",
+                     G_CALLBACK(mt_window_buffer_inserted),
+                     document);
+    g_signal_connect(mt_document_get_buffer(document),
+                     "delete-range",
+                     G_CALLBACK(mt_window_buffer_deleted),
                      document);
     g_signal_connect(mt_document_get_buffer(document),
                      "mark-set",
@@ -5563,208 +5620,6 @@ mt_window_action_replace(GSimpleAction *action, GVariant *parameter, gpointer us
     mt_window_show_find_bar(user_data, TRUE);
 }
 
-static void
-mt_window_shortcut_request_free(MtShortcutRequest *request)
-{
-    if (request != NULL)
-    {
-        g_free(request->detailed_action_name);
-        g_free(request);
-    }
-}
-
-static void
-mt_window_shortcut_button_destroyed(gpointer user_data, GClosure *closure)
-{
-    (void)closure;
-    mt_window_shortcut_request_free(user_data);
-}
-
-static gboolean
-mt_window_shortcut_key_pressed(GtkEventControllerKey *controller,
-                               guint keyval,
-                               guint keycode,
-                               GdkModifierType state,
-                               gpointer user_data)
-{
-    MtShortcutRequest *request;
-    GdkModifierType modifiers;
-    gchar *accelerator;
-    gchar *label;
-    const gchar *accelerators[2];
-    GtkApplication *application;
-
-    (void)controller;
-    (void)keycode;
-    request = user_data;
-    modifiers = state & gtk_accelerator_get_default_mod_mask();
-
-    if (keyval == GDK_KEY_Escape && modifiers == 0)
-    {
-        gtk_window_destroy(request->dialog);
-        return TRUE;
-    }
-    if (!gtk_accelerator_valid(keyval, modifiers))
-    {
-        return TRUE;
-    }
-
-    accelerator = gtk_accelerator_name(keyval, modifiers);
-    label = gtk_accelerator_get_label(keyval, modifiers);
-    mt_settings_set_shortcut(request->window->settings,
-                             request->detailed_action_name,
-                             accelerator);
-    mt_settings_save(request->window->settings);
-    accelerators[0] = accelerator;
-    accelerators[1] = NULL;
-    application = GTK_APPLICATION(gtk_window_get_application(GTK_WINDOW(request->window->window)));
-    gtk_application_set_accels_for_action(application,
-                                          request->detailed_action_name,
-                                          accelerators);
-    gtk_button_set_label(request->button, label);
-    gtk_widget_set_tooltip_text(GTK_WIDGET(request->button), accelerator);
-    g_free(label);
-    g_free(accelerator);
-    gtk_window_destroy(request->dialog);
-
-    return TRUE;
-}
-
-static void
-mt_window_shortcut_edit_clicked(GtkButton *button, gpointer user_data)
-{
-    MtShortcutRequest *source_request;
-    MtShortcutRequest *request;
-    GtkWidget *content;
-    GtkWidget *heading;
-    GtkWidget *description;
-    GtkEventController *controller;
-
-    source_request = user_data;
-    request = g_new0(MtShortcutRequest, 1);
-    request->window = source_request->window;
-    request->detailed_action_name = g_strdup(source_request->detailed_action_name);
-    request->button = GTK_BUTTON(button);
-    request->dialog = GTK_WINDOW(adw_window_new());
-    gtk_window_set_title(request->dialog, _("Set Keyboard Shortcut"));
-    gtk_window_set_transient_for(request->dialog, GTK_WINDOW(request->window->window));
-    gtk_window_set_modal(request->dialog, TRUE);
-    gtk_window_set_default_size(request->dialog, 380, 150);
-    content = gtk_box_new(GTK_ORIENTATION_VERTICAL, 12);
-    gtk_widget_set_margin_top(content, 24);
-    gtk_widget_set_margin_bottom(content, 24);
-    gtk_widget_set_margin_start(content, 24);
-    gtk_widget_set_margin_end(content, 24);
-    heading = gtk_label_new(_("Press a new shortcut"));
-    gtk_label_set_xalign(GTK_LABEL(heading), 0.0);
-    gtk_widget_add_css_class(heading, "title-3");
-    description = gtk_label_new(_("Press Escape to cancel. The change applies immediately and is saved for the next start."));
-    gtk_label_set_xalign(GTK_LABEL(description), 0.0);
-    gtk_label_set_wrap(GTK_LABEL(description), TRUE);
-    gtk_widget_add_css_class(description, "dim-label");
-    gtk_box_append(GTK_BOX(content), heading);
-    gtk_box_append(GTK_BOX(content), description);
-    adw_window_set_content(ADW_WINDOW(request->dialog), content);
-    controller = gtk_event_controller_key_new();
-    g_signal_connect(controller,
-                     "key-pressed",
-                     G_CALLBACK(mt_window_shortcut_key_pressed),
-                     request);
-    gtk_widget_add_controller(GTK_WIDGET(request->dialog), controller);
-    g_object_set_data_full(G_OBJECT(request->dialog),
-                           "vellum-shortcut-request",
-                           request,
-                           (GDestroyNotify)mt_window_shortcut_request_free);
-    gtk_window_present(request->dialog);
-}
-
-static void
-mt_window_add_shortcut_row(AdwPreferencesGroup *group,
-                           const gchar *title,
-                           const gchar *detailed_action_name,
-                           const gchar *fallback,
-                           MtWindow *window)
-{
-    AdwActionRow *row;
-    GtkWidget *button;
-    MtShortcutRequest *request;
-    const gchar *custom;
-    const gchar *label;
-
-    row = ADW_ACTION_ROW(adw_action_row_new());
-    adw_preferences_row_set_title(ADW_PREFERENCES_ROW(row), title);
-    custom = mt_settings_get_shortcut(window->settings, detailed_action_name);
-    label = custom != NULL ? custom : fallback;
-    button = gtk_button_new_with_label(label);
-    gtk_widget_set_valign(button, GTK_ALIGN_CENTER);
-    gtk_widget_set_tooltip_text(button, _("Change shortcut"));
-    request = g_new0(MtShortcutRequest, 1);
-    request->window = window;
-    request->detailed_action_name = g_strdup(detailed_action_name);
-    request->button = GTK_BUTTON(button);
-    g_signal_connect_data(button,
-                          "clicked",
-                          G_CALLBACK(mt_window_shortcut_edit_clicked),
-                          request,
-                          mt_window_shortcut_button_destroyed,
-                          0);
-    adw_action_row_add_suffix(row, button);
-    adw_preferences_group_add(group, GTK_WIDGET(row));
-}
-
-void
-mt_window_action_shortcuts(GSimpleAction *action, GVariant *parameter, gpointer user_data)
-{
-    MtWindow *window;
-    AdwPreferencesWindow *shortcuts;
-    AdwPreferencesPage *page;
-    AdwPreferencesGroup *document_group;
-    AdwPreferencesGroup *editing_group;
-    AdwPreferencesGroup *extension_group;
-
-    (void)action;
-    (void)parameter;
-    window = user_data;
-    shortcuts = ADW_PREFERENCES_WINDOW(adw_preferences_window_new());
-    gtk_window_set_transient_for(GTK_WINDOW(shortcuts), GTK_WINDOW(window->window));
-    gtk_window_set_modal(GTK_WINDOW(shortcuts), TRUE);
-    gtk_window_set_title(GTK_WINDOW(shortcuts), _("Keyboard Shortcuts"));
-    page = ADW_PREFERENCES_PAGE(adw_preferences_page_new());
-
-    document_group = ADW_PREFERENCES_GROUP(adw_preferences_group_new());
-    adw_preferences_group_set_title(document_group, _("Document"));
-    mt_window_add_shortcut_row(document_group, _("New document"), "win.new", "Ctrl+N", window);
-    mt_window_add_shortcut_row(document_group, _("Open files"), "win.open", "Ctrl+O", window);
-    mt_window_add_shortcut_row(document_group, _("Save"), "win.save", "Ctrl+S", window);
-    mt_window_add_shortcut_row(document_group, _("Save As"), "win.save-as", "Ctrl+Shift+S", window);
-    mt_window_add_shortcut_row(document_group, _("Close document"), "win.close", "Ctrl+W", window);
-
-    editing_group = ADW_PREFERENCES_GROUP(adw_preferences_group_new());
-    adw_preferences_group_set_title(editing_group, _("Editing"));
-    mt_window_add_shortcut_row(editing_group, _("Find"), "win.find", "Ctrl+F", window);
-    mt_window_add_shortcut_row(editing_group, _("Find and replace"), "win.replace", "Ctrl+H", window);
-    mt_window_add_shortcut_row(editing_group, _("Zoom in"), "win.zoom-in", "Ctrl++", window);
-    mt_window_add_shortcut_row(editing_group, _("Zoom out"), "win.zoom-out", "Ctrl+-", window);
-    mt_window_add_shortcut_row(editing_group, _("Reset zoom"), "win.zoom-reset", "Ctrl+0", window);
-    mt_window_add_shortcut_row(editing_group, _("AI completion"), "app.ai-complete", "Ctrl+Shift+Space", window);
-
-    extension_group = ADW_PREFERENCES_GROUP(adw_preferences_group_new());
-    adw_preferences_group_set_title(extension_group, _("Optional Extensions"));
-    mt_window_add_shortcut_row(extension_group, _("Insert timestamp"), "app.timestamp", "Ctrl+Shift+T", window);
-    mt_window_add_shortcut_row(extension_group, _("Document statistics"), "app.document-statistics", "Ctrl+Shift+W", window);
-    mt_window_add_shortcut_row(extension_group, _("Test links"), "app.link-check", "Ctrl+Shift+L", window);
-    mt_window_add_shortcut_row(extension_group, _("Project sidebar"), "app.project-sidebar", "Ctrl+Shift+P", window);
-    mt_window_add_shortcut_row(extension_group, _("Build"), "app.build", "F9", window);
-    mt_window_add_shortcut_row(extension_group, _("Run"), "app.run", "F10", window);
-    mt_window_add_shortcut_row(extension_group, _("Build and run"), "app.build-and-run", "F11", window);
-
-    adw_preferences_page_add(page, document_group);
-    adw_preferences_page_add(page, editing_group);
-    adw_preferences_page_add(page, extension_group);
-    adw_preferences_window_add(shortcuts, page);
-    gtk_window_present(GTK_WINDOW(shortcuts));
-}
-
 void
 mt_window_action_zoom_in(GSimpleAction *action, GVariant *parameter, gpointer user_data)
 {
@@ -5817,426 +5672,42 @@ mt_window_action_zoom_reset(GSimpleAction *action, GVariant *parameter, gpointer
     mt_window_show_toast(window, _("Zoom reset to 100%"));
 }
 
-enum
+static const gchar *
+mt_window_extension_display_name(const MtPluginInfo *info)
 {
-    MT_EDITOR_SETTING_LINE_NUMBERS = 1,
-    MT_EDITOR_SETTING_CURRENT_LINE,
-    MT_EDITOR_SETTING_OVERVIEW,
-    MT_EDITOR_SETTING_SPELL_CHECK,
-    MT_EDITOR_SETTING_RIGHT_MARGIN,
-    MT_EDITOR_SETTING_WORD_WRAP,
-    MT_EDITOR_SETTING_AUTO_INDENT,
-    MT_EDITOR_SETTING_AUTO_PAIR_BRACKETS,
-    MT_EDITOR_SETTING_RESTORE_SESSION,
-    MT_EDITOR_SETTING_EXTENSIONS_ENABLED,
-    MT_EDITOR_SETTING_AUTO_CHECK_UPDATES
-};
-
-static void
-mt_window_editor_switch_changed(GObject *object,
-                                GParamSpec *pspec,
-                                gpointer user_data)
-{
-    MtWindow *window;
-    gint setting;
-    gboolean enabled;
-
-    (void)pspec;
-    window = user_data;
-    setting = GPOINTER_TO_INT(g_object_get_data(object, "vellum-editor-setting"));
-    enabled = adw_switch_row_get_active(ADW_SWITCH_ROW(object));
-
-    switch (setting)
+    if (info == NULL || info->id == NULL)
     {
-        case MT_EDITOR_SETTING_LINE_NUMBERS:
-            mt_settings_set_show_line_numbers(window->settings, enabled);
-            break;
-        case MT_EDITOR_SETTING_CURRENT_LINE:
-            mt_settings_set_highlight_current_line(window->settings, enabled);
-            break;
-        case MT_EDITOR_SETTING_OVERVIEW:
-            mt_settings_set_show_overview(window->settings, enabled);
-            break;
-        case MT_EDITOR_SETTING_SPELL_CHECK:
-            mt_settings_set_spell_check(window->settings, enabled);
-            break;
-        case MT_EDITOR_SETTING_RIGHT_MARGIN:
-            mt_settings_set_show_right_margin(window->settings, enabled);
-            break;
-        case MT_EDITOR_SETTING_WORD_WRAP:
-            mt_settings_set_word_wrap(window->settings, enabled);
-            break;
-        case MT_EDITOR_SETTING_AUTO_INDENT:
-            mt_settings_set_auto_indent(window->settings, enabled);
-            break;
-        case MT_EDITOR_SETTING_AUTO_PAIR_BRACKETS:
-            mt_settings_set_auto_pair_brackets(window->settings, enabled);
-            break;
-        case MT_EDITOR_SETTING_RESTORE_SESSION:
-            mt_settings_set_restore_session(window->settings, enabled);
-            break;
-        case MT_EDITOR_SETTING_EXTENSIONS_ENABLED:
-            mt_settings_set_extensions_enabled(window->settings, enabled);
-            mt_window_show_toast(window,
-                                 _("Extension loading will change the next time Vellum starts"));
-            break;
-        case MT_EDITOR_SETTING_AUTO_CHECK_UPDATES:
-            mt_settings_set_auto_check_updates(window->settings, enabled);
-            break;
-        default:
-            return;
+        return "";
     }
-
-    mt_window_apply_editor_preferences(window);
-    mt_settings_save(window->settings);
+    if (g_str_equal(info->id, "io.github.vellum.ai-completion")) return _("AI Code Assistant");
+    if (g_str_equal(info->id, "io.github.vellum.timestamp")) return _("Timestamp");
+    if (g_str_equal(info->id, "io.github.vellum.document-statistics")) return _("Document Statistics");
+    if (g_str_equal(info->id, "io.github.vellum.link-check")) return _("Link Check");
+    if (g_str_equal(info->id, "io.github.vellum.project-sidebar")) return _("Project Sidebar");
+    if (g_str_equal(info->id, "io.github.vellum.build-run")) return _("Build and Run");
+    if (g_str_equal(info->id, "io.github.vellum.vim-mode")) return _("Vi Mode");
+    if (g_str_equal(info->id, "io.github.vellum.screenshot")) return _("Editor Screenshot");
+    if (g_str_equal(info->id, "io.github.vellum.welcome")) return _("Welcome Guide");
+    return info->name != NULL ? info->name : "";
 }
 
-static void
-mt_window_indent_width_changed(AdwSpinRow *row, gpointer user_data)
+static const gchar *
+mt_window_extension_display_description(const MtPluginInfo *info)
 {
-    MtWindow *window;
-
-    window = user_data;
-    mt_settings_set_indent_width(window->settings,
-                                 (gint)gtk_adjustment_get_value(adw_spin_row_get_adjustment(row)));
-    mt_window_apply_editor_preferences(window);
-    mt_settings_save(window->settings);
-}
-
-static void
-mt_window_right_margin_changed(AdwSpinRow *row, gpointer user_data)
-{
-    MtWindow *window;
-
-    window = user_data;
-    mt_settings_set_right_margin_position(window->settings,
-                                          (gint)gtk_adjustment_get_value(adw_spin_row_get_adjustment(row)));
-    mt_window_apply_editor_preferences(window);
-    mt_settings_save(window->settings);
-}
-
-static AdwSwitchRow *
-mt_window_add_editor_switch(AdwPreferencesGroup *group,
-                            const gchar *title,
-                            const gchar *subtitle,
-                            gint setting,
-                            gboolean active,
-                            MtWindow *window)
-{
-    AdwSwitchRow *row;
-
-    row = ADW_SWITCH_ROW(adw_switch_row_new());
-    adw_preferences_row_set_title(ADW_PREFERENCES_ROW(row), title);
-    if (subtitle != NULL)
+    if (info == NULL || info->id == NULL)
     {
-        adw_action_row_set_subtitle(ADW_ACTION_ROW(row), subtitle);
+        return "";
     }
-    adw_switch_row_set_active(row, active);
-    g_object_set_data(G_OBJECT(row), "vellum-editor-setting", GINT_TO_POINTER(setting));
-    g_signal_connect(row,
-                     "notify::active",
-                     G_CALLBACK(mt_window_editor_switch_changed),
-                     window);
-    adw_preferences_group_add(group, GTK_WIDGET(row));
-
-    return row;
-}
-
-void
-mt_window_action_preferences(GSimpleAction *action, GVariant *parameter, gpointer user_data)
-{
-    MtWindow *window;
-    AdwPreferencesWindow *preferences;
-    AdwPreferencesPage *page;
-    AdwPreferencesGroup *group;
-    AdwComboRow *appearance_row;
-    AdwActionRow *style_scheme_row;
-    AdwComboRow *language_row;
-    AdwSpinRow *font_scale_row;
-    AdwSpinRow *tab_width_row;
-    AdwSpinRow *indent_width_row;
-    AdwSpinRow *right_margin_row;
-    AdwActionRow *font_row;
-    AdwPreferencesGroup *display_group;
-    AdwPreferencesGroup *wrap_group;
-    AdwPreferencesGroup *behavior_group;
-    AdwSwitchRow *font_switch;
-    GtkWidget *choose_font_button;
-    GtkWidget *choose_theme_button;
-    GtkStringList *appearance_model;
-    GtkStringList *language_model;
-
-    (void)action;
-    (void)parameter;
-
-    window = user_data;
-    preferences = ADW_PREFERENCES_WINDOW(adw_preferences_window_new());
-    gtk_window_set_transient_for(GTK_WINDOW(preferences), GTK_WINDOW(window->window));
-    gtk_window_set_modal(GTK_WINDOW(preferences), TRUE);
-    gtk_window_set_title(GTK_WINDOW(preferences), _("Preferences"));
-
-    page = ADW_PREFERENCES_PAGE(adw_preferences_page_new());
-    group = ADW_PREFERENCES_GROUP(adw_preferences_group_new());
-    adw_preferences_group_set_title(group, _("Interface"));
-
-    appearance_model = gtk_string_list_new(NULL);
-    gtk_string_list_append(appearance_model, _("Follow system"));
-    gtk_string_list_append(appearance_model, _("Light"));
-    gtk_string_list_append(appearance_model, _("Dark"));
-    appearance_row = ADW_COMBO_ROW(adw_combo_row_new());
-    adw_preferences_row_set_title(ADW_PREFERENCES_ROW(appearance_row), _("Appearance"));
-    adw_combo_row_set_model(appearance_row, G_LIST_MODEL(appearance_model));
-    adw_combo_row_set_selected(appearance_row, mt_settings_get_appearance(window->settings));
-    adw_preferences_group_add(group, GTK_WIDGET(appearance_row));
-
-    style_scheme_row = ADW_ACTION_ROW(adw_action_row_new());
-    adw_preferences_row_set_title(ADW_PREFERENCES_ROW(style_scheme_row), _("Code Theme"));
-    adw_action_row_set_subtitle(style_scheme_row,
-                                mt_window_theme_label(mt_settings_get_style_scheme(window->settings)));
-    choose_theme_button = gtk_button_new_with_label(_("Choose"));
-    gtk_widget_set_valign(choose_theme_button, GTK_ALIGN_CENTER);
-    adw_action_row_add_suffix(style_scheme_row, choose_theme_button);
-    adw_preferences_group_add(group, GTK_WIDGET(style_scheme_row));
-    g_object_set_data(G_OBJECT(choose_theme_button), "vellum-theme-row", style_scheme_row);
-    g_signal_connect(choose_theme_button,
-                     "clicked",
-                     G_CALLBACK(mt_window_show_theme_chooser),
-                     window);
-
-    language_model = gtk_string_list_new(NULL);
-    gtk_string_list_append(language_model, _("System language"));
-    gtk_string_list_append(language_model, _("English"));
-    gtk_string_list_append(language_model, _("Simplified Chinese"));
-    language_row = ADW_COMBO_ROW(adw_combo_row_new());
-    adw_preferences_row_set_title(ADW_PREFERENCES_ROW(language_row), _("Language"));
-    adw_combo_row_set_model(language_row, G_LIST_MODEL(language_model));
-    adw_combo_row_set_selected(language_row,
-                               g_strcmp0(mt_settings_get_language(window->settings), "en") == 0 ? 1 :
-                               (g_strcmp0(mt_settings_get_language(window->settings), "zh_CN") == 0 ? 2 : 0));
-    adw_preferences_group_add(group, GTK_WIDGET(language_row));
-
-    font_switch = ADW_SWITCH_ROW(adw_switch_row_new());
-    adw_preferences_row_set_title(ADW_PREFERENCES_ROW(font_switch), _("Use custom font"));
-    adw_action_row_set_subtitle(ADW_ACTION_ROW(font_switch),
-                                _("When disabled, the system monospace font is used"));
-    adw_switch_row_set_active(font_switch, mt_settings_get_custom_font(window->settings));
-    adw_preferences_group_add(group, GTK_WIDGET(font_switch));
-    g_signal_connect(font_switch,
-                     "notify::active",
-                     G_CALLBACK(mt_window_custom_font_toggled),
-                     window);
-
-    font_row = ADW_ACTION_ROW(adw_action_row_new());
-    adw_preferences_row_set_title(ADW_PREFERENCES_ROW(font_row), _("Editor Font"));
-    adw_action_row_set_subtitle(font_row, mt_settings_get_font_family(window->settings));
-    choose_font_button = gtk_button_new_with_label(_("Choose"));
-    gtk_widget_set_valign(choose_font_button, GTK_ALIGN_CENTER);
-    adw_action_row_add_suffix(font_row, choose_font_button);
-    gtk_widget_set_sensitive(GTK_WIDGET(font_row),
-                             mt_settings_get_custom_font(window->settings));
-    g_object_set_data(G_OBJECT(font_switch), "vellum-font-row", font_row);
-    adw_preferences_group_add(group, GTK_WIDGET(font_row));
-    g_object_set_data(G_OBJECT(choose_font_button), "vellum-font-row", font_row);
-    g_signal_connect(choose_font_button,
-                     "clicked",
-                     G_CALLBACK(mt_window_choose_font_clicked),
-                     window);
-
-    font_scale_row = ADW_SPIN_ROW(adw_spin_row_new_with_range(0.75, 2.0, 0.05));
-    adw_preferences_row_set_title(ADW_PREFERENCES_ROW(font_scale_row), _("Editor font scale"));
-    gtk_adjustment_set_value(adw_spin_row_get_adjustment(font_scale_row),
-                             mt_settings_get_font_scale(window->settings));
-    adw_spin_row_set_digits(font_scale_row, 2);
-    adw_preferences_group_add(group, GTK_WIDGET(font_scale_row));
-
-    tab_width_row = ADW_SPIN_ROW(adw_spin_row_new_with_range(1.0, 16.0, 1.0));
-    adw_preferences_row_set_title(ADW_PREFERENCES_ROW(tab_width_row), _("Tab display width"));
-    adw_action_row_set_subtitle(ADW_ACTION_ROW(tab_width_row),
-                                 _("Controls tab columns only; Tab inserts a real tab character"));
-    gtk_adjustment_set_value(adw_spin_row_get_adjustment(tab_width_row),
-                             mt_settings_get_tab_width(window->settings));
-    adw_spin_row_set_digits(tab_width_row, 0);
-    adw_preferences_group_add(group, GTK_WIDGET(tab_width_row));
-
-    display_group = ADW_PREFERENCES_GROUP(adw_preferences_group_new());
-    adw_preferences_group_set_title(display_group, _("Display"));
-    mt_window_add_editor_switch(display_group,
-                                _("Show line numbers"),
-                                NULL,
-                                MT_EDITOR_SETTING_LINE_NUMBERS,
-                                mt_settings_get_show_line_numbers(window->settings),
-                                window);
-    mt_window_add_editor_switch(display_group,
-                                _("Highlight current line"),
-                                NULL,
-                                MT_EDITOR_SETTING_CURRENT_LINE,
-                                mt_settings_get_highlight_current_line(window->settings),
-                                window);
-    mt_window_add_editor_switch(display_group,
-                                _("Show overview map"),
-                                _("A compact map is displayed beside each document"),
-                                MT_EDITOR_SETTING_OVERVIEW,
-                                mt_settings_get_show_overview(window->settings),
-                                window);
-    mt_window_add_editor_switch(display_group,
-                                _("Check spelling"),
-                                _("Underlines misspelled words"),
-                                MT_EDITOR_SETTING_SPELL_CHECK,
-                                mt_settings_get_spell_check(window->settings),
-                                window);
-
-    wrap_group = ADW_PREFERENCES_GROUP(adw_preferences_group_new());
-    adw_preferences_group_set_title(wrap_group, _("Wrapping and Indentation"));
-    mt_window_add_editor_switch(wrap_group,
-                                _("Show right margin"),
-                                NULL,
-                                MT_EDITOR_SETTING_RIGHT_MARGIN,
-                                mt_settings_get_show_right_margin(window->settings),
-                                window);
-    right_margin_row = ADW_SPIN_ROW(adw_spin_row_new_with_range(40.0, 200.0, 1.0));
-    adw_preferences_row_set_title(ADW_PREFERENCES_ROW(right_margin_row), _("Right margin column"));
-    gtk_adjustment_set_value(adw_spin_row_get_adjustment(right_margin_row),
-                             mt_settings_get_right_margin_position(window->settings));
-    adw_spin_row_set_digits(right_margin_row, 0);
-    adw_preferences_group_add(wrap_group, GTK_WIDGET(right_margin_row));
-    mt_window_add_editor_switch(wrap_group,
-                                _("Automatic word wrap"),
-                                NULL,
-                                MT_EDITOR_SETTING_WORD_WRAP,
-                                mt_settings_get_word_wrap(window->settings),
-                                window);
-    mt_window_add_editor_switch(wrap_group,
-                                _("Automatic indentation"),
-                                NULL,
-                                MT_EDITOR_SETTING_AUTO_INDENT,
-                                mt_settings_get_auto_indent(window->settings),
-                                window);
-    mt_window_add_editor_switch(wrap_group,
-                                _("Auto-pair brackets"),
-                                _("Typing an opening bracket, quote or angle bracket in code documents inserts its closing pair and keeps the cursor inside"),
-                                MT_EDITOR_SETTING_AUTO_PAIR_BRACKETS,
-                                mt_settings_get_auto_pair_brackets(window->settings),
-                                window);
-    indent_width_row = ADW_SPIN_ROW(adw_spin_row_new_with_range(1.0, 16.0, 1.0));
-    adw_preferences_row_set_title(ADW_PREFERENCES_ROW(indent_width_row), _("Indent width"));
-    gtk_adjustment_set_value(adw_spin_row_get_adjustment(indent_width_row),
-                             mt_settings_get_indent_width(window->settings));
-    adw_spin_row_set_digits(indent_width_row, 0);
-    adw_preferences_group_add(wrap_group, GTK_WIDGET(indent_width_row));
-
-    behavior_group = ADW_PREFERENCES_GROUP(adw_preferences_group_new());
-    adw_preferences_group_set_title(behavior_group, _("Behavior"));
-    mt_window_add_editor_switch(behavior_group,
-                                _("Restore previous session"),
-                                _("Restore recoverable drafts when Vellum starts"),
-                                MT_EDITOR_SETTING_RESTORE_SESSION,
-                                mt_settings_get_restore_session(window->settings),
-                                window);
-    mt_window_add_editor_switch(behavior_group,
-                                _("Enable extensions"),
-                                _("When disabled, Vellum starts as a compact core editor; restart to apply"),
-                                MT_EDITOR_SETTING_EXTENSIONS_ENABLED,
-                                mt_settings_get_extensions_enabled(window->settings),
-                                window);
-    mt_window_add_editor_switch(behavior_group,
-                                _("Check for updates automatically"),
-                                _("Checks the GitHub release page when Vellum starts"),
-                                MT_EDITOR_SETTING_AUTO_CHECK_UPDATES,
-                                mt_settings_get_auto_check_updates(window->settings),
-                                window);
-    {
-        AdwActionRow *clear_row;
-
-        clear_row = ADW_ACTION_ROW(adw_action_row_new());
-        adw_preferences_row_set_title(ADW_PREFERENCES_ROW(clear_row), _("Clear History"));
-        adw_action_row_set_subtitle(clear_row,
-                                    _("Delete all recoverable drafts"));
-        g_object_set(G_OBJECT(clear_row), "activatable", TRUE, NULL);
-        gtk_widget_add_css_class(GTK_WIDGET(clear_row), "vellum-destructive");
-        g_signal_connect(clear_row,
-                         "activated",
-                         G_CALLBACK(mt_window_clear_history_clicked),
-                         window);
-        adw_preferences_group_add(behavior_group, GTK_WIDGET(clear_row));
-    }
-
-    adw_preferences_page_add(page, group);
-    adw_preferences_page_add(page, display_group);
-    adw_preferences_page_add(page, wrap_group);
-    adw_preferences_page_add(page, behavior_group);
-
-    if (window->plugin_manager != NULL &&
-        mt_plugin_manager_get_preference_switch_count(window->plugin_manager) > 0)
-    {
-        AdwPreferencesGroup *plugin_group;
-        guint switch_count;
-        guint index;
-
-        plugin_group = ADW_PREFERENCES_GROUP(adw_preferences_group_new());
-        switch_count = mt_plugin_manager_get_preference_switch_count(window->plugin_manager);
-        for (index = 0; index < switch_count; index++)
-        {
-            const MtPreferenceSwitch *item;
-            AdwSwitchRow *row;
-
-            item = mt_plugin_manager_get_preference_switch(window->plugin_manager, index);
-            if (item == NULL)
-            {
-                continue;
-            }
-            if (index == 0)
-            {
-                adw_preferences_group_set_title(plugin_group, item->group);
-            }
-            row = ADW_SWITCH_ROW(adw_switch_row_new());
-            adw_preferences_row_set_title(ADW_PREFERENCES_ROW(row), item->title);
-            if (item->subtitle != NULL)
-            {
-                adw_action_row_set_subtitle(ADW_ACTION_ROW(row), item->subtitle);
-            }
-            adw_switch_row_set_active(row,
-                                      item->get_callback != NULL ?
-                                      item->get_callback(item->user_data) : FALSE);
-            g_object_set_data(G_OBJECT(row),
-                              "vellum-pref-switch-index",
-                              GUINT_TO_POINTER(index));
-            g_signal_connect(row,
-                             "notify::active",
-                             G_CALLBACK(mt_window_preference_switch_active_changed),
-                             window);
-            adw_preferences_group_add(plugin_group, GTK_WIDGET(row));
-        }
-        adw_preferences_page_add(page, plugin_group);
-    }
-
-    adw_preferences_window_add(preferences, page);
-    g_signal_connect(appearance_row,
-                     "notify::selected",
-                     G_CALLBACK(mt_window_appearance_selected),
-                     window);
-    g_signal_connect(language_row,
-                     "notify::selected",
-                     G_CALLBACK(mt_window_language_selected),
-                     window);
-    g_signal_connect(font_scale_row,
-                     "changed",
-                     G_CALLBACK(mt_window_font_scale_changed),
-                     window);
-    g_signal_connect(tab_width_row,
-                     "changed",
-                     G_CALLBACK(mt_window_tab_width_changed),
-                     window);
-    g_signal_connect(indent_width_row,
-                     "changed",
-                     G_CALLBACK(mt_window_indent_width_changed),
-                     window);
-    g_signal_connect(right_margin_row,
-                     "changed",
-                     G_CALLBACK(mt_window_right_margin_changed),
-                     window);
-    gtk_window_present(GTK_WINDOW(preferences));
-    g_object_unref(appearance_model);
-    g_object_unref(language_model);
+    if (g_str_equal(info->id, "io.github.vellum.ai-completion")) return _("Inline completion and configurable code summaries through your AI service");
+    if (g_str_equal(info->id, "io.github.vellum.timestamp")) return _("Insert the current local date and time");
+    if (g_str_equal(info->id, "io.github.vellum.document-statistics")) return _("Show character, word and line counts for the current document");
+    if (g_str_equal(info->id, "io.github.vellum.link-check")) return _("Check HTTP and HTTPS links in the current document");
+    if (g_str_equal(info->id, "io.github.vellum.project-sidebar")) return _("Browse an explicitly selected project directory");
+    if (g_str_equal(info->id, "io.github.vellum.build-run")) return _("Build or run user-configured commands in a separate tool window");
+    if (g_str_equal(info->id, "io.github.vellum.vim-mode")) return _("Basic modal editing commands for Vi users");
+    if (g_str_equal(info->id, "io.github.vellum.screenshot")) return _("Export the current editor content as an image");
+    if (g_str_equal(info->id, "io.github.vellum.welcome")) return _("Interactive first-run guide with extension selection");
+    return info->description != NULL ? info->description : "";
 }
 
 static void
@@ -6257,30 +5728,6 @@ mt_window_set_plain_action_subtitle(AdwActionRow *row, const gchar *text)
     escaped = g_markup_escape_text(text != NULL ? text : "", -1);
     adw_action_row_set_subtitle(row, escaped);
     g_free(escaped);
-}
-
-static void
-mt_window_preference_switch_active_changed(GObject *object,
-                                           GParamSpec *pspec,
-                                           gpointer user_data)
-{
-    AdwSwitchRow *row;
-    MtWindow *window;
-    MtPluginManager *manager;
-    guint index;
-    const MtPreferenceSwitch *item;
-
-    (void)pspec;
-
-    row = ADW_SWITCH_ROW(object);
-    window = user_data;
-    manager = window->plugin_manager;
-    index = GPOINTER_TO_UINT(g_object_get_data(G_OBJECT(row), "vellum-pref-switch-index"));
-    item = manager != NULL ? mt_plugin_manager_get_preference_switch(manager, index) : NULL;
-    if (item != NULL && item->set_callback != NULL)
-    {
-        item->set_callback(adw_switch_row_get_active(row), item->user_data);
-    }
 }
 
 static gboolean
@@ -6388,9 +5835,10 @@ mt_window_action_extensions(GSimpleAction *action, GVariant *parameter, gpointer
         }
 
         row = ADW_ACTION_ROW(adw_action_row_new());
-        mt_window_set_plain_row_title(ADW_PREFERENCES_ROW(row), info->name);
+        mt_window_set_plain_row_title(ADW_PREFERENCES_ROW(row),
+                                      mt_window_extension_display_name(info));
         subtitle = g_strdup_printf("%s · %s",
-                                   info->description != NULL ? info->description : "",
+                                   mt_window_extension_display_description(info),
                                    info->version != NULL ? info->version : "");
         mt_window_set_plain_action_subtitle(row, subtitle);
         action_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 4);
@@ -6870,7 +6318,7 @@ mt_window_action_about(GSimpleAction *action, GVariant *parameter, gpointer user
 
     window = user_data;
     dialog = ADW_WINDOW(adw_window_new());
-    gtk_window_set_title(GTK_WINDOW(dialog), _("About vellum"));
+    gtk_window_set_title(GTK_WINDOW(dialog), _("About Vellum"));
     gtk_window_set_default_size(GTK_WINDOW(dialog), 420, 480);
     gtk_window_set_transient_for(GTK_WINDOW(dialog), GTK_WINDOW(window->window));
     gtk_window_set_modal(GTK_WINDOW(dialog), TRUE);
@@ -6890,7 +6338,7 @@ mt_window_action_about(GSimpleAction *action, GVariant *parameter, gpointer user
     gtk_widget_set_halign(icon, GTK_ALIGN_CENTER);
     gtk_box_append(GTK_BOX(content), icon);
 
-    name = gtk_label_new("vellum");
+    name = gtk_label_new("Vellum");
     gtk_widget_add_css_class(name, "title-1");
     gtk_widget_set_halign(name, GTK_ALIGN_CENTER);
     gtk_box_append(GTK_BOX(content), name);

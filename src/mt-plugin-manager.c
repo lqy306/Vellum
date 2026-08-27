@@ -16,6 +16,7 @@
 typedef struct _MtLoadedPlugin MtLoadedPlugin;
 typedef struct _MtPluginActionData MtPluginActionData;
 typedef struct _MtPluginKeyData MtPluginKeyData;
+typedef struct _MtPluginDocumentChangeData MtPluginDocumentChangeData;
 
 struct _MtPluginActionData
 {
@@ -31,6 +32,13 @@ struct _MtPluginKeyData
     GDestroyNotify destroy_notify;
 };
 
+struct _MtPluginDocumentChangeData
+{
+    MtPluginDocumentChangeFunc callback;
+    gpointer user_data;
+    GDestroyNotify destroy_notify;
+};
+
 struct _MtLoadedPlugin
 {
     GModule *module;
@@ -42,6 +50,7 @@ struct _MtLoadedPlugin
     gboolean enabled;
     GPtrArray *action_names;
     GPtrArray *key_handlers;
+    GPtrArray *document_change_handlers;
 };
 
 struct _MtPluginManager
@@ -57,6 +66,10 @@ struct _MtPluginManager
 
 static void mt_plugin_manager_request_plugin_removal(MtPluginHost *host,
                                                      const gchar *plugin_id);
+static gboolean mt_plugin_manager_set_extension_enabled(MtPluginHost *host,
+                                                        const gchar *plugin_id,
+                                                        gboolean enabled,
+                                                        GError **error);
 
 static void
 mt_plugin_manager_plugin_action_activated(GSimpleAction *action,
@@ -139,6 +152,19 @@ mt_plugin_manager_key_data_free(MtPluginKeyData *data)
     }
 }
 
+static void
+mt_plugin_manager_document_change_data_free(MtPluginDocumentChangeData *data)
+{
+    if (data != NULL)
+    {
+        if (data->destroy_notify != NULL)
+        {
+            data->destroy_notify(data->user_data);
+        }
+        g_free(data);
+    }
+}
+
 static gboolean
 mt_plugin_manager_add_key_handler(MtPluginHost *host,
                                   MtPluginKeyCallback callback,
@@ -159,6 +185,30 @@ mt_plugin_manager_add_key_handler(MtPluginHost *host,
     data->user_data = user_data;
     data->destroy_notify = destroy_notify;
     g_ptr_array_add(manager->loading_plugin->key_handlers, data);
+
+    return TRUE;
+}
+
+static gboolean
+mt_plugin_manager_add_document_change_handler(MtPluginHost *host,
+                                              MtPluginDocumentChangeFunc callback,
+                                              gpointer user_data,
+                                              GDestroyNotify destroy_notify)
+{
+    MtPluginManager *manager;
+    MtPluginDocumentChangeData *data;
+
+    manager = host->private_data;
+    if (manager->loading_plugin == NULL || callback == NULL)
+    {
+        return FALSE;
+    }
+
+    data = g_new0(MtPluginDocumentChangeData, 1);
+    data->callback = callback;
+    data->user_data = user_data;
+    data->destroy_notify = destroy_notify;
+    g_ptr_array_add(manager->loading_plugin->document_change_handlers, data);
 
     return TRUE;
 }
@@ -458,6 +508,7 @@ mt_loaded_plugin_free(MtLoadedPlugin *plugin)
     g_free(plugin->path);
     g_clear_pointer(&plugin->action_names, g_ptr_array_unref);
     g_clear_pointer(&plugin->key_handlers, g_ptr_array_unref);
+    g_clear_pointer(&plugin->document_change_handlers, g_ptr_array_unref);
     g_free(plugin);
 }
 
@@ -613,6 +664,7 @@ mt_plugin_manager_remove_plugin_actions(MtPluginManager *manager, MtLoadedPlugin
     }
     g_ptr_array_set_size(plugin->action_names, 0);
     g_ptr_array_set_size(plugin->key_handlers, 0);
+    g_ptr_array_set_size(plugin->document_change_handlers, 0);
 }
 
 static gboolean
@@ -718,6 +770,7 @@ mt_plugin_manager_load_module(MtPluginManager *manager,
     plugin->enabled = !g_hash_table_contains(manager->disabled_ids, info->id);
     plugin->action_names = g_ptr_array_new_with_free_func(g_free);
     plugin->key_handlers = g_ptr_array_new_with_free_func((GDestroyNotify)mt_plugin_manager_key_data_free);
+    plugin->document_change_handlers = g_ptr_array_new_with_free_func((GDestroyNotify)mt_plugin_manager_document_change_data_free);
 
     if (!plugin->enabled)
     {
@@ -916,6 +969,8 @@ mt_plugin_manager_new(MtApplication *application)
     manager->host.request_plugin_removal = mt_plugin_manager_request_plugin_removal;
     manager->host.add_preference_switch = mt_plugin_manager_add_preference_switch;
     manager->host.get_is_code_document = mt_plugin_manager_get_is_code_document;
+    manager->host.add_document_change_handler = mt_plugin_manager_add_document_change_handler;
+    manager->host.set_extension_enabled = mt_plugin_manager_set_extension_enabled;
 
     if (!g_module_supported())
     {
@@ -1098,6 +1153,48 @@ mt_plugin_manager_set_enabled(MtPluginManager *manager,
     plugin->enabled = TRUE;
 
     return TRUE;
+}
+
+gboolean
+mt_plugin_manager_set_enabled_by_id(MtPluginManager *manager,
+                                    const gchar *plugin_id,
+                                    gboolean enabled,
+                                    GError **error)
+{
+    guint index;
+
+    if (manager == NULL || plugin_id == NULL)
+    {
+        g_set_error(error, G_IO_ERROR, G_IO_ERROR_INVALID_ARGUMENT,
+                    "Extension identifier is required");
+        return FALSE;
+    }
+    for (index = 0; index < manager->plugins->len; index++)
+    {
+        MtLoadedPlugin *plugin;
+
+        plugin = g_ptr_array_index(manager->plugins, index);
+        if (plugin != NULL && plugin->info != NULL &&
+            g_strcmp0(plugin->info->id, plugin_id) == 0)
+        {
+            return mt_plugin_manager_set_enabled(manager, index, enabled, error);
+        }
+    }
+    g_set_error(error, G_IO_ERROR, G_IO_ERROR_NOT_FOUND,
+                "The requested extension is not loaded");
+    return FALSE;
+}
+
+static gboolean
+mt_plugin_manager_set_extension_enabled(MtPluginHost *host,
+                                        const gchar *plugin_id,
+                                        gboolean enabled,
+                                        GError **error)
+{
+    MtPluginManager *manager;
+
+    manager = host != NULL ? host->private_data : NULL;
+    return mt_plugin_manager_set_enabled_by_id(manager, plugin_id, enabled, error);
 }
 
 gboolean
@@ -1345,5 +1442,40 @@ mt_plugin_manager_request_plugin_removal(MtPluginHost *host, const gchar *plugin
     if (window != NULL)
     {
         mt_window_sync_plugin_menu(window);
+    }
+}
+
+
+void
+mt_plugin_manager_notify_document_changed(MtPluginManager *manager,
+                                          guint changed_lines)
+{
+    guint plugin_index;
+
+    if (manager == NULL || changed_lines == 0)
+    {
+        return;
+    }
+
+    for (plugin_index = 0; plugin_index < manager->plugins->len; plugin_index++)
+    {
+        MtLoadedPlugin *plugin;
+        guint handler_index;
+
+        plugin = g_ptr_array_index(manager->plugins, plugin_index);
+        if (plugin == NULL || !plugin->enabled || plugin->document_change_handlers == NULL)
+        {
+            continue;
+        }
+        for (handler_index = 0; handler_index < plugin->document_change_handlers->len; handler_index++)
+        {
+            MtPluginDocumentChangeData *data;
+
+            data = g_ptr_array_index(plugin->document_change_handlers, handler_index);
+            if (data != NULL && data->callback != NULL)
+            {
+                data->callback(&manager->host, changed_lines, data->user_data);
+            }
+        }
     }
 }

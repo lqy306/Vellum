@@ -6,7 +6,7 @@
 #include <adwaita.h>
 #include <glib/gstdio.h>
 
-#include "mt-window.h"
+#include "mt-window-private.h"
 
 static void
 spin_main_context(void)

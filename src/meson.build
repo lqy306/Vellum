@@ -18,6 +18,9 @@ vellum_core_sources = files(
   'mt-plugin-manager.c',
   'mt-settings.c',
   'mt-vut-package.c',
+  'mt-overview-map.c',
+  'mt-window-shortcuts.c',
+  'mt-window-preferences.c',
   'mt-window.c'
 )
 

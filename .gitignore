@@ -24,3 +24,15 @@
 *~
 *.swp
 .DS_Store
+
+# Internal refactor / capture scripts (not part of the distribution)
+/tools/add_*.py
+/tools/finish_*.py
+/tools/integrate_*.py
+/tools/split_*.py
+/tools/update_*.py
+/tools/capture_*.sh
+/tools/create_extension_intro_profiles.py
+
+# Temporary handoff / changelog files (not part of the release)
+/CHANGELOG_VELLUM_*.md

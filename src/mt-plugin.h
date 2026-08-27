@@ -34,6 +34,10 @@ typedef gboolean (*MtPluginKeyCallback)(MtPluginHost *host,
                                         gpointer user_data);
 typedef gboolean (*MtPluginPreferenceGetFunc)(gpointer user_data);
 typedef void (*MtPluginPreferenceSetFunc)(gboolean value, gpointer user_data);
+/* 仅在用户编辑代码文档时触发；changed_lines 为本次插入或删除涉及的逻辑行数。 */
+typedef void (*MtPluginDocumentChangeFunc)(MtPluginHost *host,
+                                           guint changed_lines,
+                                           gpointer user_data);
 
 typedef enum
 {
@@ -108,6 +112,16 @@ struct _MtPluginHost
                                       GDestroyNotify destroy_notify);
     /* 当前活动文档是否已识别为代码语言；自动补全等仅限代码的功能依赖它。 */
     gboolean (*get_is_code_document)(MtPluginHost *host);
+    /* 注册活动文档的用户编辑通知，供摘要、格式分析等扩展使用。 */
+    gboolean (*add_document_change_handler)(MtPluginHost *host,
+                                            MtPluginDocumentChangeFunc callback,
+                                            gpointer user_data,
+                                            GDestroyNotify destroy_notify);
+    /* 按稳定扩展标识启用或停用扩展；供新手引导保存用户选择。 */
+    gboolean (*set_extension_enabled)(MtPluginHost *host,
+                                      const gchar *plugin_id,
+                                      gboolean enabled,
+                                      GError **error);
 };
 
 struct _MtPluginInfo

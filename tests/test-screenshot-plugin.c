@@ -8,7 +8,7 @@
 #include <gmodule.h>
 
 #include "mt-plugin.h"
-#include "mt-window.h"
+#include "mt-window-private.h"
 
 typedef struct _TestHost
 {

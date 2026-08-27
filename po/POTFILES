@@ -5,7 +5,10 @@ src/mt-plugin-manager.c
 src/mt-settings.c
 src/mt-vut-package.c
 src/mt-window.c
+src/mt-window-shortcuts.c
+src/mt-window-preferences.c
 src/plugins/ai-completion-plugin.c
+src/plugins/ai-code-summary.c
 src/plugins/build-run-plugin.c
 src/plugins/link-check-plugin.c
 src/plugins/project-sidebar-plugin.c

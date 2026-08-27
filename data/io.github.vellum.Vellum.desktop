@@ -1,6 +1,6 @@
 [Desktop Entry]
-Name=vellum
-Name[zh_CN]=vellum
+Name=Vellum
+Name[zh_CN]=Vellum
 Comment=A focused GTK4 text editor
 Comment[zh_CN]=专注的 GTK4 文本编辑器
 Exec=vellum %U

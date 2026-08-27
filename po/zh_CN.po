@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Vellum\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-08-27 09:33+0800\n"
+"POT-Creation-Date: 2026-08-27 11:36+0000\n"
 "PO-Revision-Date: 2026-08-26 00:00+0000\n"
 "Last-Translator: Vellum contributors\n"
 "Language-Team: Chinese (Simplified)\n"
@@ -16,743 +16,636 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 
-#: src/mt-document.c:238 src/mt-document.c:432 src/mt-document.c:450
+#: src/mt-document.c:239 src/mt-document.c:430 src/mt-document.c:448
 msgid "Untitled"
 msgstr "未命名"
 
-#: src/mt-document.c:860
+#: src/mt-document.c:888
 msgid "Recovered draft"
 msgstr "已恢复的草稿"
 
-#: src/mt-window.c:275
+#: src/mt-window.c:380
 #, c-format
 msgid "Editor font set to %s"
 msgstr "编辑器字体已设为 %s"
 
-#: src/mt-window.c:285
+#: src/mt-window.c:390
 #, c-format
 msgid "Unable to select font: %s"
 msgstr "无法选择字体：%s"
 
-#: src/mt-window.c:306
+#: src/mt-window.c:411
 msgid "Choose Editor Font"
 msgstr "选择编辑器字体"
 
-#: src/mt-window.c:391
+#: src/mt-window.c:505
 msgid "Extension imported. Reopen Extensions to refresh the list."
 msgstr "扩展已导入，请重新打开“扩展”刷新列表。"
 
-#: src/mt-window.c:392
+#: src/mt-window.c:506
 msgid "Extension exported"
 msgstr "扩展已导出"
 
-#: src/mt-window.c:398
+#: src/mt-window.c:512
 #, c-format
 msgid "Extension operation failed: %s"
 msgstr "扩展操作失败：%s"
 
-#: src/mt-window.c:420
+#: src/mt-window.c:534
 msgid "Import Extension"
 msgstr "导入扩展"
 
-#: src/mt-window.c:422
+#: src/mt-window.c:536
 msgid "Vellum Extension Package (.vut)"
 msgstr "Vellum 扩展包（.vut）"
 
-#: src/mt-window.c:461
+#: src/mt-window.c:575
 msgid "Export Extension"
 msgstr "导出扩展"
 
-#: src/mt-window.c:503
+#: src/mt-window.c:617
 msgid "Extension removed"
 msgstr "扩展已删除"
 
-#: src/mt-window.c:509
+#: src/mt-window.c:624
 #, c-format
 msgid "Unable to delete extension: %s"
 msgstr "无法删除扩展：%s"
 
-#: src/mt-window.c:548
+#: src/mt-window.c:674
 msgid "Delete extension?"
 msgstr "删除扩展？"
 
-#: src/mt-window.c:549
-msgid "The extension file will be removed and unload after restart."
-msgstr "扩展文件将被移除，并在重启后卸载。"
+#: src/mt-window.c:677
+msgid "The extension file will be deleted from disk."
+msgstr "扩展文件将从磁盘中删除。"
 
-#: src/mt-window.c:550 src/mt-window.c:1507 src/mt-window.c:2831
+#: src/mt-window.c:678
+msgid ""
+"This built-in extension will be hidden and unloaded. It cannot be restored "
+"from the application."
+msgstr "内置扩展将被隐藏并卸载，无法从应用中恢复。"
+
+#: src/mt-window.c:679 src/mt-window.c:1839 src/mt-window.c:4119
+#: src/plugins/ai-completion-plugin.c:351
 msgid "Cancel"
 msgstr "取消"
 
-#: src/mt-window.c:551
+#: src/mt-window.c:680
 msgid "Delete"
 msgstr "删除"
 
-#: src/mt-window.c:936 src/mt-window.c:2233 src/mt-window.c:3072
+#: src/mt-window.c:793
+msgid "Overview map kept hidden for a large document"
+msgstr "大文档已保持隐藏概览图"
+
+#: src/mt-window.c:1114 src/mt-window.c:2779 src/mt-window.c:2838
+#: src/mt-window.c:3554 src/mt-window.c:3577 src/mt-window.c:4510
 msgid "Plain Text"
 msgstr "纯文本"
 
-#: src/mt-window.c:1111
+#: src/mt-window.c:1288
+msgid "Draft"
+msgstr "草稿"
+
+#: src/mt-window.c:1438
 #, c-format
 msgid "Ln %d, Col %d"
 msgstr "第 %d 行，第 %d 列"
 
-#: src/mt-window.c:1260
+#: src/mt-window.c:1588
 msgid "Reloading file from disk…"
 msgstr "正在从磁盘重新载入文件…"
 
-#: src/mt-window.c:1287
+#: src/mt-window.c:1615
 #, c-format
 msgid "Unable to open file: %s"
 msgstr "无法打开文件：%s"
 
-#: src/mt-window.c:1299
+#: src/mt-window.c:1628
 msgid "File opened"
 msgstr "文件已打开"
 
-#: src/mt-window.c:1322 src/mt-window.c:1438 src/mt-window.c:3629
+#: src/mt-window.c:1651 src/mt-window.c:1768 src/mt-window.c:5201
 #, c-format
 msgid "Unable to save file: %s"
 msgstr "无法保存文件：%s"
 
-#: src/mt-window.c:1333
+#: src/mt-window.c:1663
 msgid "Saved"
 msgstr "已保存"
 
-#: src/mt-window.c:1361
+#: src/mt-window.c:1691
 #, c-format
 msgid "Unable to select files: %s"
 msgstr "无法选择文件：%s"
 
-#: src/mt-window.c:1387 src/mt-window.c:3736 src/mt-window.c:3895
-#: src/mt-window.c:3930
+#: src/mt-window.c:1717 src/mt-window.c:5368 src/mt-window.c:5537
+#: src/mt-window.c:5572
 msgid "Saving is already in progress"
 msgstr "保存正在进行中"
 
-#: src/mt-window.c:1398 src/mt-window.c:3907
+#: src/mt-window.c:1728 src/mt-window.c:5549
 msgid "Saving…"
 msgstr "正在保存…"
 
-#: src/mt-window.c:1406
+#: src/mt-window.c:1736
 #, c-format
 msgid "Unable to choose save location: %s"
 msgstr "无法选择保存位置：%s"
 
-#: src/mt-window.c:1505
+#: src/mt-window.c:1837
 msgid "Save changes?"
 msgstr "保存更改？"
 
-#: src/mt-window.c:1506
+#: src/mt-window.c:1838
 msgid "This document has unsaved changes."
 msgstr "此文档包含未保存的更改。"
 
-#: src/mt-window.c:1508
+#: src/mt-window.c:1840
 msgid "Discard"
 msgstr "放弃更改"
 
-#: src/mt-window.c:1515 src/mt-window.c:4152
-#: src/plugins/ai-completion-plugin.c:1122 src/plugins/build-run-plugin.c:898
+#: src/mt-window.c:1847 src/mt-window-shortcuts.c:190
+#: src/plugins/ai-completion-plugin.c:1283 src/plugins/build-run-plugin.c:898
 msgid "Save"
 msgstr "保存"
 
-#: src/mt-window.c:1616
+#: src/mt-window.c:1954 src/mt-window.c:2067
 msgid "No matches found"
 msgstr "未找到匹配项"
 
-#: src/mt-window.c:1758
+#: src/mt-window.c:2073
+#, c-format
+msgid "Replaced %u occurrence"
+msgid_plural "Replaced %u occurrences"
+msgstr[0] "已替换 %u 处"
+
+#: src/mt-window.c:2217
 msgid "Adwaita"
 msgstr "Adwaita"
 
-#: src/mt-window.c:1762
+#: src/mt-window.c:2221
 msgid "Classic"
 msgstr "经典"
 
-#: src/mt-window.c:1766
+#: src/mt-window.c:2225
 msgid "Cobalt"
 msgstr "钴蓝"
 
-#: src/mt-window.c:1770
+#: src/mt-window.c:2229
 msgid "Kate"
 msgstr "Kate"
 
-#: src/mt-window.c:1774
+#: src/mt-window.c:2233
 msgid "Oblivion"
 msgstr "Oblivion"
 
-#: src/mt-window.c:1778
+#: src/mt-window.c:2237
 msgid "Solarized"
 msgstr "Solarized"
 
-#: src/mt-window.c:1782
+#: src/mt-window.c:2241
 msgid "Tango"
 msgstr "Tango"
 
-#: src/mt-window.c:1785
+#: src/mt-window.c:2244
 msgid "Automatic (Adwaita)"
 msgstr "自动（Adwaita）"
 
-#: src/mt-window.c:1978
+#: src/mt-window.c:2417
 msgid "Choose Code Theme"
 msgstr "选择代码主题"
 
-#: src/mt-window.c:1989
+#: src/mt-window.c:2440
 msgid "Code Themes"
 msgstr "代码主题"
 
-#: src/mt-window.c:1992
+#: src/mt-window.c:2443
 msgid ""
 "Choose a color scheme for source code. The preview uses the same "
 "GtkSourceView scheme as the editor."
 msgstr "选择源代码配色方案。预览使用与编辑器相同的 GtkSourceView 方案。"
 
-#: src/mt-window.c:2019
+#: src/mt-window.c:2470
 msgid ""
 "Theme colors are provided by installed GtkSourceView schemes; Vellum does "
 "not copy third-party theme assets."
-msgstr ""
+msgstr "主题颜色由已安装的 GtkSourceView 方案提供；Vellum 不复制第三方主题资源。"
 "主题颜色由已安装的 GtkSourceView 方案提供；Vellum 不复制第三方主题资源。"
 
-#: src/mt-window.c:2054
+#: src/mt-window.c:2516
 msgid "Language will apply after restart"
 msgstr "语言将在重启后生效"
 
-#: src/mt-window.c:2218
+#: src/mt-window.c:2704
+msgid "The document is too large to convert line endings"
+msgstr "文档过大，无法转换换行符"
+
+#: src/mt-window.c:2756
+msgid "Line endings converted"
+msgstr "已转换换行符"
+
+#: src/mt-window.c:2801
 msgid "Unknown location"
 msgstr "未知位置"
 
-#: src/mt-window.c:2225 src/mt-window.c:2538
+#: src/mt-window.c:2808 src/mt-window.c:3538
 msgid "Not saved yet"
 msgstr "尚未保存"
 
-#: src/mt-window.c:2249
-msgid "Classic Mac (CR)"
-msgstr "Classic Mac (CR)"
+#: src/mt-window.c:3265 src/mt-window.c:3576
+msgid "Document Type"
+msgstr "文档类型"
 
-#: src/mt-window.c:2252
-msgid "Windows (CRLF)"
-msgstr "Windows (CRLF)"
+#: src/mt-window.c:3279
+msgid "Search"
+msgstr "搜索"
 
-#: src/mt-window.c:2256
-msgid "Unix (LF)"
-msgstr "Unix (LF)"
+#: src/mt-window.c:3370
+msgid "Save or discard changes before changing the encoding"
+msgstr "更改编码前请保存或丢弃更改"
 
-#: src/mt-window.c:2525
+#: src/mt-window.c:3378
+msgid "Save the file first to change its encoding"
+msgstr "更改编码前请先保存文件"
+
+#: src/mt-window.c:3390
+msgid "Reloading with the selected encoding…"
+msgstr "正在以选定编码重新载入…"
+
+#: src/mt-window.c:3525
 msgid "File Name"
 msgstr "文件名"
 
-#: src/mt-window.c:2534
+#: src/mt-window.c:3534
 msgid "Location"
 msgstr "位置"
 
-#: src/mt-window.c:2544
-msgid "Type"
-msgstr "类型"
+#: src/mt-window.c:3583
+msgid "Change Document Type"
+msgstr "更改文档类型"
 
-#: src/mt-window.c:2550
+#: src/mt-window.c:3620
 msgid "Encoding"
 msgstr "编码"
 
-#: src/mt-window.c:2556
+#: src/mt-window.c:3632
+msgid "Unix (LF)"
+msgstr "Unix (LF)"
+
+#: src/mt-window.c:3633
+msgid "Windows (CRLF)"
+msgstr "Windows (CRLF)"
+
+#: src/mt-window.c:3634
+msgid "Classic Mac (CR)"
+msgstr "Classic Mac (CR)"
+
+#: src/mt-window.c:3636
 msgid "Newline"
 msgstr "换行符"
 
-#: src/mt-window.c:2564
+#: src/mt-window.c:3648
 msgid "Indentation"
 msgstr "缩进"
 
-#: src/mt-window.c:2567
+#: src/mt-window.c:3651
 msgid "Auto Indentation"
 msgstr "自动缩进"
 
-#: src/mt-window.c:2577
+#: src/mt-window.c:3661
 msgid "Tabs"
 msgstr "制表符"
 
-#: src/mt-window.c:2578
+#: src/mt-window.c:3662
 msgid "Spaces"
 msgstr "空格"
 
-#: src/mt-window.c:2580
+#: src/mt-window.c:3664
 msgid "Character"
 msgstr "缩进字符"
 
-#: src/mt-window.c:2592
+#: src/mt-window.c:3676
 msgid "Spaces Per Tab"
 msgstr "每个制表符宽度"
 
-#: src/mt-window.c:2604
+#: src/mt-window.c:3688
 msgid "Spaces Per Indent"
 msgstr "每次缩进空格数"
 
-#: src/mt-window.c:2617
+#: src/mt-window.c:3701
 msgid "Statistics"
 msgstr "统计"
 
-#: src/mt-window.c:2619
+#: src/mt-window.c:3703
 msgid "Lines"
 msgstr "行数"
 
-#: src/mt-window.c:2625
+#: src/mt-window.c:3709
 msgid "Words"
 msgstr "词语"
 
-#: src/mt-window.c:2631
+#: src/mt-window.c:3715
 msgid "Characters, No Spaces"
 msgstr "字符数（不含空格）"
 
-#: src/mt-window.c:2637
+#: src/mt-window.c:3721
 msgid "All Characters"
 msgstr "全部字符"
 
-#: src/mt-window.c:2658
+#: src/mt-window.c:3822
+msgid "Follow System Style"
+msgstr "跟随系统风格"
+
+#: src/mt-window.c:3831
+msgid "Light Style"
+msgstr "浅色风格"
+
+#: src/mt-window.c:3840
+msgid "Dark Style"
+msgstr "深色风格"
+
+#: src/mt-window.c:3875
+msgid "Zoom Out"
+msgstr "缩小"
+
+#: src/mt-window.c:3882
+msgid "Reset Zoom"
+msgstr "重置缩放"
+
+#: src/mt-window.c:3888
+msgid "Zoom In"
+msgstr "放大"
+
+#: src/mt-window.c:3920
 msgid "_New"
 msgstr "新建"
 
-#: src/mt-window.c:2666
+#: src/mt-window.c:3928
 msgid "_Save"
 msgstr "保存"
 
-#: src/mt-window.c:2670
+#: src/mt-window.c:3932
 msgid "Save _As…"
 msgstr "另存为…"
 
-#: src/mt-window.c:2674
+#: src/mt-window.c:3936
 msgid "_Close"
 msgstr "关闭"
 
-#: src/mt-window.c:2682
+#: src/mt-window.c:3944
 msgid "_Find…"
 msgstr "查找…"
 
-#: src/mt-window.c:2686
+#: src/mt-window.c:3948
 msgid "_Replace…"
 msgstr "替换…"
 
-#: src/mt-window.c:2694
-msgid "Zoom _In"
-msgstr "放大"
-
-#: src/mt-window.c:2698
-msgid "Zoom _Out"
-msgstr "缩小"
-
-#: src/mt-window.c:2702
-msgid "Reset _Zoom"
-msgstr "重置缩放"
-
-#: src/mt-window.c:2710
+#: src/mt-window.c:3956
 msgid "_Document Properties"
 msgstr "文档属性"
 
-#: src/mt-window.c:2718
+#: src/mt-window.c:3964
 msgid "_Preferences"
 msgstr "首选项"
 
-#: src/mt-window.c:2722
+#: src/mt-window.c:3968
 msgid "_Keyboard Shortcuts"
 msgstr "键盘快捷键"
 
-#: src/mt-window.c:2725
+#: src/mt-window.c:3971
 msgid "_Extensions"
 msgstr "扩展"
 
-#: src/mt-window.c:2728
-msgid "_About vellum"
-msgstr "关于 vellum"
-
-#: src/mt-window.c:2780
-msgid "About vellum"
-msgstr "关于 vellum"
-
-#: src/mt-window.c:2782
-msgid "vellum is licensed under BSD-2-Clause."
-msgstr "vellum 采用 BSD-2-Clause 许可证发布。"
-
-#: src/mt-window.c:3900
+#: src/mt-window.c:4007 src/mt-window.c:5689
 msgid "Welcome Guide"
 msgstr "新手引导"
 
-#: src/mt-window.c:672
-msgid "The extension file will be deleted from disk."
-msgstr "扩展文件将从磁盘中删除。"
-
-#: src/mt-window.c:674
-msgid "This built-in extension will be hidden and unloaded. It cannot be restored from the application."
-msgstr "内置扩展将被隐藏并卸载，无法从应用中恢复。"
-
-#: src/mt-window.c:2797
+#: src/mt-window.c:4085
 #, c-format
 msgid "Cleared %u draft"
 msgid_plural "Cleared %u drafts"
 msgstr[0] "已清除 %u 个草稿"
 
-#: src/mt-window.c:2804
+#: src/mt-window.c:4092
 msgid "No history to clear"
 msgstr "没有可清除的历史"
 
-#: src/mt-window.c:2820
+#: src/mt-window.c:4108
 msgid ""
 "All recoverable drafts will be deleted permanently. Open documents are not "
 "affected."
 msgstr "所有可恢复的草稿将被永久删除。已打开的文档不受影响。"
 
-#: src/mt-window.c:2828
+#: src/mt-window.c:4116
 msgid "Clear History?"
 msgstr "清除历史？"
 
-#: src/mt-window.c:2832
+#: src/mt-window.c:4120
 msgid "Clear"
 msgstr "清除"
 
-#: src/mt-window.c:2950 src/mt-window.c:4150
-msgid "New document"
-msgstr "新建文档"
+#: src/mt-window.c:4257
+msgid "_Open"
+msgstr "打开(_O)"
 
-#: src/mt-window.c:2951
-msgid "Open file"
+#: src/mt-window.c:4264
+msgid "New Tab"
+msgstr "新建标签页"
+
+#: src/mt-window.c:4265
+msgid "Open File"
 msgstr "打开文件"
 
-#: src/mt-window.c:2965
+#: src/mt-window.c:4304
+msgid "Main Menu"
+msgstr "主菜单"
+
+#: src/mt-window.c:4322
 msgid "Document Properties"
 msgstr "文档属性"
 
-#: src/mt-window.c:2979
+#: src/mt-window.c:4336
 msgid "File changed on disk"
 msgstr "磁盘上的文件已更改"
 
-#: src/mt-window.c:2980
+#: src/mt-window.c:4337
 msgid "The file was changed by another program."
 msgstr "文件已被另一个程序更改。"
 
-#: src/mt-window.c:2981
+#: src/mt-window.c:4338
 msgid "Discard Changes and Reload"
 msgstr "丢弃更改并重新载入"
 
-#: src/mt-window.c:2997
+#: src/mt-window.c:4354
 msgid "Dismiss external file change notification"
 msgstr "关闭外部文件更改通知"
 
-#: src/mt-window.c:3053 src/mt-window.c:4158
+#: src/mt-window.c:4442 src/mt-window-shortcuts.c:196
 msgid "Find"
 msgstr "查找"
 
-#: src/mt-window.c:3054
-msgid "Replace with"
-msgstr "替换为"
-
-#: src/mt-window.c:3059
+#: src/mt-window.c:4443
 msgid "Replace"
 msgstr "替换"
 
-#: src/mt-window.c:3382
+#: src/mt-window.c:4455
+msgid "Previous Match"
+msgstr "上一个匹配项"
+
+#: src/mt-window.c:4456
+msgid "Next Match"
+msgstr "下一个匹配项"
+
+#: src/mt-window.c:4467
+msgid "Search and Replace"
+msgstr "查找和替换"
+
+#: src/mt-window.c:4473
+msgid "Search Options"
+msgstr "搜索选项"
+
+#: src/mt-window.c:4476
+msgid "_Case Sensitive"
+msgstr "区分大小写(_C)"
+
+#: src/mt-window.c:4484
+msgid "_Replace"
+msgstr "替换(_R)"
+
+#: src/mt-window.c:4485
+msgid "Replace _All"
+msgstr "全部替换(_A)"
+
+#: src/mt-window.c:4492
+msgid "Close Search"
+msgstr "关闭搜索"
+
+#: src/mt-window.c:4943
 #, c-format
 msgid "Recovered %u draft"
 msgid_plural "Recovered %u drafts"
 msgstr[0] "已恢复 %u 个草稿"
 
-#: src/mt-window.c:3731
+#: src/mt-window.c:5363
 msgid "Save an untitled document with :w before closing"
 msgstr "关闭前请使用 :w 保存未命名文档"
 
-#: src/mt-window.c:3747
+#: src/mt-window.c:5379
 msgid "Saving before closing…"
 msgstr "正在保存后关闭…"
 
-#: src/mt-window.c:3866
+#: src/mt-window.c:5508
 msgid "Open Files"
 msgstr "打开文件"
 
-#: src/mt-window.c:3935 src/mt-window.c:4153
+#: src/mt-window.c:5577 src/mt-window-shortcuts.c:191
 msgid "Save As"
 msgstr "另存为"
 
-#: src/mt-window.c:4063
-msgid "Set Keyboard Shortcut"
-msgstr "设置键盘快捷键"
+#: src/mt-window.c:5637
+msgid "Zoomed in"
+msgstr "已放大"
 
-#: src/mt-window.c:4072
-msgid "Press a new shortcut"
-msgstr "请按下新的快捷键"
+#: src/mt-window.c:5655
+msgid "Zoomed out"
+msgstr "已缩小"
 
-#: src/mt-window.c:4075
-msgid ""
-"Press Escape to cancel. The change applies immediately and is saved for the "
-"next start."
-msgstr "按 Escape 取消。更改会立即生效，并在下次启动时保留。"
-
-#: src/mt-window.c:4114
-msgid "Change shortcut"
-msgstr "更改快捷键"
-
-#: src/mt-window.c:4145
-msgid "Keyboard Shortcuts"
-msgstr "键盘快捷键"
-
-#: src/mt-window.c:4149
-msgid "Document"
-msgstr "文档"
-
-#: src/mt-window.c:4151
-msgid "Open files"
-msgstr "打开文件"
-
-#: src/mt-window.c:4154
-msgid "Close document"
-msgstr "关闭文档"
-
-#: src/mt-window.c:4157
-msgid "Editing"
-msgstr "编辑"
-
-#: src/mt-window.c:4159
-msgid "Find and replace"
-msgstr "查找和替换"
-
-#: src/mt-window.c:4160
-msgid "Zoom in"
-msgstr "放大"
-
-#: src/mt-window.c:4161
-msgid "Zoom out"
-msgstr "缩小"
-
-#: src/mt-window.c:4162
-msgid "Reset zoom"
-msgstr "重置缩放"
-
-#: src/mt-window.c:4163
-msgid "AI completion"
-msgstr "AI 补全"
-
-#: src/mt-window.c:4166
-msgid "Optional Extensions"
-msgstr "可选扩展"
-
-#: src/mt-window.c:4167
-msgid "Insert timestamp"
-msgstr "插入时间戳"
-
-#: src/mt-window.c:4168
-msgid "Document statistics"
-msgstr "文档统计"
-
-#: src/mt-window.c:4169
-msgid "Test links"
-msgstr "测试链接"
-
-#: src/mt-window.c:4170
-msgid "Project sidebar"
-msgstr "项目侧边栏"
-
-#: src/mt-window.c:4171 src/plugins/build-run-plugin.c:656
-msgid "Build"
-msgstr "构建"
-
-#: src/mt-window.c:4172 src/plugins/build-run-plugin.c:657
-msgid "Run"
-msgstr "运行"
-
-#: src/mt-window.c:4173
-msgid "Build and run"
-msgstr "构建并运行"
-
-#: src/mt-window.c:4224
+#: src/mt-window.c:5671
 msgid "Zoom reset to 100%"
 msgstr "缩放已重置为 100%"
 
-#: src/mt-window.c:4283
-msgid "Extension loading will change the next time Vellum starts"
-msgstr "扩展加载状态将在下次启动 Vellum 时变更"
+#: src/mt-window.c:5681
+msgid "AI Code Assistant"
+msgstr "AI 代码助手"
 
-#: src/mt-window.c:4375
-msgid "Preferences"
-msgstr "首选项"
+#: src/mt-window.c:5682
+msgid "Timestamp"
+msgstr "时间戳"
 
-#: src/mt-window.c:4379
-msgid "Interface"
-msgstr "界面"
+#: src/mt-window.c:5683
+msgid "Document Statistics"
+msgstr "文档统计"
 
-#: src/mt-window.c:4382
-msgid "Follow system"
-msgstr "跟随系统"
+#: src/mt-window.c:5684
+msgid "Link Check"
+msgstr "链接测试"
 
-#: src/mt-window.c:4383
-msgid "Light"
-msgstr "浅色"
+#: src/mt-window.c:5685
+msgid "Project Sidebar"
+msgstr "项目侧边栏"
 
-#: src/mt-window.c:4384
-msgid "Dark"
-msgstr "深色"
+#: src/mt-window.c:5686
+msgid "Build and Run"
+msgstr "构建与运行"
 
-#: src/mt-window.c:4386
-msgid "Appearance"
-msgstr "外观"
+#: src/mt-window.c:5687
+msgid "Vi Mode"
+msgstr "Vi 模式"
 
-#: src/mt-window.c:4392
-msgid "Code Theme"
-msgstr "代码主题"
+#: src/mt-window.c:5688
+msgid "Editor Screenshot"
+msgstr "编辑器截图"
 
-#: src/mt-window.c:4395 src/mt-window.c:4431
-msgid "Choose"
-msgstr "选择"
+#: src/mt-window.c:5700
+msgid ""
+"Inline completion and configurable code summaries through your AI service"
+msgstr "通过你的 AI 服务提供内联补全和可配置的代码总结"
 
-#: src/mt-window.c:4406
-msgid "System language"
-msgstr "系统语言"
+#: src/mt-window.c:5701
+msgid "Insert the current local date and time"
+msgstr "插入当前本地日期和时间"
 
-#: src/mt-window.c:4407
-msgid "English"
-msgstr "英语"
+#: src/mt-window.c:5702
+msgid "Show character, word and line counts for the current document"
+msgstr "显示当前文档的字符数、词数和行数"
 
-#: src/mt-window.c:4408
-msgid "Simplified Chinese"
-msgstr "简体中文"
+#: src/mt-window.c:5703
+msgid "Check HTTP and HTTPS links in the current document"
+msgstr "检查当前文档中的 HTTP 和 HTTPS 链接"
 
-#: src/mt-window.c:4410
-msgid "Language"
-msgstr "语言"
+#: src/mt-window.c:5704
+msgid "Browse an explicitly selected project directory"
+msgstr "浏览你明确选择的项目目录"
 
-#: src/mt-window.c:4418
-msgid "Use custom font"
-msgstr "使用自定义字体"
+#: src/mt-window.c:5705
+msgid "Build or run user-configured commands in a separate tool window"
+msgstr "在独立工具窗口构建或运行用户配置的命令"
 
-#: src/mt-window.c:4420
-msgid "When disabled, the system monospace font is used"
-msgstr "关闭时使用系统等宽字体"
+#: src/mt-window.c:5706
+msgid "Basic modal editing commands for Vi users"
+msgstr "为 Vi 用户提供基础模态编辑命令"
 
-#: src/mt-window.c:4429
-msgid "Editor Font"
-msgstr "编辑器字体"
+#: src/mt-window.c:5707
+msgid "Export the current editor content as an image"
+msgstr "将当前编辑器内容导出为图片"
 
-#: src/mt-window.c:4445
-msgid "Editor font scale"
-msgstr "编辑器字体缩放"
+#: src/mt-window.c:5708
+msgid "Interactive first-run guide with extension selection"
+msgstr "带扩展选择的交互式首次启动引导"
 
-#: src/mt-window.c:4452
-msgid "Tab display width"
-msgstr "Tab 显示宽度"
-
-#: src/mt-window.c:4454
-msgid "Controls tab columns only; Tab inserts a real tab character"
-msgstr "仅控制 Tab 的显示列宽；按 Tab 会插入真实制表符"
-
-#: src/mt-window.c:4461
-msgid "Display"
-msgstr "显示"
-
-#: src/mt-window.c:4463
-msgid "Show line numbers"
-msgstr "显示行号"
-
-#: src/mt-window.c:4469
-msgid "Highlight current line"
-msgstr "高亮当前行"
-
-#: src/mt-window.c:4475
-msgid "Show overview map"
-msgstr "显示概览图"
-
-#: src/mt-window.c:4476
-msgid "A compact map is displayed beside each document"
-msgstr "在每个文档旁显示紧凑概览图"
-
-#: src/mt-window.c:4481
-msgid "Check spelling"
-msgstr "检查拼写"
-
-#: src/mt-window.c:4482
-msgid "Underlines misspelled words"
-msgstr "在拼写错误的单词下加波浪线"
-
-#: src/mt-window.c:4488
-msgid "Wrapping and Indentation"
-msgstr "折行和缩进"
-
-#: src/mt-window.c:4490
-msgid "Show right margin"
-msgstr "显示右边界"
-
-#: src/mt-window.c:4496
-msgid "Right margin column"
-msgstr "右边界列"
-
-#: src/mt-window.c:4502
-msgid "Automatic word wrap"
-msgstr "自动折行"
-
-#: src/mt-window.c:4508
-msgid "Automatic indentation"
-msgstr "自动缩进"
-
-#: src/mt-window.c:4511
-msgid "Auto-pair brackets"
-msgstr "自动配对括号"
-
-#: src/mt-window.c:4512
-msgid "Typing an opening bracket, quote or angle bracket in code documents inserts its closing pair and keeps the cursor inside"
-msgstr "在代码文档中，输入开括号、引号或尖括号时自动补全另一半，光标停在括号内侧"
-
-#: src/mt-window.c:4514
-msgid "Indent width"
-msgstr "缩进宽度"
-
-#: src/mt-window.c:4521
-msgid "Behavior"
-msgstr "行为"
-
-#: src/mt-window.c:4523
-msgid "Restore previous session"
-msgstr "恢复上一会话"
-
-#: src/mt-window.c:4524
-msgid "Restore recoverable drafts when Vellum starts"
-msgstr "Vellum 启动时恢复可恢复的草稿"
-
-#: src/mt-window.c:4529
-msgid "Enable extensions"
-msgstr "启用扩展"
-
-#: src/mt-window.c:4530
-msgid "When disabled, Vellum starts as a compact core editor; restart to apply"
-msgstr "关闭后，Vellum 将以紧凑的核心编辑器启动；重启后生效"
-
-#: src/mt-window.c:5979
-msgid "Check for updates automatically"
-msgstr "自动检查更新"
-
-#: src/mt-window.c:5980
-msgid "Checks the GitHub release page when Vellum starts"
-msgstr "Vellum 启动时自动检查 GitHub 发布页"
-
-#: src/mt-window.c:4538
-msgid "Clear History"
-msgstr "清除历史"
-
-#: src/mt-window.c:4540
-msgid "Delete all recoverable drafts"
-msgstr "删除所有可恢复的草稿"
-
-#: src/mt-window.c:4696
+#: src/mt-window.c:5755
 #, c-format
 msgid "Unable to change extension state: %s"
 msgstr "无法更改扩展状态：%s"
 
-#: src/mt-window.c:4724
+#: src/mt-window.c:5783
 msgid "Extensions"
 msgstr "扩展"
 
-#: src/mt-window.c:4727
+#: src/mt-window.c:5786
 msgid "Loaded Extensions"
 msgstr "已加载扩展"
 
-#: src/mt-window.c:4731
+#: src/mt-window.c:5790
 msgid ""
 "Extensions are disabled. Enable them in Preferences and restart Vellum to "
 "load or manage extensions."
-msgstr ""
+msgstr "扩展已关闭。请在“首选项”中启用扩展并重启 Vellum，之后才能加载或管理扩展。"
 "扩展已关闭。请在“首选项”中启用扩展并重启 Vellum，之后才能加载或管理扩展。"
 
-#: src/mt-window.c:4736
+#: src/mt-window.c:5795
 msgid ""
 "Extensions can be disabled without deleting them. Any extension can be "
 "removed: user extensions are deleted from disk, built-in extensions are "
@@ -762,169 +655,465 @@ msgstr ""
 "扩展可在不删除的情况下禁用。任何扩展都可以移除：用户扩展会从磁盘删除，内置扩"
 "展会隐藏，直到重新安装 vellum。原生模块和源码包必须来自可信来源。"
 
-#: src/mt-window.c:4738
+#: src/mt-window.c:5797
 msgid "Import"
 msgstr "导入"
 
-#: src/mt-window.c:4755
+#: src/mt-window.c:5814
 msgid "Extension loading is disabled for this session"
 msgstr "此会话已关闭扩展加载"
 
-#: src/mt-window.c:4756
+#: src/mt-window.c:5815
 msgid "No extensions are currently loaded"
 msgstr "当前未加载任何扩展"
 
-#: src/mt-window.c:4796
+#: src/mt-window.c:5856
 msgid "Enable extension"
 msgstr "启用扩展"
 
-#: src/mt-window.c:4801
+#: src/mt-window.c:5861
 msgid "Export extension"
 msgstr "导出扩展"
 
-#: src/mt-window.c:4816
+#: src/mt-window.c:5876
 msgid "Configure extension"
 msgstr "配置扩展"
 
-#: src/mt-window.c:4835
+#: src/mt-window.c:5893
 msgid "Delete extension"
 msgstr "删除扩展"
 
-#: src/mt-window.c:4871
-msgid "A focused GTK4 text editor."
-msgstr "专注的 GTK4 文本编辑器。"
-
-#: src/mt-window.c:6390
+#: src/mt-window.c:6000
 #, c-format
 msgid "Check failed: %s"
 msgstr "检查失败：%s"
 
-#: src/mt-window.c:6400
+#: src/mt-window.c:6010
 msgid "No published releases yet"
 msgstr "尚无已发布的版本"
 
-#: src/mt-window.c:6406
+#: src/mt-window.c:6016
 #, c-format
 msgid "Check failed: HTTP %u"
 msgstr "检查失败：HTTP %u"
 
-#: src/mt-window.c:6440 src/mt-window.c:6592
+#: src/mt-window.c:6050 src/mt-window.c:6194
 #, c-format
 msgid "New version available: %s"
 msgstr "发现新版本：%s"
 
-#: src/mt-window.c:6448
+#: src/mt-window.c:6058
 msgid "You are up to date"
 msgstr "已是最新版本"
 
-#: src/mt-window.c:6454 src/mt-window.c:6459
+#: src/mt-window.c:6064 src/mt-window.c:6069
 msgid "Unable to read release information"
 msgstr "无法读取版本信息"
 
-#: src/mt-window.c:6466
+#: src/mt-window.c:6076
 msgid "Check failed: no response"
 msgstr "检查失败：无响应"
 
-#: src/mt-window.c:6486
+#: src/mt-window.c:6096
 msgid "Checking for updates…"
 msgstr "正在检查更新…"
 
-#: src/mt-window.c:6595
+#: src/mt-window.c:6197
 msgid "View"
 msgstr "查看"
 
-#: src/mt-window.c:6749
+#: src/mt-window.c:6320
+msgid "About Vellum"
+msgstr "关于 Vellum"
+
+#: src/mt-window.c:6345
+msgid "A focused GTK4 text editor."
+msgstr "专注的 GTK4 文本编辑器。"
+
+#: src/mt-window.c:6351
 msgid "Check for Updates"
 msgstr "检查更新"
 
-#: src/mt-window.c:6760
+#: src/mt-window.c:6362
 msgid "Open Download Page"
 msgstr "打开下载页面"
 
-#: src/mt-window.c:6772
+#: src/mt-window.c:6374
 msgid "GitHub Repository"
 msgstr "GitHub 仓库"
 
-#: src/plugins/ai-completion-plugin.c:294
+#: src/mt-window.c:6386
+msgid "vellum is licensed under BSD-2-Clause."
+msgstr "vellum 采用 BSD-2-Clause 许可证发布。"
+
+#: src/mt-window-shortcuts.c:101
+msgid "Set Keyboard Shortcut"
+msgstr "设置键盘快捷键"
+
+#: src/mt-window-shortcuts.c:110
+msgid "Press a new shortcut"
+msgstr "请按下新的快捷键"
+
+#: src/mt-window-shortcuts.c:113
+msgid ""
+"Press Escape to cancel. The change applies immediately and is saved for the "
+"next start."
+msgstr "按 Escape 取消。更改会立即生效，并在下次启动时保留。"
+
+#: src/mt-window-shortcuts.c:152
+msgid "Change shortcut"
+msgstr "更改快捷键"
+
+#: src/mt-window-shortcuts.c:183
+msgid "Keyboard Shortcuts"
+msgstr "键盘快捷键"
+
+#: src/mt-window-shortcuts.c:187
+msgid "Document"
+msgstr "文档"
+
+#: src/mt-window-shortcuts.c:188
+msgid "New document"
+msgstr "新建文档"
+
+#: src/mt-window-shortcuts.c:189
+msgid "Open files"
+msgstr "打开文件"
+
+#: src/mt-window-shortcuts.c:192
+msgid "Close document"
+msgstr "关闭文档"
+
+#: src/mt-window-shortcuts.c:195
+msgid "Editing"
+msgstr "编辑"
+
+#: src/mt-window-shortcuts.c:197
+msgid "Find and replace"
+msgstr "查找和替换"
+
+#: src/mt-window-shortcuts.c:198
+msgid "Zoom in"
+msgstr "放大"
+
+#: src/mt-window-shortcuts.c:199
+msgid "Zoom out"
+msgstr "缩小"
+
+#: src/mt-window-shortcuts.c:200
+msgid "Reset zoom"
+msgstr "重置缩放"
+
+#: src/mt-window-shortcuts.c:201
+msgid "AI completion"
+msgstr "AI 补全"
+
+#: src/mt-window-shortcuts.c:202
+msgid "Summarize code with AI"
+msgstr "使用 AI 总结代码"
+
+#: src/mt-window-shortcuts.c:205
+msgid "Optional Extensions"
+msgstr "可选扩展"
+
+#: src/mt-window-shortcuts.c:206
+msgid "Insert timestamp"
+msgstr "插入时间戳"
+
+#: src/mt-window-shortcuts.c:207
+msgid "Document statistics"
+msgstr "文档统计"
+
+#: src/mt-window-shortcuts.c:208
+msgid "Test links"
+msgstr "测试链接"
+
+#: src/mt-window-shortcuts.c:209
+msgid "Project sidebar"
+msgstr "项目侧边栏"
+
+#: src/mt-window-shortcuts.c:210 src/plugins/build-run-plugin.c:656
+msgid "Build"
+msgstr "构建"
+
+#: src/mt-window-shortcuts.c:211 src/plugins/build-run-plugin.c:657
+msgid "Run"
+msgstr "运行"
+
+#: src/mt-window-shortcuts.c:212
+msgid "Build and run"
+msgstr "构建并运行"
+
+#: src/mt-window-preferences.c:96
+msgid "Extension loading will change the next time Vellum starts"
+msgstr "扩展加载状态将在下次启动 Vellum 时变更"
+
+#: src/mt-window-preferences.c:191
+msgid "Preferences"
+msgstr "首选项"
+
+#: src/mt-window-preferences.c:195
+msgid "Interface"
+msgstr "界面"
+
+#: src/mt-window-preferences.c:198
+msgid "Follow system"
+msgstr "跟随系统"
+
+#: src/mt-window-preferences.c:199
+msgid "Light"
+msgstr "浅色"
+
+#: src/mt-window-preferences.c:200
+msgid "Dark"
+msgstr "深色"
+
+#: src/mt-window-preferences.c:202
+msgid "Appearance"
+msgstr "外观"
+
+#: src/mt-window-preferences.c:208
+msgid "Code Theme"
+msgstr "代码主题"
+
+#: src/mt-window-preferences.c:211 src/mt-window-preferences.c:247
+msgid "Choose"
+msgstr "选择"
+
+#: src/mt-window-preferences.c:222
+msgid "System language"
+msgstr "系统语言"
+
+#: src/mt-window-preferences.c:223
+msgid "English"
+msgstr "英语"
+
+#: src/mt-window-preferences.c:224
+msgid "Simplified Chinese"
+msgstr "简体中文"
+
+#: src/mt-window-preferences.c:226
+msgid "Language"
+msgstr "语言"
+
+#: src/mt-window-preferences.c:234
+msgid "Use custom font"
+msgstr "使用自定义字体"
+
+#: src/mt-window-preferences.c:236
+msgid "When disabled, the system monospace font is used"
+msgstr "关闭时使用系统等宽字体"
+
+#: src/mt-window-preferences.c:245
+msgid "Editor Font"
+msgstr "编辑器字体"
+
+#: src/mt-window-preferences.c:261
+msgid "Editor font scale"
+msgstr "编辑器字体缩放"
+
+#: src/mt-window-preferences.c:268
+msgid "Tab display width"
+msgstr "Tab 显示宽度"
+
+#: src/mt-window-preferences.c:270
+msgid "Controls tab columns only; Tab inserts a real tab character"
+msgstr "仅控制 Tab 的显示列宽；按 Tab 会插入真实制表符"
+
+#: src/mt-window-preferences.c:277
+msgid "Display"
+msgstr "显示"
+
+#: src/mt-window-preferences.c:279
+msgid "Show line numbers"
+msgstr "显示行号"
+
+#: src/mt-window-preferences.c:285
+msgid "Highlight current line"
+msgstr "高亮当前行"
+
+#: src/mt-window-preferences.c:291
+msgid "Show overview map"
+msgstr "显示概览图"
+
+#: src/mt-window-preferences.c:292
+msgid "A compact map is displayed beside each document"
+msgstr "在每个文档旁显示紧凑概览图"
+
+#: src/mt-window-preferences.c:297
+msgid "Check spelling"
+msgstr "检查拼写"
+
+#: src/mt-window-preferences.c:298
+msgid "Underlines misspelled words"
+msgstr "在拼写错误的单词下加波浪线"
+
+#: src/mt-window-preferences.c:304
+msgid "Wrapping and Indentation"
+msgstr "折行和缩进"
+
+#: src/mt-window-preferences.c:306
+msgid "Show right margin"
+msgstr "显示右边界"
+
+#: src/mt-window-preferences.c:312
+msgid "Right margin column"
+msgstr "右边界列"
+
+#: src/mt-window-preferences.c:318
+msgid "Automatic word wrap"
+msgstr "自动折行"
+
+#: src/mt-window-preferences.c:324
+msgid "Automatic indentation"
+msgstr "自动缩进"
+
+#: src/mt-window-preferences.c:330
+msgid "Auto-pair brackets"
+msgstr "自动配对括号"
+
+#: src/mt-window-preferences.c:331
+msgid ""
+"Typing an opening bracket, quote or angle bracket in code documents inserts "
+"its closing pair and keeps the cursor inside"
+msgstr ""
+"在代码文档中，输入开括号、引号或尖括号时自动补全另一半，光标停在括号内侧"
+
+#: src/mt-window-preferences.c:336
+msgid "Indent width"
+msgstr "缩进宽度"
+
+#: src/mt-window-preferences.c:343
+msgid "Behavior"
+msgstr "行为"
+
+#: src/mt-window-preferences.c:345
+msgid "Restore previous session"
+msgstr "恢复上一会话"
+
+#: src/mt-window-preferences.c:346
+msgid "Restore recoverable drafts when Vellum starts"
+msgstr "Vellum 启动时恢复可恢复的草稿"
+
+#: src/mt-window-preferences.c:351
+msgid "Enable extensions"
+msgstr "启用扩展"
+
+#: src/mt-window-preferences.c:352
+msgid "When disabled, Vellum starts as a compact core editor; restart to apply"
+msgstr "关闭后，Vellum 将以紧凑的核心编辑器启动；重启后生效"
+
+#: src/mt-window-preferences.c:357
+msgid "Check for updates automatically"
+msgstr "自动检查更新"
+
+#: src/mt-window-preferences.c:358
+msgid "Checks the GitHub release page when Vellum starts"
+msgstr "Vellum 启动时自动检查 GitHub 发布页"
+
+#: src/mt-window-preferences.c:366
+msgid "Clear History"
+msgstr "清除历史"
+
+#: src/mt-window-preferences.c:368
+msgid "Delete all recoverable drafts"
+msgstr "删除所有可恢复的草稿"
+
+#: src/plugins/ai-completion-plugin.c:333
 msgid "AI endpoint must begin with https:// or http://"
 msgstr "AI 服务地址必须以 https:// 或 http:// 开头"
 
-#: src/plugins/ai-completion-plugin.c:300
+#: src/plugins/ai-completion-plugin.c:339
 msgid "AI model and API key are required"
 msgstr "必须填写 AI 模型和 API 密钥"
 
-#: src/plugins/ai-completion-plugin.c:306
+#: src/plugins/ai-completion-plugin.c:349
+msgid "Frequent AI summaries may use many tokens"
+msgstr "频繁的 AI 总结可能消耗大量 token"
+
+#: src/plugins/ai-completion-plugin.c:350
+msgid ""
+"The selected interval is below 30 modified lines. Automatic summaries can "
+"send code to your configured AI service very often and may significantly "
+"increase token consumption."
+msgstr "当前间隔低于 30 个修改行。自动总结可能会非常频繁地将代码发送给你配置的 AI 服务，并显著增加 token 消耗。"
+
+#: src/plugins/ai-completion-plugin.c:352
+msgid "Enable Anyway"
+msgstr "仍然启用"
+
+#: src/plugins/ai-completion-plugin.c:362
 msgid "AI completion settings saved"
 msgstr "AI 补全设置已保存"
 
-#: src/plugins/ai-completion-plugin.c:314
+#: src/plugins/ai-completion-plugin.c:370
 #, c-format
 msgid "Unable to save AI settings: %s"
 msgstr "无法保存 AI 设置：%s"
 
-#: src/plugins/ai-completion-plugin.c:727
+#: src/plugins/ai-completion-plugin.c:865
 #, c-format
 msgid "AI completion request failed: %s"
 msgstr "AI 补全请求失败：%s"
 
-#: src/plugins/ai-completion-plugin.c:728
+#: src/plugins/ai-completion-plugin.c:866
 msgid "No response received"
 msgstr "未收到响应"
 
-#: src/plugins/ai-completion-plugin.c:747
+#: src/plugins/ai-completion-plugin.c:885
 #, c-format
 msgid "AI service returned HTTP %u: %s"
 msgstr "AI 服务返回 HTTP %u：%s"
 
-#: src/plugins/ai-completion-plugin.c:783
+#: src/plugins/ai-completion-plugin.c:932
 msgid "AI completion ready: press Tab to accept or Escape to dismiss"
 msgstr "AI 补全已就绪：按 Tab 接受，按 Escape 取消"
 
-#: src/plugins/ai-completion-plugin.c:795
+#: src/plugins/ai-completion-plugin.c:945
 #, c-format
 msgid "Unable to parse AI completion: %s"
 msgstr "无法解析 AI 补全结果：%s"
 
-#: src/plugins/ai-completion-plugin.c:850
+#: src/plugins/ai-completion-plugin.c:1007 src/plugins/ai-code-summary.c:656
 msgid "Configure an AI endpoint, model and API key in Extensions first"
 msgstr "请先在“扩展”中配置 AI 服务地址、模型和 API 密钥"
 
-#: src/plugins/ai-completion-plugin.c:869
+#: src/plugins/ai-completion-plugin.c:1026
 msgid "Type some text before requesting AI completion"
 msgstr "请先输入一些文本再请求 AI 补全"
 
-#: src/plugins/ai-completion-plugin.c:905
+#: src/plugins/ai-completion-plugin.c:1064 src/plugins/ai-code-summary.c:692
 msgid "AI endpoint URL is invalid"
 msgstr "AI 服务地址无效"
 
-#: src/plugins/ai-completion-plugin.c:949
+#: src/plugins/ai-completion-plugin.c:1108
 msgid "Requesting AI completion…"
 msgstr "正在请求 AI 补全…"
 
-#: src/plugins/ai-completion-plugin.c:1032
+#: src/plugins/ai-completion-plugin.c:1192
 msgid "AI Completion"
 msgstr "AI 补全"
 
-#: src/plugins/ai-completion-plugin.c:1033
+#: src/plugins/ai-completion-plugin.c:1193
 msgid "Automatic AI completion"
 msgstr "自动 AI 补全"
 
-#: src/plugins/ai-completion-plugin.c:1034
-#: src/plugins/ai-completion-plugin.c:1116
+#: src/plugins/ai-completion-plugin.c:1194
+#: src/plugins/ai-completion-plugin.c:1277
 msgid ""
 "Wait for a short pause after typing, then request a completion without "
 "pressing a shortcut."
 msgstr "停止输入片刻后自动请求补全，无需按快捷键。"
 
-#: src/plugins/ai-completion-plugin.c:1085
+#: src/plugins/ai-completion-plugin.c:1246
 msgid "AI Completion Settings"
 msgstr "AI 补全设置"
 
-#: src/plugins/ai-completion-plugin.c:1090
+#: src/plugins/ai-completion-plugin.c:1251
 msgid "OpenAI-Compatible Service"
 msgstr "OpenAI 兼容服务"
 
-#: src/plugins/ai-completion-plugin.c:1092
+#: src/plugins/ai-completion-plugin.c:1253
 msgid ""
 "Enter a full Chat Completions URL, an OpenAI-compatible URL ending in /v1, "
 "or a bare service host. Text around the cursor is sent to this service."
@@ -932,25 +1121,116 @@ msgstr ""
 "输入完整的 Chat Completions URL、以 /v1 结尾的 OpenAI 兼容 URL，或裸服务主机"
 "地址。光标附近的文本会发送到该服务。"
 
-#: src/plugins/ai-completion-plugin.c:1098
+#: src/plugins/ai-completion-plugin.c:1259
 msgid "API Endpoint URL"
 msgstr "API 服务地址"
 
-#: src/plugins/ai-completion-plugin.c:1103
+#: src/plugins/ai-completion-plugin.c:1264
 msgid "Model"
 msgstr "模型"
 
-#: src/plugins/ai-completion-plugin.c:1108
+#: src/plugins/ai-completion-plugin.c:1269
 msgid "API Key"
 msgstr "API 密钥"
 
-#: src/plugins/ai-completion-plugin.c:1114
+#: src/plugins/ai-completion-plugin.c:1275
 msgid "Suggest automatically while typing"
 msgstr "输入时自动补全"
 
-#: src/plugins/ai-completion-plugin.c:1121
+#: src/plugins/ai-completion-plugin.c:1282
 msgid "Save AI Settings"
 msgstr "保存 AI 设置"
+
+#: src/plugins/ai-code-summary.c:328
+msgid "AI Code Summary"
+msgstr "AI 代码总结"
+
+#: src/plugins/ai-code-summary.c:330
+msgid ""
+"Create a compact local summary after a configurable amount of code editing. "
+"The latest summary is sent with later AI requests for the same document."
+msgstr "在达到可配置的代码编辑量后生成紧凑的本地总结。最新总结会随同一文档后续的 AI 请求一并发送。"
+
+#: src/plugins/ai-code-summary.c:333
+msgid "Enable code summaries"
+msgstr "启用代码总结"
+
+#: src/plugins/ai-code-summary.c:335
+msgid ""
+"Automatically summarize selected document types after enough lines change."
+msgstr "当选定文档类型的修改行数达到阈值后自动生成总结。"
+
+#: src/plugins/ai-code-summary.c:341
+msgid "Source files"
+msgstr "源代码文件"
+
+#: src/plugins/ai-code-summary.c:343
+msgid "C, C++, Rust, Go, Java and other compiled-language source files."
+msgstr "C、C++、Rust、Go、Java 等编译型语言的源代码文件。"
+
+#: src/plugins/ai-code-summary.c:349
+msgid "Script files"
+msgstr "脚本文件"
+
+#: src/plugins/ai-code-summary.c:351
+msgid "Python, Shell, Ruby, Perl, PHP and similar scripts."
+msgstr "Python、Shell、Ruby、Perl、PHP 等脚本。"
+
+#: src/plugins/ai-code-summary.c:357
+msgid "Web files"
+msgstr "Web 文件"
+
+#: src/plugins/ai-code-summary.c:359
+msgid "JavaScript, TypeScript, HTML, CSS and component files."
+msgstr "JavaScript、TypeScript、HTML、CSS 与组件文件。"
+
+#: src/plugins/ai-code-summary.c:365
+msgid "Structured data files"
+msgstr "结构化数据文件"
+
+#: src/plugins/ai-code-summary.c:367
+msgid "JSON, YAML, TOML, XML and SQL files."
+msgstr "JSON、YAML、TOML、XML 与 SQL 文件。"
+
+#: src/plugins/ai-code-summary.c:374
+msgid "Modified lines between automatic summaries"
+msgstr "自动总结之间的修改行数"
+
+#: src/plugins/ai-code-summary.c:376
+msgid ""
+"The recommended minimum is 30 lines; lower values can greatly increase token "
+"use."
+msgstr "建议至少设置为 30 行；更低的数值可能大幅增加 token 消耗。"
+
+#: src/plugins/ai-code-summary.c:572
+#, c-format
+msgid "AI code summary failed: %s"
+msgstr "AI 代码总结失败：%s"
+
+#: src/plugins/ai-code-summary.c:578
+msgid "AI code summary service returned an error"
+msgstr "AI 代码总结服务返回错误"
+
+#: src/plugins/ai-code-summary.c:591
+#, c-format
+msgid "Unable to parse AI code summary: %s"
+msgstr "无法解析 AI 代码总结：%s"
+
+#: src/plugins/ai-code-summary.c:603
+msgid "AI code summary updated and will be included with later AI requests"
+msgstr "AI 代码总结已更新，并会随之后的 AI 请求一并发送"
+
+#: src/plugins/ai-code-summary.c:637
+msgid "AI code summaries are available only for recognized code documents"
+msgstr "AI 代码总结仅适用于已识别的代码文档"
+
+#: src/plugins/ai-code-summary.c:674
+msgid "Add some code before generating an AI summary"
+msgstr "请先输入一些代码再生成 AI 总结"
+
+#: src/plugins/ai-code-summary.c:725
+msgid "Generating AI code summary…"
+msgstr "正在生成 AI 代码总结…"
 
 #: src/plugins/build-run-plugin.c:290
 msgid "Build completed"
@@ -1035,8 +1315,8 @@ msgstr "隐藏构建输出"
 
 #: src/plugins/build-run-plugin.c:706
 msgid ""
-"Commands use direct argument parsing, not a shell. Available placeholders: $"
-"{file}, ${dir}, ${name}, ${root} (${name} is the source file name without "
+"Commands use direct argument parsing, not a shell. Available placeholders: "
+"${file}, ${dir}, ${name}, ${root} (${name} is the source file name without "
 "its extension).\n"
 msgstr ""
 "命令使用直接参数解析而非 shell。可用占位符：${file}、${dir}、${name}、${root}"
@@ -1138,37 +1418,52 @@ msgstr "刷新项目文件"
 msgid "Hide Project Sidebar"
 msgstr "隐藏项目侧边栏"
 
-#: src/plugins/vim-mode-plugin.c:40
+#: src/plugins/vim-mode-plugin.c:44
 msgid "Vi: Normal mode"
 msgstr "Vi：普通模式"
 
-#: src/plugins/vim-mode-plugin.c:49
+#: src/plugins/vim-mode-plugin.c:55
 msgid "Vi: Insert mode"
 msgstr "Vi：插入模式"
 
-#: src/plugins/vim-mode-plugin.c:95
-msgid "Vi commands: :w, :wq, :x, :q, :q!, :help; normal keys: h j k l w b 0 $ G gg i a o x d d d y y c c p u"
-msgstr "Vi 命令：:w、:wq、:x、:q、:q!、:help；普通模式键：h j k l w b 0 $ G gg i a o x dd yy cc p u"
+#: src/plugins/vim-mode-plugin.c:102
+msgid ""
+"Vi commands: :w, :wq, :x, :q, :q!, :help; normal keys: h j k l w b 0 $ G gg "
+"i a o x d d d y y c c p u"
+msgstr ""
+"Vi 命令：:w、:wq、:x、:q、:q!、:help；普通模式键：h j k l w b 0 $ G gg i a o "
+"x dd yy cc p u"
 
-#: src/plugins/vim-mode-plugin.c:101
+#: src/plugins/vim-mode-plugin.c:108
 #, c-format
 msgid "Unsupported Vi command: :%s"
 msgstr "不支持的 Vi 命令：:%s"
 
-#: src/plugins/vim-mode-plugin.c:150
+#: src/plugins/vim-mode-plugin.c:157
 msgid "Vi Command"
 msgstr "Vi 命令"
 
-#: src/plugins/vim-mode-plugin.c:162
+#: src/plugins/vim-mode-plugin.c:169
 msgid "w, wq, x, q, q!, help"
 msgstr "w、wq、x、q、q!、help"
 
-#: src/plugins/vim-mode-plugin.c:342
+#: src/plugins/vim-mode-plugin.c:379
 msgid ""
 "Vi mode enabled: press i to insert, Escape for normal mode, and : for "
 "commands"
-msgstr ""
-"Vi 模式已启用：按 i 进入插入模式，按 Escape 返回普通模式，按 : 输入命令"
+msgstr "Vi 模式已启用：按 i 进入插入模式，按 Escape 返回普通模式，按 : 输入命令"
 
-#~ msgid "_Open…"
-#~ msgstr "打开…"
+#~ msgid "The extension file will be removed and unload after restart."
+#~ msgstr "扩展文件将被移除，并在重启后卸载。"
+
+#~ msgid "Type"
+#~ msgstr "类型"
+
+#~ msgid "_About vellum"
+#~ msgstr "关于 vellum"
+
+#~ msgid "Open file"
+#~ msgstr "打开文件"
+
+#~ msgid "Replace with"
+#~ msgstr "替换为"

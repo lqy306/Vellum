@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Vellum\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-08-27 09:33+0800\n"
+"POT-Creation-Date: 2026-08-27 11:36+0000\n"
 "PO-Revision-Date: 2026-08-26 00:00+0000\n"
 "Last-Translator: Vellum contributors\n"
 "Language-Team: English\n"
@@ -16,943 +16,1227 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: src/mt-document.c:238 src/mt-document.c:432 src/mt-document.c:450
+#: src/mt-document.c:239 src/mt-document.c:430 src/mt-document.c:448
 msgid "Untitled"
 msgstr "Untitled"
 
-#: src/mt-document.c:860
+#: src/mt-document.c:888
 msgid "Recovered draft"
 msgstr "Recovered draft"
 
-#: src/mt-window.c:275
+#: src/mt-window.c:380
 #, c-format
 msgid "Editor font set to %s"
 msgstr "Editor font set to %s"
 
-#: src/mt-window.c:285
+#: src/mt-window.c:390
 #, c-format
 msgid "Unable to select font: %s"
 msgstr "Unable to select font: %s"
 
-#: src/mt-window.c:306
+#: src/mt-window.c:411
 msgid "Choose Editor Font"
 msgstr "Choose Editor Font"
 
-#: src/mt-window.c:391
+#: src/mt-window.c:505
 msgid "Extension imported. Reopen Extensions to refresh the list."
 msgstr "Extension imported. Reopen Extensions to refresh the list."
 
-#: src/mt-window.c:392
+#: src/mt-window.c:506
 msgid "Extension exported"
 msgstr "Extension exported"
 
-#: src/mt-window.c:398
+#: src/mt-window.c:512
 #, c-format
 msgid "Extension operation failed: %s"
 msgstr "Extension operation failed: %s"
 
-#: src/mt-window.c:420
+#: src/mt-window.c:534
 msgid "Import Extension"
 msgstr "Import Extension"
 
-#: src/mt-window.c:422
+#: src/mt-window.c:536
 msgid "Vellum Extension Package (.vut)"
 msgstr "Vellum Extension Package (.vut)"
 
-#: src/mt-window.c:461
+#: src/mt-window.c:575
 msgid "Export Extension"
 msgstr "Export Extension"
 
-#: src/mt-window.c:503
+#: src/mt-window.c:617
 msgid "Extension removed"
 msgstr "Extension removed"
 
-#: src/mt-window.c:509
+#: src/mt-window.c:624
 #, c-format
 msgid "Unable to delete extension: %s"
 msgstr "Unable to delete extension: %s"
 
-#: src/mt-window.c:548
+#: src/mt-window.c:674
 msgid "Delete extension?"
 msgstr "Delete extension?"
 
-#: src/mt-window.c:549
-msgid "The extension file will be removed and unload after restart."
-msgstr "The extension file will be removed and unload after restart."
+#: src/mt-window.c:677
+msgid "The extension file will be deleted from disk."
+msgstr "The extension file will be deleted from disk."
 
-#: src/mt-window.c:550 src/mt-window.c:1507 src/mt-window.c:2831
+#: src/mt-window.c:678
+msgid ""
+"This built-in extension will be hidden and unloaded. It cannot be restored "
+"from the application."
+msgstr "This built-in extension will be hidden and unloaded. It cannot be restored from the application."
+"This built-in extension will be hidden and unloaded. It cannot be restored "
+"from the application."
+
+#: src/mt-window.c:679 src/mt-window.c:1839 src/mt-window.c:4119
+#: src/plugins/ai-completion-plugin.c:351
 msgid "Cancel"
 msgstr "Cancel"
 
-#: src/mt-window.c:551
+#: src/mt-window.c:680
 msgid "Delete"
 msgstr "Delete"
 
-#: src/mt-window.c:936 src/mt-window.c:2233 src/mt-window.c:3072
+#: src/mt-window.c:793
+msgid "Overview map kept hidden for a large document"
+msgstr "Overview map kept hidden for a large document"
+
+#: src/mt-window.c:1114 src/mt-window.c:2779 src/mt-window.c:2838
+#: src/mt-window.c:3554 src/mt-window.c:3577 src/mt-window.c:4510
 msgid "Plain Text"
 msgstr "Plain Text"
 
-#: src/mt-window.c:1111
+#: src/mt-window.c:1288
+msgid "Draft"
+msgstr "Draft"
+
+#: src/mt-window.c:1438
 #, c-format
 msgid "Ln %d, Col %d"
 msgstr "Ln %d, Col %d"
 
-#: src/mt-window.c:1260
+#: src/mt-window.c:1588
 msgid "Reloading file from disk…"
 msgstr "Reloading file from disk…"
 
-#: src/mt-window.c:1287
+#: src/mt-window.c:1615
 #, c-format
 msgid "Unable to open file: %s"
 msgstr "Unable to open file: %s"
 
-#: src/mt-window.c:1299
+#: src/mt-window.c:1628
 msgid "File opened"
 msgstr "File opened"
 
-#: src/mt-window.c:1322 src/mt-window.c:1438 src/mt-window.c:3629
+#: src/mt-window.c:1651 src/mt-window.c:1768 src/mt-window.c:5201
 #, c-format
 msgid "Unable to save file: %s"
 msgstr "Unable to save file: %s"
 
-#: src/mt-window.c:1333
+#: src/mt-window.c:1663
 msgid "Saved"
 msgstr "Saved"
 
-#: src/mt-window.c:1361
+#: src/mt-window.c:1691
 #, c-format
 msgid "Unable to select files: %s"
 msgstr "Unable to select files: %s"
 
-#: src/mt-window.c:1387 src/mt-window.c:3736 src/mt-window.c:3895
-#: src/mt-window.c:3930
+#: src/mt-window.c:1717 src/mt-window.c:5368 src/mt-window.c:5537
+#: src/mt-window.c:5572
 msgid "Saving is already in progress"
 msgstr "Saving is already in progress"
 
-#: src/mt-window.c:1398 src/mt-window.c:3907
+#: src/mt-window.c:1728 src/mt-window.c:5549
 msgid "Saving…"
 msgstr "Saving…"
 
-#: src/mt-window.c:1406
+#: src/mt-window.c:1736
 #, c-format
 msgid "Unable to choose save location: %s"
 msgstr "Unable to choose save location: %s"
 
-#: src/mt-window.c:1505
+#: src/mt-window.c:1837
 msgid "Save changes?"
 msgstr "Save changes?"
 
-#: src/mt-window.c:1506
+#: src/mt-window.c:1838
 msgid "This document has unsaved changes."
 msgstr "This document has unsaved changes."
 
-#: src/mt-window.c:1508
+#: src/mt-window.c:1840
 msgid "Discard"
 msgstr "Discard"
 
-#: src/mt-window.c:1515 src/mt-window.c:4152
-#: src/plugins/ai-completion-plugin.c:1122 src/plugins/build-run-plugin.c:898
+#: src/mt-window.c:1847 src/mt-window-shortcuts.c:190
+#: src/plugins/ai-completion-plugin.c:1283 src/plugins/build-run-plugin.c:898
 msgid "Save"
 msgstr "Save"
 
-#: src/mt-window.c:1616
+#: src/mt-window.c:1954 src/mt-window.c:2067
 msgid "No matches found"
 msgstr "No matches found"
 
-#: src/mt-window.c:1758
+#: src/mt-window.c:2073
+#, c-format
+msgid "Replaced %u occurrence"
+msgid_plural "Replaced %u occurrences"
+msgstr[0] ""
+msgstr[1] ""
+
+#: src/mt-window.c:2217
 msgid "Adwaita"
 msgstr "Adwaita"
 
-#: src/mt-window.c:1762
+#: src/mt-window.c:2221
 msgid "Classic"
 msgstr "Classic"
 
-#: src/mt-window.c:1766
+#: src/mt-window.c:2225
 msgid "Cobalt"
 msgstr "Cobalt"
 
-#: src/mt-window.c:1770
+#: src/mt-window.c:2229
 msgid "Kate"
 msgstr "Kate"
 
-#: src/mt-window.c:1774
+#: src/mt-window.c:2233
 msgid "Oblivion"
 msgstr "Oblivion"
 
-#: src/mt-window.c:1778
+#: src/mt-window.c:2237
 msgid "Solarized"
 msgstr "Solarized"
 
-#: src/mt-window.c:1782
+#: src/mt-window.c:2241
 msgid "Tango"
 msgstr "Tango"
 
-#: src/mt-window.c:1785
+#: src/mt-window.c:2244
 msgid "Automatic (Adwaita)"
 msgstr "Automatic (Adwaita)"
 
-#: src/mt-window.c:1978
+#: src/mt-window.c:2417
 msgid "Choose Code Theme"
 msgstr "Choose Code Theme"
 
-#: src/mt-window.c:1989
+#: src/mt-window.c:2440
 msgid "Code Themes"
 msgstr "Code Themes"
 
-#: src/mt-window.c:1992
+#: src/mt-window.c:2443
 msgid ""
 "Choose a color scheme for source code. The preview uses the same "
 "GtkSourceView scheme as the editor."
-msgstr ""
+msgstr "Choose a color scheme for source code. The preview uses the same GtkSourceView scheme as the editor."
 
-#: src/mt-window.c:2019
+#: src/mt-window.c:2470
 msgid ""
 "Theme colors are provided by installed GtkSourceView schemes; Vellum does "
 "not copy third-party theme assets."
-msgstr ""
+msgstr "Theme colors are provided by installed GtkSourceView schemes; Vellum does not copy third-party theme assets."
 
-#: src/mt-window.c:2054
+#: src/mt-window.c:2516
 msgid "Language will apply after restart"
 msgstr "Language will apply after restart"
 
-#: src/mt-window.c:2218
+#: src/mt-window.c:2704
+msgid "The document is too large to convert line endings"
+msgstr "The document is too large to convert line endings"
+
+#: src/mt-window.c:2756
+msgid "Line endings converted"
+msgstr "Line endings converted"
+
+#: src/mt-window.c:2801
 msgid "Unknown location"
 msgstr "Unknown location"
 
-#: src/mt-window.c:2225 src/mt-window.c:2538
+#: src/mt-window.c:2808 src/mt-window.c:3538
 msgid "Not saved yet"
 msgstr "Not saved yet"
 
-#: src/mt-window.c:2249
-msgid "Classic Mac (CR)"
-msgstr "Classic Mac (CR)"
+#: src/mt-window.c:3265 src/mt-window.c:3576
+msgid "Document Type"
+msgstr "Document Type"
 
-#: src/mt-window.c:2252
-msgid "Windows (CRLF)"
-msgstr "Windows (CRLF)"
+#: src/mt-window.c:3279
+msgid "Search"
+msgstr "Search"
 
-#: src/mt-window.c:2256
-msgid "Unix (LF)"
-msgstr "Unix (LF)"
+#: src/mt-window.c:3370
+msgid "Save or discard changes before changing the encoding"
+msgstr "Save or discard changes before changing the encoding"
 
-#: src/mt-window.c:2525
+#: src/mt-window.c:3378
+msgid "Save the file first to change its encoding"
+msgstr "Save the file first to change its encoding"
+
+#: src/mt-window.c:3390
+msgid "Reloading with the selected encoding…"
+msgstr "Reloading with the selected encoding…"
+
+#: src/mt-window.c:3525
 msgid "File Name"
 msgstr "File Name"
 
-#: src/mt-window.c:2534
+#: src/mt-window.c:3534
 msgid "Location"
 msgstr "Location"
 
-#: src/mt-window.c:2544
-msgid "Type"
-msgstr "Type"
+#: src/mt-window.c:3583
+msgid "Change Document Type"
+msgstr "Change Document Type"
 
-#: src/mt-window.c:2550
+#: src/mt-window.c:3620
 msgid "Encoding"
 msgstr "Encoding"
 
-#: src/mt-window.c:2556
+#: src/mt-window.c:3632
+msgid "Unix (LF)"
+msgstr "Unix (LF)"
+
+#: src/mt-window.c:3633
+msgid "Windows (CRLF)"
+msgstr "Windows (CRLF)"
+
+#: src/mt-window.c:3634
+msgid "Classic Mac (CR)"
+msgstr "Classic Mac (CR)"
+
+#: src/mt-window.c:3636
 msgid "Newline"
 msgstr "Newline"
 
-#: src/mt-window.c:2564
+#: src/mt-window.c:3648
 msgid "Indentation"
 msgstr "Indentation"
 
-#: src/mt-window.c:2567
+#: src/mt-window.c:3651
 msgid "Auto Indentation"
 msgstr "Auto Indentation"
 
-#: src/mt-window.c:2577
+#: src/mt-window.c:3661
 msgid "Tabs"
 msgstr "Tabs"
 
-#: src/mt-window.c:2578
+#: src/mt-window.c:3662
 msgid "Spaces"
 msgstr "Spaces"
 
-#: src/mt-window.c:2580
+#: src/mt-window.c:3664
 msgid "Character"
 msgstr "Character"
 
-#: src/mt-window.c:2592
+#: src/mt-window.c:3676
 msgid "Spaces Per Tab"
 msgstr "Spaces Per Tab"
 
-#: src/mt-window.c:2604
+#: src/mt-window.c:3688
 msgid "Spaces Per Indent"
 msgstr "Spaces Per Indent"
 
-#: src/mt-window.c:2617
+#: src/mt-window.c:3701
 msgid "Statistics"
 msgstr "Statistics"
 
-#: src/mt-window.c:2619
+#: src/mt-window.c:3703
 msgid "Lines"
 msgstr "Lines"
 
-#: src/mt-window.c:2625
+#: src/mt-window.c:3709
 msgid "Words"
 msgstr "Words"
 
-#: src/mt-window.c:2631
+#: src/mt-window.c:3715
 msgid "Characters, No Spaces"
 msgstr "Characters, No Spaces"
 
-#: src/mt-window.c:2637
+#: src/mt-window.c:3721
 msgid "All Characters"
 msgstr "All Characters"
 
-#: src/mt-window.c:2658
+#: src/mt-window.c:3822
+msgid "Follow System Style"
+msgstr "Follow System Style"
+
+#: src/mt-window.c:3831
+msgid "Light Style"
+msgstr "Light Style"
+
+#: src/mt-window.c:3840
+msgid "Dark Style"
+msgstr "Dark Style"
+
+#: src/mt-window.c:3875
+msgid "Zoom Out"
+msgstr "Zoom Out"
+
+#: src/mt-window.c:3882
+msgid "Reset Zoom"
+msgstr "Reset Zoom"
+
+#: src/mt-window.c:3888
+msgid "Zoom In"
+msgstr "Zoom In"
+
+#: src/mt-window.c:3920
 msgid "_New"
 msgstr "_New"
 
-#: src/mt-window.c:2666
+#: src/mt-window.c:3928
 msgid "_Save"
 msgstr "_Save"
 
-#: src/mt-window.c:2670
+#: src/mt-window.c:3932
 msgid "Save _As…"
 msgstr "Save _As…"
 
-#: src/mt-window.c:2674
+#: src/mt-window.c:3936
 msgid "_Close"
 msgstr "_Close"
 
-#: src/mt-window.c:2682
+#: src/mt-window.c:3944
 msgid "_Find…"
 msgstr "_Find…"
 
-#: src/mt-window.c:2686
+#: src/mt-window.c:3948
 msgid "_Replace…"
 msgstr "_Replace…"
 
-#: src/mt-window.c:2694
-msgid "Zoom _In"
-msgstr "Zoom _In"
-
-#: src/mt-window.c:2698
-msgid "Zoom _Out"
-msgstr "Zoom _Out"
-
-#: src/mt-window.c:2702
-msgid "Reset _Zoom"
-msgstr "Reset _Zoom"
-
-#: src/mt-window.c:2710
+#: src/mt-window.c:3956
 msgid "_Document Properties"
 msgstr "_Document Properties"
 
-#: src/mt-window.c:2718
+#: src/mt-window.c:3964
 msgid "_Preferences"
 msgstr "_Preferences"
 
-#: src/mt-window.c:2722
+#: src/mt-window.c:3968
 msgid "_Keyboard Shortcuts"
 msgstr "_Keyboard Shortcuts"
 
-#: src/mt-window.c:2725
+#: src/mt-window.c:3971
 msgid "_Extensions"
 msgstr "_Extensions"
 
-#: src/mt-window.c:2728
-msgid "_About vellum"
-msgstr "_About vellum"
-
-#: src/mt-window.c:2780
-msgid "About vellum"
-msgstr "About vellum"
-
-#: src/mt-window.c:2782
-msgid "vellum is licensed under BSD-2-Clause."
-msgstr "vellum is licensed under BSD-2-Clause."
-
-#: src/mt-window.c:3900
+#: src/mt-window.c:4007 src/mt-window.c:5689
 msgid "Welcome Guide"
 msgstr "Welcome Guide"
 
-#: src/mt-window.c:672
-msgid "The extension file will be deleted from disk."
-msgstr "The extension file will be deleted from disk."
-
-#: src/mt-window.c:674
-msgid "This built-in extension will be hidden and unloaded. It cannot be restored from the application."
-msgstr "This built-in extension will be hidden and unloaded. It cannot be restored from the application."
-
-#: src/mt-window.c:2797
+#: src/mt-window.c:4085
 #, c-format
 msgid "Cleared %u draft"
 msgid_plural "Cleared %u drafts"
 msgstr[0] "Cleared %u draft"
 msgstr[1] "Cleared %u drafts"
 
-#: src/mt-window.c:2804
+#: src/mt-window.c:4092
 msgid "No history to clear"
 msgstr "No history to clear"
 
-#: src/mt-window.c:2820
+#: src/mt-window.c:4108
 msgid ""
 "All recoverable drafts will be deleted permanently. Open documents are not "
 "affected."
-msgstr ""
+msgstr "All recoverable drafts will be deleted permanently. Open documents are not affected."
 "All recoverable drafts will be deleted permanently. Open documents are not "
 "affected."
 
-#: src/mt-window.c:2828
+#: src/mt-window.c:4116
 msgid "Clear History?"
 msgstr "Clear History?"
 
-#: src/mt-window.c:2832
+#: src/mt-window.c:4120
 msgid "Clear"
 msgstr "Clear"
 
-#: src/mt-window.c:2950 src/mt-window.c:4150
-msgid "New document"
-msgstr "New document"
+#: src/mt-window.c:4257
+msgid "_Open"
+msgstr "_Open"
 
-#: src/mt-window.c:2951
-msgid "Open file"
-msgstr "Open file"
+#: src/mt-window.c:4264
+msgid "New Tab"
+msgstr "New Tab"
 
-#: src/mt-window.c:2965
+#: src/mt-window.c:4265
+msgid "Open File"
+msgstr "Open File"
+
+#: src/mt-window.c:4304
+msgid "Main Menu"
+msgstr "Main Menu"
+
+#: src/mt-window.c:4322
 msgid "Document Properties"
 msgstr "Document Properties"
 
-#: src/mt-window.c:2979
+#: src/mt-window.c:4336
 msgid "File changed on disk"
 msgstr "File changed on disk"
 
-#: src/mt-window.c:2980
+#: src/mt-window.c:4337
 msgid "The file was changed by another program."
 msgstr "The file was changed by another program."
 
-#: src/mt-window.c:2981
+#: src/mt-window.c:4338
 msgid "Discard Changes and Reload"
 msgstr "Discard Changes and Reload"
 
-#: src/mt-window.c:2997
+#: src/mt-window.c:4354
 msgid "Dismiss external file change notification"
 msgstr "Dismiss external file change notification"
 
-#: src/mt-window.c:3053 src/mt-window.c:4158
+#: src/mt-window.c:4442 src/mt-window-shortcuts.c:196
 msgid "Find"
 msgstr "Find"
 
-#: src/mt-window.c:3054
-msgid "Replace with"
-msgstr "Replace with"
-
-#: src/mt-window.c:3059
+#: src/mt-window.c:4443
 msgid "Replace"
 msgstr "Replace"
 
-#: src/mt-window.c:3382
+#: src/mt-window.c:4455
+msgid "Previous Match"
+msgstr "Previous Match"
+
+#: src/mt-window.c:4456
+msgid "Next Match"
+msgstr "Next Match"
+
+#: src/mt-window.c:4467
+msgid "Search and Replace"
+msgstr "Search and Replace"
+
+#: src/mt-window.c:4473
+msgid "Search Options"
+msgstr "Search Options"
+
+#: src/mt-window.c:4476
+msgid "_Case Sensitive"
+msgstr "_Case Sensitive"
+
+#: src/mt-window.c:4484
+msgid "_Replace"
+msgstr "_Replace"
+
+#: src/mt-window.c:4485
+msgid "Replace _All"
+msgstr "Replace _All"
+
+#: src/mt-window.c:4492
+msgid "Close Search"
+msgstr "Close Search"
+
+#: src/mt-window.c:4943
 #, c-format
 msgid "Recovered %u draft"
 msgid_plural "Recovered %u drafts"
 msgstr[0] "Recovered %u draft"
 msgstr[1] "Recovered %u drafts"
 
-#: src/mt-window.c:3731
+#: src/mt-window.c:5363
 msgid "Save an untitled document with :w before closing"
 msgstr "Save an untitled document with :w before closing"
 
-#: src/mt-window.c:3747
+#: src/mt-window.c:5379
 msgid "Saving before closing…"
 msgstr "Saving before closing…"
 
-#: src/mt-window.c:3866
+#: src/mt-window.c:5508
 msgid "Open Files"
 msgstr "Open Files"
 
-#: src/mt-window.c:3935 src/mt-window.c:4153
+#: src/mt-window.c:5577 src/mt-window-shortcuts.c:191
 msgid "Save As"
 msgstr "Save As"
 
-#: src/mt-window.c:4063
-msgid "Set Keyboard Shortcut"
-msgstr "Set Keyboard Shortcut"
+#: src/mt-window.c:5637
+msgid "Zoomed in"
+msgstr "Zoomed in"
 
-#: src/mt-window.c:4072
-msgid "Press a new shortcut"
-msgstr "Press a new shortcut"
+#: src/mt-window.c:5655
+msgid "Zoomed out"
+msgstr "Zoomed out"
 
-#: src/mt-window.c:4075
-msgid ""
-"Press Escape to cancel. The change applies immediately and is saved for the "
-"next start."
-msgstr ""
-
-#: src/mt-window.c:4114
-msgid "Change shortcut"
-msgstr "Change shortcut"
-
-#: src/mt-window.c:4145
-msgid "Keyboard Shortcuts"
-msgstr "Keyboard Shortcuts"
-
-#: src/mt-window.c:4149
-msgid "Document"
-msgstr "Document"
-
-#: src/mt-window.c:4151
-msgid "Open files"
-msgstr "Open files"
-
-#: src/mt-window.c:4154
-msgid "Close document"
-msgstr "Close document"
-
-#: src/mt-window.c:4157
-msgid "Editing"
-msgstr "Editing"
-
-#: src/mt-window.c:4159
-msgid "Find and replace"
-msgstr "Find and replace"
-
-#: src/mt-window.c:4160
-msgid "Zoom in"
-msgstr "Zoom in"
-
-#: src/mt-window.c:4161
-msgid "Zoom out"
-msgstr "Zoom out"
-
-#: src/mt-window.c:4162
-msgid "Reset zoom"
-msgstr "Reset zoom"
-
-#: src/mt-window.c:4163
-msgid "AI completion"
-msgstr "AI completion"
-
-#: src/mt-window.c:4166
-msgid "Optional Extensions"
-msgstr "Optional Extensions"
-
-#: src/mt-window.c:4167
-msgid "Insert timestamp"
-msgstr "Insert timestamp"
-
-#: src/mt-window.c:4168
-msgid "Document statistics"
-msgstr "Document statistics"
-
-#: src/mt-window.c:4169
-msgid "Test links"
-msgstr "Test links"
-
-#: src/mt-window.c:4170
-msgid "Project sidebar"
-msgstr "Project sidebar"
-
-#: src/mt-window.c:4171 src/plugins/build-run-plugin.c:656
-msgid "Build"
-msgstr "Build"
-
-#: src/mt-window.c:4172 src/plugins/build-run-plugin.c:657
-msgid "Run"
-msgstr "Run"
-
-#: src/mt-window.c:4173
-msgid "Build and run"
-msgstr "Build and run"
-
-#: src/mt-window.c:4224
+#: src/mt-window.c:5671
 msgid "Zoom reset to 100%"
 msgstr "Zoom reset to 100%"
 
-#: src/mt-window.c:4283
-msgid "Extension loading will change the next time Vellum starts"
-msgstr "Extension loading will change the next time Vellum starts"
+#: src/mt-window.c:5681
+msgid "AI Code Assistant"
+msgstr "AI Code Assistant"
 
-#: src/mt-window.c:4375
-msgid "Preferences"
-msgstr "Preferences"
+#: src/mt-window.c:5682
+msgid "Timestamp"
+msgstr "Timestamp"
 
-#: src/mt-window.c:4379
-msgid "Interface"
-msgstr "Interface"
+#: src/mt-window.c:5683
+msgid "Document Statistics"
+msgstr "Document Statistics"
 
-#: src/mt-window.c:4382
-msgid "Follow system"
-msgstr "Follow system"
+#: src/mt-window.c:5684
+msgid "Link Check"
+msgstr "Link Check"
 
-#: src/mt-window.c:4383
-msgid "Light"
-msgstr "Light"
+#: src/mt-window.c:5685
+msgid "Project Sidebar"
+msgstr "Project Sidebar"
 
-#: src/mt-window.c:4384
-msgid "Dark"
-msgstr "Dark"
+#: src/mt-window.c:5686
+msgid "Build and Run"
+msgstr "Build and Run"
 
-#: src/mt-window.c:4386
-msgid "Appearance"
-msgstr "Appearance"
+#: src/mt-window.c:5687
+msgid "Vi Mode"
+msgstr "Vi Mode"
 
-#: src/mt-window.c:4392
-msgid "Code Theme"
-msgstr "Code Theme"
+#: src/mt-window.c:5688
+msgid "Editor Screenshot"
+msgstr "Editor Screenshot"
 
-#: src/mt-window.c:4395 src/mt-window.c:4431
-msgid "Choose"
-msgstr "Choose"
+#: src/mt-window.c:5700
+msgid ""
+"Inline completion and configurable code summaries through your AI service"
+msgstr "Inline completion and configurable code summaries through your AI service"
 
-#: src/mt-window.c:4406
-msgid "System language"
-msgstr "System language"
+#: src/mt-window.c:5701
+msgid "Insert the current local date and time"
+msgstr "Insert the current local date and time"
 
-#: src/mt-window.c:4407
-msgid "English"
-msgstr "English"
+#: src/mt-window.c:5702
+msgid "Show character, word and line counts for the current document"
+msgstr "Show character, word and line counts for the current document"
 
-#: src/mt-window.c:4408
-msgid "Simplified Chinese"
-msgstr "Simplified Chinese"
+#: src/mt-window.c:5703
+msgid "Check HTTP and HTTPS links in the current document"
+msgstr "Check HTTP and HTTPS links in the current document"
 
-#: src/mt-window.c:4410
-msgid "Language"
-msgstr "Language"
+#: src/mt-window.c:5704
+msgid "Browse an explicitly selected project directory"
+msgstr "Browse an explicitly selected project directory"
 
-#: src/mt-window.c:4418
-msgid "Use custom font"
-msgstr "Use custom font"
+#: src/mt-window.c:5705
+msgid "Build or run user-configured commands in a separate tool window"
+msgstr "Build or run user-configured commands in a separate tool window"
 
-#: src/mt-window.c:4420
-msgid "When disabled, the system monospace font is used"
-msgstr "When disabled, the system monospace font is used"
+#: src/mt-window.c:5706
+msgid "Basic modal editing commands for Vi users"
+msgstr "Basic modal editing commands for Vi users"
 
-#: src/mt-window.c:4429
-msgid "Editor Font"
-msgstr "Editor Font"
+#: src/mt-window.c:5707
+msgid "Export the current editor content as an image"
+msgstr "Export the current editor content as an image"
 
-#: src/mt-window.c:4445
-msgid "Editor font scale"
-msgstr "Editor font scale"
+#: src/mt-window.c:5708
+msgid "Interactive first-run guide with extension selection"
+msgstr "Interactive first-run guide with extension selection"
 
-#: src/mt-window.c:4452
-msgid "Tab display width"
-msgstr "Tab display width"
-
-#: src/mt-window.c:4454
-msgid "Controls tab columns only; Tab inserts a real tab character"
-msgstr "Controls tab columns only; Tab inserts a real tab character"
-
-#: src/mt-window.c:4461
-msgid "Display"
-msgstr "Display"
-
-#: src/mt-window.c:4463
-msgid "Show line numbers"
-msgstr "Show line numbers"
-
-#: src/mt-window.c:4469
-msgid "Highlight current line"
-msgstr "Highlight current line"
-
-#: src/mt-window.c:4475
-msgid "Show overview map"
-msgstr "Show overview map"
-
-#: src/mt-window.c:4476
-msgid "A compact map is displayed beside each document"
-msgstr "A compact map is displayed beside each document"
-
-#: src/mt-window.c:4481
-msgid "Check spelling"
-msgstr "Check spelling"
-
-#: src/mt-window.c:4482
-msgid "Underlines misspelled words"
-msgstr ""
-
-#: src/mt-window.c:4488
-msgid "Wrapping and Indentation"
-msgstr "Wrapping and Indentation"
-
-#: src/mt-window.c:4490
-msgid "Show right margin"
-msgstr "Show right margin"
-
-#: src/mt-window.c:4496
-msgid "Right margin column"
-msgstr "Right margin column"
-
-#: src/mt-window.c:4502
-msgid "Automatic word wrap"
-msgstr "Automatic word wrap"
-
-#: src/mt-window.c:4508
-msgid "Automatic indentation"
-msgstr "Automatic indentation"
-
-#: src/mt-window.c:4511
-msgid "Auto-pair brackets"
-msgstr "Auto-pair brackets"
-
-#: src/mt-window.c:4512
-msgid "Typing an opening bracket, quote or angle bracket in code documents inserts its closing pair and keeps the cursor inside"
-msgstr "Typing an opening bracket, quote or angle bracket in code documents inserts its closing pair and keeps the cursor inside"
-
-#: src/mt-window.c:4514
-msgid "Indent width"
-msgstr "Indent width"
-
-#: src/mt-window.c:4521
-msgid "Behavior"
-msgstr "Behavior"
-
-#: src/mt-window.c:4523
-msgid "Restore previous session"
-msgstr "Restore previous session"
-
-#: src/mt-window.c:4524
-msgid "Restore recoverable drafts when Vellum starts"
-msgstr "Restore recoverable drafts when Vellum starts"
-
-#: src/mt-window.c:4529
-msgid "Enable extensions"
-msgstr "Enable extensions"
-
-#: src/mt-window.c:4530
-msgid "When disabled, Vellum starts as a compact core editor; restart to apply"
-msgstr ""
-
-#: src/mt-window.c:5979
-msgid "Check for updates automatically"
-msgstr "Check for updates automatically"
-
-#: src/mt-window.c:5980
-msgid "Checks the GitHub release page when Vellum starts"
-msgstr "Checks the GitHub release page when Vellum starts"
-
-#: src/mt-window.c:4538
-msgid "Clear History"
-msgstr "Clear History"
-
-#: src/mt-window.c:4540
-msgid "Delete all recoverable drafts"
-msgstr "Delete all recoverable drafts"
-
-#: src/mt-window.c:4696
+#: src/mt-window.c:5755
 #, c-format
 msgid "Unable to change extension state: %s"
 msgstr "Unable to change extension state: %s"
 
-#: src/mt-window.c:4724
+#: src/mt-window.c:5783
 msgid "Extensions"
 msgstr "Extensions"
 
-#: src/mt-window.c:4727
+#: src/mt-window.c:5786
 msgid "Loaded Extensions"
 msgstr "Loaded Extensions"
 
-#: src/mt-window.c:4731
+#: src/mt-window.c:5790
 msgid ""
 "Extensions are disabled. Enable them in Preferences and restart Vellum to "
 "load or manage extensions."
-msgstr ""
+msgstr "Extensions are disabled. Enable them in Preferences and restart Vellum to load or manage extensions."
 
-#: src/mt-window.c:4736
+#: src/mt-window.c:5795
 msgid ""
 "Extensions can be disabled without deleting them. Any extension can be "
 "removed: user extensions are deleted from disk, built-in extensions are "
 "hidden until vellum is reinstalled. Native modules and source packages must "
 "come from trusted sources."
-msgstr ""
+msgstr "Extensions can be disabled without deleting them. Any extension can be removed: user extensions are deleted from disk, built-in extensions are hidden until vellum is reinstalled. Native modules and source packages must come from trusted sources."
 
-#: src/mt-window.c:4738
+#: src/mt-window.c:5797
 msgid "Import"
 msgstr "Import"
 
-#: src/mt-window.c:4755
+#: src/mt-window.c:5814
 msgid "Extension loading is disabled for this session"
 msgstr "Extension loading is disabled for this session"
 
-#: src/mt-window.c:4756
+#: src/mt-window.c:5815
 msgid "No extensions are currently loaded"
 msgstr "No extensions are currently loaded"
 
-#: src/mt-window.c:4796
+#: src/mt-window.c:5856
 msgid "Enable extension"
 msgstr "Enable extension"
 
-#: src/mt-window.c:4801
+#: src/mt-window.c:5861
 msgid "Export extension"
 msgstr "Export extension"
 
-#: src/mt-window.c:4816
+#: src/mt-window.c:5876
 msgid "Configure extension"
 msgstr "Configure extension"
 
-#: src/mt-window.c:4835
+#: src/mt-window.c:5893
 msgid "Delete extension"
 msgstr "Delete extension"
 
-#: src/mt-window.c:4871
-msgid "A focused GTK4 text editor."
-msgstr "A focused GTK4 text editor."
-
-#: src/mt-window.c:6390
+#: src/mt-window.c:6000
 #, c-format
 msgid "Check failed: %s"
 msgstr "Check failed: %s"
 
-#: src/mt-window.c:6400
+#: src/mt-window.c:6010
 msgid "No published releases yet"
 msgstr "No published releases yet"
 
-#: src/mt-window.c:6406
+#: src/mt-window.c:6016
 #, c-format
 msgid "Check failed: HTTP %u"
 msgstr "Check failed: HTTP %u"
 
-#: src/mt-window.c:6440 src/mt-window.c:6592
+#: src/mt-window.c:6050 src/mt-window.c:6194
 #, c-format
 msgid "New version available: %s"
 msgstr "New version available: %s"
 
-#: src/mt-window.c:6448
+#: src/mt-window.c:6058
 msgid "You are up to date"
 msgstr "You are up to date"
 
-#: src/mt-window.c:6454 src/mt-window.c:6459
+#: src/mt-window.c:6064 src/mt-window.c:6069
 msgid "Unable to read release information"
 msgstr "Unable to read release information"
 
-#: src/mt-window.c:6466
+#: src/mt-window.c:6076
 msgid "Check failed: no response"
 msgstr "Check failed: no response"
 
-#: src/mt-window.c:6486
+#: src/mt-window.c:6096
 msgid "Checking for updates…"
 msgstr "Checking for updates…"
 
-#: src/mt-window.c:6595
+#: src/mt-window.c:6197
 msgid "View"
 msgstr "View"
 
-#: src/mt-window.c:6749
+#: src/mt-window.c:6320
+msgid "About Vellum"
+msgstr "About Vellum"
+
+#: src/mt-window.c:6345
+msgid "A focused GTK4 text editor."
+msgstr "A focused GTK4 text editor."
+
+#: src/mt-window.c:6351
 msgid "Check for Updates"
 msgstr "Check for Updates"
 
-#: src/mt-window.c:6760
+#: src/mt-window.c:6362
 msgid "Open Download Page"
 msgstr "Open Download Page"
 
-#: src/mt-window.c:6772
+#: src/mt-window.c:6374
 msgid "GitHub Repository"
 msgstr "GitHub Repository"
 
-#: src/plugins/ai-completion-plugin.c:294
+#: src/mt-window.c:6386
+msgid "vellum is licensed under BSD-2-Clause."
+msgstr "vellum is licensed under BSD-2-Clause."
+
+#: src/mt-window-shortcuts.c:101
+msgid "Set Keyboard Shortcut"
+msgstr "Set Keyboard Shortcut"
+
+#: src/mt-window-shortcuts.c:110
+msgid "Press a new shortcut"
+msgstr "Press a new shortcut"
+
+#: src/mt-window-shortcuts.c:113
+msgid ""
+"Press Escape to cancel. The change applies immediately and is saved for the "
+"next start."
+msgstr "Press Escape to cancel. The change applies immediately and is saved for the next start."
+
+#: src/mt-window-shortcuts.c:152
+msgid "Change shortcut"
+msgstr "Change shortcut"
+
+#: src/mt-window-shortcuts.c:183
+msgid "Keyboard Shortcuts"
+msgstr "Keyboard Shortcuts"
+
+#: src/mt-window-shortcuts.c:187
+msgid "Document"
+msgstr "Document"
+
+#: src/mt-window-shortcuts.c:188
+msgid "New document"
+msgstr "New document"
+
+#: src/mt-window-shortcuts.c:189
+msgid "Open files"
+msgstr "Open files"
+
+#: src/mt-window-shortcuts.c:192
+msgid "Close document"
+msgstr "Close document"
+
+#: src/mt-window-shortcuts.c:195
+msgid "Editing"
+msgstr "Editing"
+
+#: src/mt-window-shortcuts.c:197
+msgid "Find and replace"
+msgstr "Find and replace"
+
+#: src/mt-window-shortcuts.c:198
+msgid "Zoom in"
+msgstr "Zoom in"
+
+#: src/mt-window-shortcuts.c:199
+msgid "Zoom out"
+msgstr "Zoom out"
+
+#: src/mt-window-shortcuts.c:200
+msgid "Reset zoom"
+msgstr "Reset zoom"
+
+#: src/mt-window-shortcuts.c:201
+msgid "AI completion"
+msgstr "AI completion"
+
+#: src/mt-window-shortcuts.c:202
+msgid "Summarize code with AI"
+msgstr "Summarize code with AI"
+
+#: src/mt-window-shortcuts.c:205
+msgid "Optional Extensions"
+msgstr "Optional Extensions"
+
+#: src/mt-window-shortcuts.c:206
+msgid "Insert timestamp"
+msgstr "Insert timestamp"
+
+#: src/mt-window-shortcuts.c:207
+msgid "Document statistics"
+msgstr "Document statistics"
+
+#: src/mt-window-shortcuts.c:208
+msgid "Test links"
+msgstr "Test links"
+
+#: src/mt-window-shortcuts.c:209
+msgid "Project sidebar"
+msgstr "Project sidebar"
+
+#: src/mt-window-shortcuts.c:210 src/plugins/build-run-plugin.c:656
+msgid "Build"
+msgstr "Build"
+
+#: src/mt-window-shortcuts.c:211 src/plugins/build-run-plugin.c:657
+msgid "Run"
+msgstr "Run"
+
+#: src/mt-window-shortcuts.c:212
+msgid "Build and run"
+msgstr "Build and run"
+
+#: src/mt-window-preferences.c:96
+msgid "Extension loading will change the next time Vellum starts"
+msgstr "Extension loading will change the next time Vellum starts"
+
+#: src/mt-window-preferences.c:191
+msgid "Preferences"
+msgstr "Preferences"
+
+#: src/mt-window-preferences.c:195
+msgid "Interface"
+msgstr "Interface"
+
+#: src/mt-window-preferences.c:198
+msgid "Follow system"
+msgstr "Follow system"
+
+#: src/mt-window-preferences.c:199
+msgid "Light"
+msgstr "Light"
+
+#: src/mt-window-preferences.c:200
+msgid "Dark"
+msgstr "Dark"
+
+#: src/mt-window-preferences.c:202
+msgid "Appearance"
+msgstr "Appearance"
+
+#: src/mt-window-preferences.c:208
+msgid "Code Theme"
+msgstr "Code Theme"
+
+#: src/mt-window-preferences.c:211 src/mt-window-preferences.c:247
+msgid "Choose"
+msgstr "Choose"
+
+#: src/mt-window-preferences.c:222
+msgid "System language"
+msgstr "System language"
+
+#: src/mt-window-preferences.c:223
+msgid "English"
+msgstr "English"
+
+#: src/mt-window-preferences.c:224
+msgid "Simplified Chinese"
+msgstr "Simplified Chinese"
+
+#: src/mt-window-preferences.c:226
+msgid "Language"
+msgstr "Language"
+
+#: src/mt-window-preferences.c:234
+msgid "Use custom font"
+msgstr "Use custom font"
+
+#: src/mt-window-preferences.c:236
+msgid "When disabled, the system monospace font is used"
+msgstr "When disabled, the system monospace font is used"
+
+#: src/mt-window-preferences.c:245
+msgid "Editor Font"
+msgstr "Editor Font"
+
+#: src/mt-window-preferences.c:261
+msgid "Editor font scale"
+msgstr "Editor font scale"
+
+#: src/mt-window-preferences.c:268
+msgid "Tab display width"
+msgstr "Tab display width"
+
+#: src/mt-window-preferences.c:270
+msgid "Controls tab columns only; Tab inserts a real tab character"
+msgstr "Controls tab columns only; Tab inserts a real tab character"
+
+#: src/mt-window-preferences.c:277
+msgid "Display"
+msgstr "Display"
+
+#: src/mt-window-preferences.c:279
+msgid "Show line numbers"
+msgstr "Show line numbers"
+
+#: src/mt-window-preferences.c:285
+msgid "Highlight current line"
+msgstr "Highlight current line"
+
+#: src/mt-window-preferences.c:291
+msgid "Show overview map"
+msgstr "Show overview map"
+
+#: src/mt-window-preferences.c:292
+msgid "A compact map is displayed beside each document"
+msgstr "A compact map is displayed beside each document"
+
+#: src/mt-window-preferences.c:297
+msgid "Check spelling"
+msgstr "Check spelling"
+
+#: src/mt-window-preferences.c:298
+msgid "Underlines misspelled words"
+msgstr "Underlines misspelled words"
+
+#: src/mt-window-preferences.c:304
+msgid "Wrapping and Indentation"
+msgstr "Wrapping and Indentation"
+
+#: src/mt-window-preferences.c:306
+msgid "Show right margin"
+msgstr "Show right margin"
+
+#: src/mt-window-preferences.c:312
+msgid "Right margin column"
+msgstr "Right margin column"
+
+#: src/mt-window-preferences.c:318
+msgid "Automatic word wrap"
+msgstr "Automatic word wrap"
+
+#: src/mt-window-preferences.c:324
+msgid "Automatic indentation"
+msgstr "Automatic indentation"
+
+#: src/mt-window-preferences.c:330
+msgid "Auto-pair brackets"
+msgstr "Auto-pair brackets"
+
+#: src/mt-window-preferences.c:331
+msgid ""
+"Typing an opening bracket, quote or angle bracket in code documents inserts "
+"its closing pair and keeps the cursor inside"
+msgstr "Typing an opening bracket, quote or angle bracket in code documents inserts its closing pair and keeps the cursor inside"
+"Typing an opening bracket, quote or angle bracket in code documents inserts "
+"its closing pair and keeps the cursor inside"
+
+#: src/mt-window-preferences.c:336
+msgid "Indent width"
+msgstr "Indent width"
+
+#: src/mt-window-preferences.c:343
+msgid "Behavior"
+msgstr "Behavior"
+
+#: src/mt-window-preferences.c:345
+msgid "Restore previous session"
+msgstr "Restore previous session"
+
+#: src/mt-window-preferences.c:346
+msgid "Restore recoverable drafts when Vellum starts"
+msgstr "Restore recoverable drafts when Vellum starts"
+
+#: src/mt-window-preferences.c:351
+msgid "Enable extensions"
+msgstr "Enable extensions"
+
+#: src/mt-window-preferences.c:352
+msgid "When disabled, Vellum starts as a compact core editor; restart to apply"
+msgstr "When disabled, Vellum starts as a compact core editor; restart to apply"
+
+#: src/mt-window-preferences.c:357
+msgid "Check for updates automatically"
+msgstr "Check for updates automatically"
+
+#: src/mt-window-preferences.c:358
+msgid "Checks the GitHub release page when Vellum starts"
+msgstr "Checks the GitHub release page when Vellum starts"
+
+#: src/mt-window-preferences.c:366
+msgid "Clear History"
+msgstr "Clear History"
+
+#: src/mt-window-preferences.c:368
+msgid "Delete all recoverable drafts"
+msgstr "Delete all recoverable drafts"
+
+#: src/plugins/ai-completion-plugin.c:333
 msgid "AI endpoint must begin with https:// or http://"
 msgstr "AI endpoint must begin with https:// or http://"
 
-#: src/plugins/ai-completion-plugin.c:300
+#: src/plugins/ai-completion-plugin.c:339
 msgid "AI model and API key are required"
 msgstr "AI model and API key are required"
 
-#: src/plugins/ai-completion-plugin.c:306
+#: src/plugins/ai-completion-plugin.c:349
+msgid "Frequent AI summaries may use many tokens"
+msgstr "Frequent AI summaries may use many tokens"
+
+#: src/plugins/ai-completion-plugin.c:350
+msgid ""
+"The selected interval is below 30 modified lines. Automatic summaries can "
+"send code to your configured AI service very often and may significantly "
+"increase token consumption."
+msgstr "The selected interval is below 30 modified lines. Automatic summaries can send code to your configured AI service very often and may significantly increase token consumption."
+
+#: src/plugins/ai-completion-plugin.c:352
+msgid "Enable Anyway"
+msgstr "Enable Anyway"
+
+#: src/plugins/ai-completion-plugin.c:362
 msgid "AI completion settings saved"
 msgstr "AI completion settings saved"
 
-#: src/plugins/ai-completion-plugin.c:314
+#: src/plugins/ai-completion-plugin.c:370
 #, c-format
 msgid "Unable to save AI settings: %s"
 msgstr "Unable to save AI settings: %s"
 
-#: src/plugins/ai-completion-plugin.c:727
+#: src/plugins/ai-completion-plugin.c:865
 #, c-format
 msgid "AI completion request failed: %s"
 msgstr "AI completion request failed: %s"
 
-#: src/plugins/ai-completion-plugin.c:728
+#: src/plugins/ai-completion-plugin.c:866
 msgid "No response received"
 msgstr "No response received"
 
-#: src/plugins/ai-completion-plugin.c:747
+#: src/plugins/ai-completion-plugin.c:885
 #, c-format
 msgid "AI service returned HTTP %u: %s"
 msgstr "AI service returned HTTP %u: %s"
 
-#: src/plugins/ai-completion-plugin.c:783
+#: src/plugins/ai-completion-plugin.c:932
 msgid "AI completion ready: press Tab to accept or Escape to dismiss"
 msgstr "AI completion ready: press Tab to accept or Escape to dismiss"
 
-#: src/plugins/ai-completion-plugin.c:795
+#: src/plugins/ai-completion-plugin.c:945
 #, c-format
 msgid "Unable to parse AI completion: %s"
 msgstr "Unable to parse AI completion: %s"
 
-#: src/plugins/ai-completion-plugin.c:850
+#: src/plugins/ai-completion-plugin.c:1007 src/plugins/ai-code-summary.c:656
 msgid "Configure an AI endpoint, model and API key in Extensions first"
 msgstr "Configure an AI endpoint, model and API key in Extensions first"
 
-#: src/plugins/ai-completion-plugin.c:869
+#: src/plugins/ai-completion-plugin.c:1026
 msgid "Type some text before requesting AI completion"
 msgstr "Type some text before requesting AI completion"
 
-#: src/plugins/ai-completion-plugin.c:905
+#: src/plugins/ai-completion-plugin.c:1064 src/plugins/ai-code-summary.c:692
 msgid "AI endpoint URL is invalid"
 msgstr "AI endpoint URL is invalid"
 
-#: src/plugins/ai-completion-plugin.c:949
+#: src/plugins/ai-completion-plugin.c:1108
 msgid "Requesting AI completion…"
 msgstr "Requesting AI completion…"
 
-#: src/plugins/ai-completion-plugin.c:1032
+#: src/plugins/ai-completion-plugin.c:1192
 msgid "AI Completion"
 msgstr "AI Completion"
 
-#: src/plugins/ai-completion-plugin.c:1033
+#: src/plugins/ai-completion-plugin.c:1193
 msgid "Automatic AI completion"
 msgstr "Automatic AI completion"
 
-#: src/plugins/ai-completion-plugin.c:1034
-#: src/plugins/ai-completion-plugin.c:1116
+#: src/plugins/ai-completion-plugin.c:1194
+#: src/plugins/ai-completion-plugin.c:1277
 msgid ""
 "Wait for a short pause after typing, then request a completion without "
 "pressing a shortcut."
-msgstr ""
+msgstr "Wait for a short pause after typing, then request a completion without pressing a shortcut."
 "Wait for a short pause after typing, then request a completion without "
 "pressing a shortcut."
 
-#: src/plugins/ai-completion-plugin.c:1085
+#: src/plugins/ai-completion-plugin.c:1246
 msgid "AI Completion Settings"
 msgstr "AI Completion Settings"
 
-#: src/plugins/ai-completion-plugin.c:1090
+#: src/plugins/ai-completion-plugin.c:1251
 msgid "OpenAI-Compatible Service"
 msgstr "OpenAI-Compatible Service"
 
-#: src/plugins/ai-completion-plugin.c:1092
+#: src/plugins/ai-completion-plugin.c:1253
 msgid ""
 "Enter a full Chat Completions URL, an OpenAI-compatible URL ending in /v1, "
 "or a bare service host. Text around the cursor is sent to this service."
-msgstr ""
+msgstr "Enter a full Chat Completions URL, an OpenAI-compatible URL ending in /v1, or a bare service host. Text around the cursor is sent to this service."
 "Enter a full Chat Completions URL, an OpenAI-compatible URL ending in /v1, "
 "or a bare service host. Text around the cursor is sent to this service."
 
-#: src/plugins/ai-completion-plugin.c:1098
+#: src/plugins/ai-completion-plugin.c:1259
 msgid "API Endpoint URL"
 msgstr "API Endpoint URL"
 
-#: src/plugins/ai-completion-plugin.c:1103
+#: src/plugins/ai-completion-plugin.c:1264
 msgid "Model"
 msgstr "Model"
 
-#: src/plugins/ai-completion-plugin.c:1108
+#: src/plugins/ai-completion-plugin.c:1269
 msgid "API Key"
 msgstr "API Key"
 
-#: src/plugins/ai-completion-plugin.c:1114
+#: src/plugins/ai-completion-plugin.c:1275
 msgid "Suggest automatically while typing"
 msgstr "Suggest automatically while typing"
 
-#: src/plugins/ai-completion-plugin.c:1121
+#: src/plugins/ai-completion-plugin.c:1282
 msgid "Save AI Settings"
 msgstr "Save AI Settings"
+
+#: src/plugins/ai-code-summary.c:328
+msgid "AI Code Summary"
+msgstr "AI Code Summary"
+
+#: src/plugins/ai-code-summary.c:330
+msgid ""
+"Create a compact local summary after a configurable amount of code editing. "
+"The latest summary is sent with later AI requests for the same document."
+msgstr "Create a compact local summary after a configurable amount of code editing. The latest summary is sent with later AI requests for the same document."
+
+#: src/plugins/ai-code-summary.c:333
+msgid "Enable code summaries"
+msgstr "Enable code summaries"
+
+#: src/plugins/ai-code-summary.c:335
+msgid ""
+"Automatically summarize selected document types after enough lines change."
+msgstr "Automatically summarize selected document types after enough lines change."
+
+#: src/plugins/ai-code-summary.c:341
+msgid "Source files"
+msgstr "Source files"
+
+#: src/plugins/ai-code-summary.c:343
+msgid "C, C++, Rust, Go, Java and other compiled-language source files."
+msgstr "C, C++, Rust, Go, Java and other compiled-language source files."
+
+#: src/plugins/ai-code-summary.c:349
+msgid "Script files"
+msgstr "Script files"
+
+#: src/plugins/ai-code-summary.c:351
+msgid "Python, Shell, Ruby, Perl, PHP and similar scripts."
+msgstr "Python, Shell, Ruby, Perl, PHP and similar scripts."
+
+#: src/plugins/ai-code-summary.c:357
+msgid "Web files"
+msgstr "Web files"
+
+#: src/plugins/ai-code-summary.c:359
+msgid "JavaScript, TypeScript, HTML, CSS and component files."
+msgstr "JavaScript, TypeScript, HTML, CSS and component files."
+
+#: src/plugins/ai-code-summary.c:365
+msgid "Structured data files"
+msgstr "Structured data files"
+
+#: src/plugins/ai-code-summary.c:367
+msgid "JSON, YAML, TOML, XML and SQL files."
+msgstr "JSON, YAML, TOML, XML and SQL files."
+
+#: src/plugins/ai-code-summary.c:374
+msgid "Modified lines between automatic summaries"
+msgstr "Modified lines between automatic summaries"
+
+#: src/plugins/ai-code-summary.c:376
+msgid ""
+"The recommended minimum is 30 lines; lower values can greatly increase token "
+"use."
+msgstr "The recommended minimum is 30 lines; lower values can greatly increase token use."
+
+#: src/plugins/ai-code-summary.c:572
+#, c-format
+msgid "AI code summary failed: %s"
+msgstr "AI code summary failed: %s"
+
+#: src/plugins/ai-code-summary.c:578
+msgid "AI code summary service returned an error"
+msgstr "AI code summary service returned an error"
+
+#: src/plugins/ai-code-summary.c:591
+#, c-format
+msgid "Unable to parse AI code summary: %s"
+msgstr "Unable to parse AI code summary: %s"
+
+#: src/plugins/ai-code-summary.c:603
+msgid "AI code summary updated and will be included with later AI requests"
+msgstr "AI code summary updated and will be included with later AI requests"
+
+#: src/plugins/ai-code-summary.c:637
+msgid "AI code summaries are available only for recognized code documents"
+msgstr "AI code summaries are available only for recognized code documents"
+
+#: src/plugins/ai-code-summary.c:674
+msgid "Add some code before generating an AI summary"
+msgstr "Add some code before generating an AI summary"
+
+#: src/plugins/ai-code-summary.c:725
+msgid "Generating AI code summary…"
+msgstr "Generating AI code summary…"
 
 #: src/plugins/build-run-plugin.c:290
 msgid "Build completed"
@@ -1037,12 +1321,12 @@ msgstr "Hide Build Output"
 
 #: src/plugins/build-run-plugin.c:706
 msgid ""
-"Commands use direct argument parsing, not a shell. Available placeholders: $"
-"{file}, ${dir}, ${name}, ${root} (${name} is the source file name without "
+"Commands use direct argument parsing, not a shell. Available placeholders: "
+"${file}, ${dir}, ${name}, ${root} (${name} is the source file name without "
 "its extension).\n"
-msgstr ""
-"Commands use direct argument parsing, not a shell. Available placeholders: $"
-"{file}, ${dir}, ${name}, ${root} (${name} is the source file name without "
+msgstr "Commands use direct argument parsing, not a shell. Available placeholders: ${file}, ${dir}, ${name}, ${root} (${name} is the source file name without its extension).\n"
+"Commands use direct argument parsing, not a shell. Available placeholders: "
+"${file}, ${dir}, ${name}, ${root} (${name} is the source file name without "
 "its extension).\n"
 
 #: src/plugins/build-run-plugin.c:762
@@ -1068,7 +1352,7 @@ msgid ""
 "without a shell. Use ${file}, ${dir}, ${name}, or ${root}; ${name} is the "
 "source file name without its extension. Quote placeholders when paths may "
 "contain spaces."
-msgstr ""
+msgstr "Commands run only after F9, F10 or F11. They are parsed into arguments without a shell. Use ${file}, ${dir}, ${name}, or ${root}; ${name} is the source file name without its extension. Quote placeholders when paths may contain spaces."
 "Commands run only after F9, F10 or F11. They are parsed into arguments "
 "without a shell. Use ${file}, ${dir}, ${name}, or ${root}; ${name} is the "
 "source file name without its extension. Quote placeholders when paths may "
@@ -1142,36 +1426,52 @@ msgstr "Refresh Project Files"
 msgid "Hide Project Sidebar"
 msgstr "Hide Project Sidebar"
 
-#: src/plugins/vim-mode-plugin.c:40
+#: src/plugins/vim-mode-plugin.c:44
 msgid "Vi: Normal mode"
 msgstr "Vi: Normal mode"
 
-#: src/plugins/vim-mode-plugin.c:49
+#: src/plugins/vim-mode-plugin.c:55
 msgid "Vi: Insert mode"
 msgstr "Vi: Insert mode"
 
-#: src/plugins/vim-mode-plugin.c:95
-msgid "Vi commands: :w, :wq, :x, :q, :q!, :help; normal keys: h j k l w b 0 $ G gg i a o x d d d y y c c p u"
-msgstr "Vi commands: :w, :wq, :x, :q, :q!, :help; normal keys: h j k l w b 0 $ G gg i a o x dd yy cc p u"
+#: src/plugins/vim-mode-plugin.c:102
+msgid ""
+"Vi commands: :w, :wq, :x, :q, :q!, :help; normal keys: h j k l w b 0 $ G gg "
+"i a o x d d d y y c c p u"
+msgstr "Vi commands: :w, :wq, :x, :q, :q!, :help; normal keys: h j k l w b 0 $ G gg i a o x d d d y y c c p u"
+"Vi commands: :w, :wq, :x, :q, :q!, :help; normal keys: h j k l w b 0 $ G gg "
+"i a o x dd yy cc p u"
 
-#: src/plugins/vim-mode-plugin.c:101
+#: src/plugins/vim-mode-plugin.c:108
 #, c-format
 msgid "Unsupported Vi command: :%s"
 msgstr "Unsupported Vi command: :%s"
 
-#: src/plugins/vim-mode-plugin.c:150
+#: src/plugins/vim-mode-plugin.c:157
 msgid "Vi Command"
 msgstr "Vi Command"
 
-#: src/plugins/vim-mode-plugin.c:162
+#: src/plugins/vim-mode-plugin.c:169
 msgid "w, wq, x, q, q!, help"
 msgstr "w, wq, x, q, q!, help"
 
-#: src/plugins/vim-mode-plugin.c:342
+#: src/plugins/vim-mode-plugin.c:379
 msgid ""
 "Vi mode enabled: press i to insert, Escape for normal mode, and : for "
 "commands"
-msgstr ""
+msgstr "Vi mode enabled: press i to insert, Escape for normal mode, and : for commands"
 
-#~ msgid "_Open…"
-#~ msgstr "_Open…"
+#~ msgid "The extension file will be removed and unload after restart."
+#~ msgstr "The extension file will be removed and unload after restart."
+
+#~ msgid "Type"
+#~ msgstr "Type"
+
+#~ msgid "_About vellum"
+#~ msgstr "_About vellum"
+
+#~ msgid "Open file"
+#~ msgstr "Open file"
+
+#~ msgid "Replace with"
+#~ msgstr "Replace with"

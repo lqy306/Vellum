@@ -64,6 +64,9 @@ test_theme_chooser = executable(
     'test-theme-chooser.c',
     '../src/mt-application.c',
     '../src/mt-window.c',
+    '../src/mt-window-shortcuts.c',
+    '../src/mt-window-preferences.c',
+    '../src/mt-overview-map.c',
     '../src/mt-document.c',
     '../src/mt-plugin-manager.c',
     '../src/mt-settings.c',
@@ -146,7 +149,7 @@ test(
 
 test_ai_completion_parsing = executable(
   'test-ai-completion-parsing',
-  files('test-ai-completion-parsing.c'),
+  files('test-ai-completion-parsing.c', '../src/plugins/ai-code-summary.c'),
   include_directories : include_directories('../src'),
   dependencies : [
     dependency('gtk4', version : '>= 4.10'),
@@ -174,6 +177,9 @@ test_properties_panel = executable(
     'test-properties-panel.c',
     '../src/mt-application.c',
     '../src/mt-window.c',
+    '../src/mt-window-shortcuts.c',
+    '../src/mt-window-preferences.c',
+    '../src/mt-overview-map.c',
     '../src/mt-document.c',
     '../src/mt-plugin-manager.c',
     '../src/mt-settings.c',
@@ -213,6 +219,9 @@ test_screenshot_plugin = executable(
     'test-screenshot-plugin.c',
     '../src/mt-application.c',
     '../src/mt-window.c',
+    '../src/mt-window-shortcuts.c',
+    '../src/mt-window-preferences.c',
+    '../src/mt-overview-map.c',
     '../src/mt-document.c',
     '../src/mt-plugin-manager.c',
     '../src/mt-settings.c',

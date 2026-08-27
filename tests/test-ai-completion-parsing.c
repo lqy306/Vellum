@@ -160,13 +160,15 @@ test_build_body_uses_prefix_and_suffix(void)
     JsonObject *message;
     const gchar *content;
 
-    body = ai_completion_build_body("test-model", "int main", "{");
+    body = ai_completion_build_body("test-model", "int main", "{", "Existing summary");
     parser = json_parser_new();
     g_assert_true(json_parser_load_from_data(parser, body, -1, NULL));
     object = json_node_get_object(json_parser_get_root(parser));
     g_assert_cmpstr(json_object_get_string_member(object, "model"), ==, "test-model");
     message = json_array_get_object_element(json_object_get_array_member(object, "messages"), 1);
     content = json_object_get_string_member(message, "content");
+    g_assert_nonnull(strstr(content, "<document_summary>"));
+    g_assert_nonnull(strstr(content, "Existing summary"));
     g_assert_nonnull(strstr(content, "<fim_prefix>"));
     g_assert_nonnull(strstr(content, "int main"));
     g_assert_nonnull(strstr(content, "<fim_suffix>"));

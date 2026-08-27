@@ -4,6 +4,7 @@
  */
 
 #include "mt-plugin.h"
+#include "ai-code-summary.h"
 
 #include <adwaita.h>
 #include <glib/gi18n.h>
@@ -24,6 +25,11 @@
 
 typedef struct _AiRequest AiRequest;
 typedef struct _AiConfigWidgets AiConfigWidgets;
+
+static void ai_completion_cost_warning_response(AdwMessageDialog *dialog,
+                                                const gchar *response,
+                                                gpointer user_data);
+static void ai_completion_config_save_clicked(GtkButton *button, gpointer user_data);
 
 struct _AiRequest
 {
@@ -50,6 +56,7 @@ struct _AiConfigWidgets
     AdwEntryRow *model_row;
     AdwPasswordEntryRow *key_row;
     AdwSwitchRow *auto_row;
+    AiCodeSummaryConfigWidgets *summary_widgets;
     GtkWindow *window;
 };
 
@@ -58,7 +65,7 @@ static const MtPluginInfo ai_completion_plugin_info = {
     "io.github.vellum.ai-completion",
     "AI Completion",
     "Complete text through a user-configured OpenAI-compatible API",
-    "0.1.0"
+    "0.2.0"
 };
 
 static SoupSession *ai_session;
@@ -232,6 +239,7 @@ ai_completion_save_settings(const gchar *endpoint,
                             const gchar *model,
                             const gchar *api_key,
                             gboolean auto_enabled,
+                            AiCodeSummaryConfigWidgets *summary_widgets,
                             GError **error)
 {
     GKeyFile *settings;
@@ -248,6 +256,7 @@ ai_completion_save_settings(const gchar *endpoint,
     g_key_file_set_string(settings, AI_COMPLETION_GROUP, "model", model);
     g_key_file_set_string(settings, AI_COMPLETION_GROUP, "api-key", api_key);
     g_key_file_set_boolean(settings, AI_COMPLETION_GROUP, "auto-complete", auto_enabled);
+    ai_code_summary_config_save(settings, summary_widgets);
     contents = g_key_file_to_data(settings, &length, error);
 
     if (contents == NULL)
@@ -273,9 +282,31 @@ ai_completion_save_settings(const gchar *endpoint,
 }
 
 static void
+ai_completion_cost_warning_response(AdwMessageDialog *dialog,
+                                    const gchar *response,
+                                    gpointer user_data)
+{
+    AiConfigWidgets *widgets;
+
+    widgets = user_data;
+    gtk_window_destroy(GTK_WINDOW(dialog));
+    if (g_strcmp0(response, "continue") == 0)
+    {
+        g_object_set_data(G_OBJECT(widgets->window),
+                          "vellum-ai-summary-warning-accepted",
+                          GINT_TO_POINTER(1));
+        ai_completion_config_save_clicked(NULL, widgets);
+    }
+}
+
+static void
 ai_completion_config_widgets_free(AiConfigWidgets *widgets)
 {
-    g_free(widgets);
+    if (widgets != NULL)
+    {
+        ai_code_summary_config_widgets_free(widgets->summary_widgets);
+        g_free(widgets);
+    }
 }
 
 static void
@@ -309,7 +340,24 @@ ai_completion_config_save_clicked(GtkButton *button, gpointer user_data)
         return;
     }
 
-    if (ai_completion_save_settings(endpoint, model, api_key, auto_enabled, &error))
+    if (ai_code_summary_config_requires_cost_warning(widgets->summary_widgets) &&
+        g_object_get_data(G_OBJECT(widgets->window), "vellum-ai-summary-warning-accepted") == NULL)
+    {
+        AdwMessageDialog *dialog;
+
+        dialog = ADW_MESSAGE_DIALOG(adw_message_dialog_new(widgets->window,
+                                                            _("Frequent AI summaries may use many tokens"),
+                                                            _("The selected interval is below 30 modified lines. Automatic summaries can send code to your configured AI service very often and may significantly increase token consumption.")));
+        adw_message_dialog_add_response(dialog, "cancel", _("Cancel"));
+        adw_message_dialog_add_response(dialog, "continue", _("Enable Anyway"));
+        adw_message_dialog_set_response_appearance(dialog, "continue", ADW_RESPONSE_DESTRUCTIVE);
+        g_object_set_data(G_OBJECT(dialog), "vellum-ai-summary-widgets", widgets);
+        g_signal_connect(dialog, "response", G_CALLBACK(ai_completion_cost_warning_response), widgets);
+        gtk_window_present(GTK_WINDOW(dialog));
+        return;
+    }
+
+    if (ai_completion_save_settings(endpoint, model, api_key, auto_enabled, widgets->summary_widgets, &error))
     {
         widgets->host->show_toast(widgets->host, _("AI completion settings saved"));
         ai_auto_enabled = auto_enabled;
@@ -343,7 +391,7 @@ ai_completion_trim_context(const gchar *text, glong limit)
 }
 
 static gchar *
-ai_completion_build_body(const gchar *model, const gchar *prefix, const gchar *suffix)
+ai_completion_build_body(const gchar *model, const gchar *prefix, const gchar *suffix, const gchar *summary)
 {
     JsonBuilder *builder;
     JsonGenerator *generator;
@@ -356,13 +404,15 @@ ai_completion_build_body(const gchar *model, const gchar *prefix, const gchar *s
         /* 与真实补全工具一致的 fill-in-the-middle 思路：同时给出光标前后文，
          * 让模型只补中间段；聊天模型用标记符描述前缀与后缀。指令刻意强调
          * “不是对话”：聊天模型常把“你好”当开场白接一句问候。 */
-        prompt = g_strdup_printf("This is not a chat. Continue the code or prose at the cursor. The text before the cursor is between <fim_prefix> and <fim_suffix>; the text after the cursor follows <fim_suffix>. Output only the missing middle that flows from the prefix toward the suffix. Never greet, never answer a question, never explain, never use Markdown or fences, never repeat text that already exists.\n\n<fim_prefix>\n%s\n<fim_suffix>\n%s\n<fim_middle>\n",
+        prompt = g_strdup_printf("This is not a chat. Continue the code or prose at the cursor. A local AI-maintained summary may appear before the code; treat it as context, not output. The text before the cursor is between <fim_prefix> and <fim_suffix>; the text after the cursor follows <fim_suffix>. Output only the missing middle that flows from the prefix toward the suffix. Never greet, never answer a question, never explain, never use Markdown or fences, never repeat text that already exists.\n\n<document_summary>\n%s\n</document_summary>\n<fim_prefix>\n%s\n<fim_suffix>\n%s\n<fim_middle>\n",
+                                 summary != NULL ? summary : "",
                                  prefix,
                                  suffix);
     }
     else
     {
-        prompt = g_strdup_printf("This is not a chat. Continue the code or prose at the cursor. Output only the characters that should immediately follow the cursor, as if the file keeps going. Never greet, never answer a question, never explain, never use Markdown or fences, never repeat text that already exists.\n\n%s",
+        prompt = g_strdup_printf("This is not a chat. Continue the code or prose at the cursor. A local AI-maintained summary may appear before the code; treat it as context, not output. Output only the characters that should immediately follow the cursor, as if the file keeps going. Never greet, never answer a question, never explain, never use Markdown or fences, never repeat text that already exists.\n\n<document_summary>\n%s\n</document_summary>\n%s",
+                                 summary != NULL ? summary : "",
                                  prefix);
     }
     builder = json_builder_new();
@@ -918,6 +968,7 @@ ai_completion_request_start(MtPluginHost *host, gboolean automatic)
     gchar *trimmed_suffix;
     gchar *body;
     gchar *authorization;
+    gchar *summary;
     SoupMessage *message;
     GBytes *body_bytes;
     AiRequest *request;
@@ -1002,7 +1053,9 @@ ai_completion_request_start(MtPluginHost *host, gboolean automatic)
     g_free(ai_auto_context);
     ai_auto_context = g_strdup(trimmed_context);
     ai_auto_context_loaded = TRUE;
-    body = ai_completion_build_body(model, trimmed_context, trimmed_suffix);
+    summary = ai_code_summary_get_current(host);
+    body = ai_completion_build_body(model, trimmed_context, trimmed_suffix, summary);
+    g_free(summary);
     message = soup_message_new("POST", endpoint);
     if (message == NULL)
     {
@@ -1131,6 +1184,7 @@ mt_plugin_activate(MtPluginHost *host, GError **error)
 
     host->set_accelerators(host, "app.ai-complete", accelerators);
     host->add_key_handler(host, ai_completion_handle_key, NULL, NULL);
+    ai_code_summary_activate(host);
 
     if (host->add_preference_switch != NULL)
     {
@@ -1154,6 +1208,7 @@ mt_plugin_deactivate(MtPluginHost *host)
 
     ai_completion_auto_cancel();
     ai_completion_clear_candidate();
+    ai_code_summary_deactivate();
     g_clear_pointer(&ai_auto_context, g_free);
     ai_auto_context_loaded = FALSE;
     ai_request_in_flight = FALSE;
@@ -1239,6 +1294,15 @@ mt_plugin_configure(MtPluginHost *host, gpointer parent_window)
                            (GDestroyNotify)ai_completion_config_widgets_free);
 
     adw_preferences_page_add(page, group);
+
+    {
+        GKeyFile *summary_settings;
+
+        summary_settings = ai_completion_load_settings();
+        widgets->summary_widgets = ai_code_summary_add_config_group(page, summary_settings);
+        g_key_file_unref(summary_settings);
+    }
+
     adw_preferences_window_add(window, page);
     gtk_window_present(GTK_WINDOW(window));
 

@@ -32,7 +32,7 @@ shared_module(
 
 shared_module(
   'ai-completion-plugin',
-  'ai-completion-plugin.c',
+  ['ai-completion-plugin.c', 'ai-code-summary.c'],
   include_directories : include_directories('..'),
   dependencies : [gtk_dep, adw_dep, gio_dep, gmodule_dep, soup_dep, json_dep],
   name_prefix : '',

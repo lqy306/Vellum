@@ -37,10 +37,17 @@ gboolean mt_plugin_manager_set_enabled(MtPluginManager *manager,
                                        guint index,
                                        gboolean enabled,
                                        GError **error);
+gboolean mt_plugin_manager_set_enabled_by_id(MtPluginManager *manager,
+                                             const gchar *plugin_id,
+                                             gboolean enabled,
+                                             GError **error);
 gboolean mt_plugin_manager_handle_key(MtPluginManager *manager,
                                       guint keyval,
                                       guint keycode,
                                       guint state);
+/* 向已启用扩展分发活动代码文档的用户编辑行数。 */
+void mt_plugin_manager_notify_document_changed(MtPluginManager *manager,
+                                               guint changed_lines);
 gboolean mt_plugin_manager_import(MtPluginManager *manager, GFile *source, GError **error);
 gboolean mt_plugin_manager_export(MtPluginManager *manager,
                                   guint index,
