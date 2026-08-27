@@ -41,6 +41,8 @@ struct _MtSettings
     gboolean extensions_enabled;
     gboolean custom_font;
     gboolean insert_spaces;
+    /* 启动后自动向 GitHub 发布页查询新版本，发现新版时用 Toast 提醒。 */
+    gboolean auto_check_updates;
     gdouble font_scale;
     GHashTable *shortcuts;
 };
@@ -81,6 +83,8 @@ gboolean mt_settings_get_restore_session(MtSettings *settings);
 void mt_settings_set_restore_session(MtSettings *settings, gboolean enabled);
 gboolean mt_settings_get_extensions_enabled(MtSettings *settings);
 void mt_settings_set_extensions_enabled(MtSettings *settings, gboolean enabled);
+gboolean mt_settings_get_auto_check_updates(MtSettings *settings);
+void mt_settings_set_auto_check_updates(MtSettings *settings, gboolean enabled);
 gboolean mt_settings_get_custom_font(MtSettings *settings);
 void mt_settings_set_custom_font(MtSettings *settings, gboolean enabled);
 gboolean mt_settings_get_insert_spaces(MtSettings *settings);

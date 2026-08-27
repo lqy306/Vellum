@@ -1,6 +1,6 @@
 #!/bin/sh
 # build-appimage.sh
-# 从 Meson staging 目录创建用于测试的 Linux x86_64 AppImage。
+# 从 Meson staging 目录创建用于测试的 Linux amd64 AppImage。
 
 set -eu
 
@@ -9,7 +9,8 @@ BUILD_DIR=${BUILD_DIR:-"$PROJECT_ROOT/build"}
 WORK_DIR=${WORK_DIR:-"$PROJECT_ROOT/dist/appimage-work"}
 APPDIR="$WORK_DIR/Vellum.AppDir"
 STAGE_DIR="$WORK_DIR/stage"
-OUTPUT=${OUTPUT:-"$PROJECT_ROOT/dist/Vellum-x86_64.AppImage"}
+VERSION=${VERSION:-"1.0.0"}
+OUTPUT=${OUTPUT:-"$PROJECT_ROOT/dist/vellum-$VERSION-amd64.AppImage"}
 APPIMAGETOOL=${APPIMAGETOOL:-appimagetool}
 
 if [ ! -d "$BUILD_DIR" ]; then

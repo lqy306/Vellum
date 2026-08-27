@@ -65,6 +65,19 @@ typedef struct _MtExtensionDeleteRequest MtExtensionDeleteRequest;
 typedef struct _MtThemeChooser MtThemeChooser;
 typedef struct _MtShortcutRequest MtShortcutRequest;
 typedef struct _MtPropertiesPanel MtPropertiesPanel;
+typedef struct _MtAutoUpdateCheck MtAutoUpdateCheck;
+
+struct _MtAutoUpdateCheck
+{
+    MtWindow *window;
+    SoupSession *session;
+    SoupMessage *message;
+    GCancellable *cancellable;
+};
+
+static void mt_window_auto_update_check_start(MtWindow *window);
+static gboolean mt_window_auto_update_check_idle(gpointer user_data);
+static void mt_auto_update_check_free(MtAutoUpdateCheck *check);
 
 struct _MtFileRequest
 {
@@ -99,6 +112,7 @@ struct _MtExtensionFileRequest
 struct _MtExtensionDeleteRequest
 {
     MtWindow *window;
+    GtkWidget *extensions_window;
     guint index;
 };
 
@@ -611,7 +625,8 @@ mt_window_extension_delete_response(AdwMessageDialog *dialog,
         if (mt_plugin_manager_remove(manager, request->index, &error))
         {
             mt_window_show_toast(request->window,
-                                 _("Extension deleted from disk. It will unload after restart."));
+                                 _("Extension removed"));
+            mt_window_sync_plugin_menu(request->window);
         }
         else
         {
@@ -625,6 +640,12 @@ mt_window_extension_delete_response(AdwMessageDialog *dialog,
     }
 
     gtk_window_destroy(GTK_WINDOW(dialog));
+    if (request->extensions_window != NULL && GTK_IS_WIDGET(request->extensions_window))
+    {
+        gtk_window_destroy(GTK_WINDOW(request->extensions_window));
+        request->extensions_window = NULL;
+        mt_window_action_extensions(NULL, NULL, request->window);
+    }
     g_free(request);
 }
 
@@ -648,16 +669,24 @@ static void
 mt_window_extension_delete_clicked(GtkButton *button, gpointer user_data)
 {
     MtWindow *window;
+    MtPluginManager *manager;
     MtExtensionDeleteRequest *request;
     AdwMessageDialog *dialog;
+    guint index;
 
     window = user_data;
     request = g_new0(MtExtensionDeleteRequest, 1);
     request->window = window;
-    request->index = GPOINTER_TO_UINT(g_object_get_data(G_OBJECT(button), "vellum-extension-index"));
+    index = GPOINTER_TO_UINT(g_object_get_data(G_OBJECT(button), "vellum-extension-index"));
+    request->index = index;
+    request->extensions_window = GTK_WIDGET(gtk_widget_get_root(GTK_WIDGET(button)));
+    manager = window->plugin_manager;
     dialog = ADW_MESSAGE_DIALOG(adw_message_dialog_new(GTK_WINDOW(window->window),
                                                         _("Delete extension?"),
-                                                        _("The extension file will be removed and unload after restart.")));
+                                                        manager != NULL &&
+                                                        mt_plugin_manager_is_user_managed(manager, index) ?
+                                                        _("The extension file will be deleted from disk.") :
+                                                        _("This built-in extension will be hidden and unloaded. It cannot be restored from the application.")));
     adw_message_dialog_add_response(dialog, "cancel", _("Cancel"));
     adw_message_dialog_add_response(dialog, "delete", _("Delete"));
     adw_message_dialog_set_response_appearance(dialog, "delete", ADW_RESPONSE_DESTRUCTIVE);
@@ -1184,7 +1213,7 @@ mt_window_update_header_title(MtWindow *window)
     document = mt_window_get_current_document(window);
     if (document == NULL)
     {
-        gtk_label_set_text(window->header_title_label, "Vellum");
+        gtk_label_set_text(window->header_title_label, "vellum");
         gtk_label_set_text(window->header_subtitle_label, "");
         if (window->header_modified_indicator != NULL)
         {
@@ -3784,7 +3813,7 @@ mt_window_build_zoom_box(MtWindow *window)
 }
 
 static GMenu *
-mt_window_build_primary_menu(void)
+mt_window_build_primary_menu(MtWindow *window)
 {
     GMenu *menu;
     GMenu *section;
@@ -3860,13 +3889,55 @@ mt_window_build_primary_menu(void)
     item = g_menu_item_new(_("_Extensions"), "win.extensions");
     g_menu_append_item(section, item);
     g_object_unref(item);
-    item = g_menu_item_new(_("_About Vellum"), "win.about");
+    item = g_menu_item_new(_("_About vellum"), "win.about");
     g_menu_append_item(section, item);
     g_object_unref(item);
     g_menu_append_section(menu, NULL, G_MENU_MODEL(section));
     g_object_unref(section);
 
+    /* 新手引导入口：welcome 插件加载后动态追加，删除后自动移除。 */
+    section = g_menu_new();
+    g_menu_append_section(menu, NULL, G_MENU_MODEL(section));
+    window->welcome_menu_section = section;
+
     return menu;
+}
+
+void
+mt_window_sync_plugin_menu(MtWindow *window)
+{
+    MtPluginManager *manager;
+    gboolean loaded;
+
+    if (window == NULL || window->welcome_menu_section == NULL)
+    {
+        return;
+    }
+
+    manager = window->plugin_manager;
+    loaded = manager != NULL &&
+             mt_plugin_manager_has_plugin(manager, "io.github.vellum.welcome");
+
+    if (loaded && !window->welcome_menu_present)
+    {
+        GMenuItem *item;
+
+        item = g_menu_item_new(_("Welcome Guide"), "app.show-welcome");
+        g_menu_append_item(window->welcome_menu_section, item);
+        g_object_unref(item);
+        window->welcome_menu_present = TRUE;
+    }
+    else if (!loaded && window->welcome_menu_present)
+    {
+        gint n_items;
+
+        n_items = g_menu_model_get_n_items(G_MENU_MODEL(window->welcome_menu_section));
+        if (n_items > 0)
+        {
+            g_menu_remove(window->welcome_menu_section, n_items - 1);
+        }
+        window->welcome_menu_present = FALSE;
+    }
 }
 
 /* ---------- 清除历史（行为组里的红色危险操作） ---------- */
@@ -4054,6 +4125,7 @@ mt_window_new(AdwApplication *application, MtSettings *settings)
         { "shortcuts", mt_window_action_shortcuts, NULL, NULL, NULL, { 0, 0, 0 } },
         { "extensions", mt_window_action_extensions, NULL, NULL, NULL, { 0, 0, 0 } },
         { "about", mt_window_action_about, NULL, NULL, NULL, { 0, 0, 0 } },
+        { "open-releases", mt_window_action_open_releases, NULL, NULL, NULL, { 0, 0, 0 } },
         { "toggle-properties", mt_window_toggle_properties, NULL, NULL, NULL, { 0, 0, 0 } }
     };
 
@@ -4072,7 +4144,7 @@ mt_window_new(AdwApplication *application, MtSettings *settings)
     gtk_widget_set_size_request(GTK_WIDGET(window->window),
                                 MT_MIN_WINDOW_WIDTH,
                                 MT_MIN_WINDOW_HEIGHT);
-    gtk_window_set_title(GTK_WINDOW(window->window), "Vellum");
+    gtk_window_set_title(GTK_WINDOW(window->window), "vellum");
     adw_tab_bar_set_view(window->tab_bar, window->tab_view);
     adw_tab_view_set_menu_model(window->tab_view, NULL);
 
@@ -4121,7 +4193,7 @@ mt_window_new(AdwApplication *application, MtSettings *settings)
     header_subtitle_row = gtk_center_box_new();
     header_title_center = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 4);
     window->header_modified_indicator = gtk_label_new("•");
-    window->header_title_label = GTK_LABEL(gtk_label_new("Vellum"));
+    window->header_title_label = GTK_LABEL(gtk_label_new("vellum"));
     window->header_subtitle_label = GTK_LABEL(gtk_label_new(""));
     gtk_widget_add_css_class(header_title_box, "vellum-header-title");
     gtk_widget_add_css_class(GTK_WIDGET(window->header_title_label), "title");
@@ -4143,7 +4215,8 @@ mt_window_new(AdwApplication *application, MtSettings *settings)
     gtk_widget_set_margin_end(header_title_box, 12);
     adw_header_bar_set_title_widget(ADW_HEADER_BAR(header_bar), header_title_box);
 
-    menu = mt_window_build_primary_menu();
+    menu = mt_window_build_primary_menu(window);
+    window->primary_menu = menu;
     menu_button = gtk_menu_button_new();
     gtk_menu_button_set_icon_name(GTK_MENU_BUTTON(menu_button), "open-menu-symbolic");
     gtk_widget_set_tooltip_text(menu_button, _("Main Menu"));
@@ -4159,7 +4232,6 @@ mt_window_new(AdwApplication *application, MtSettings *settings)
                                    "zoom");
         gtk_menu_button_set_popover(GTK_MENU_BUTTON(menu_button), GTK_WIDGET(popover));
     }
-    g_object_unref(menu);
     mt_window_update_menu_theme_buttons(window);
     mt_window_update_menu_zoom_label(window);
     window->properties_button = GTK_TOGGLE_BUTTON(gtk_toggle_button_new());
@@ -4423,6 +4495,13 @@ mt_window_new(AdwApplication *application, MtSettings *settings)
                      G_CALLBACK(mt_window_find_next_clicked),
                      window);
 
+    if (mt_settings_get_auto_check_updates(window->settings))
+    {
+        window->auto_update_source_id = g_timeout_add_seconds(5,
+                                                              mt_window_auto_update_check_idle,
+                                                              window);
+    }
+
     return window;
 }
 
@@ -4454,6 +4533,22 @@ mt_window_destroyed(GtkWidget *widget, gpointer user_data)
         g_signal_handler_disconnect(adw_style_manager_get_default(),
                                     window->style_manager_handler_id);
         window->style_manager_handler_id = 0;
+    }
+    if (window->auto_update_source_id != 0)
+    {
+        g_source_remove(window->auto_update_source_id);
+        window->auto_update_source_id = 0;
+    }
+    /* 进行中的自动检查在回调里自行释放；此处仅取消请求避免界面已销毁后弹窗。 */
+    if (window->auto_update_check != NULL)
+    {
+        MtAutoUpdateCheck *check;
+
+        check = window->auto_update_check;
+        if (check->cancellable != NULL)
+        {
+            g_cancellable_cancel(check->cancellable);
+        }
     }
 
     window->tab_view = NULL;
@@ -4502,6 +4597,13 @@ mt_window_free(MtWindow *window)
     {
         g_source_remove(window->properties_source_id);
         window->properties_source_id = 0;
+    }
+
+    /* 主循环已退出，不会再派发回调，这里兜底释放未完成的自动检查。 */
+    if (window->auto_update_check != NULL)
+    {
+        mt_auto_update_check_free(window->auto_update_check);
+        window->auto_update_check = NULL;
     }
 
     if (window->properties != NULL)
@@ -4553,6 +4655,8 @@ mt_window_free(MtWindow *window)
 
     g_clear_object(&window->css_provider);
     g_clear_object(&window->display);
+    g_clear_object(&window->welcome_menu_section);
+    g_clear_object(&window->primary_menu);
     g_free(window);
 }
 
@@ -4571,6 +4675,7 @@ void
 mt_window_set_plugin_manager(MtWindow *window, gpointer plugin_manager)
 {
     window->plugin_manager = plugin_manager;
+    mt_window_sync_plugin_menu(window);
 }
 
 static void
@@ -5588,7 +5693,8 @@ enum
     MT_EDITOR_SETTING_WORD_WRAP,
     MT_EDITOR_SETTING_AUTO_INDENT,
     MT_EDITOR_SETTING_RESTORE_SESSION,
-    MT_EDITOR_SETTING_EXTENSIONS_ENABLED
+    MT_EDITOR_SETTING_EXTENSIONS_ENABLED,
+    MT_EDITOR_SETTING_AUTO_CHECK_UPDATES
 };
 
 static void
@@ -5635,6 +5741,9 @@ mt_window_editor_switch_changed(GObject *object,
             mt_settings_set_extensions_enabled(window->settings, enabled);
             mt_window_show_toast(window,
                                  _("Extension loading will change the next time Vellum starts"));
+            break;
+        case MT_EDITOR_SETTING_AUTO_CHECK_UPDATES:
+            mt_settings_set_auto_check_updates(window->settings, enabled);
             break;
         default:
             return;
@@ -5885,6 +5994,12 @@ mt_window_action_preferences(GSimpleAction *action, GVariant *parameter, gpointe
                                 MT_EDITOR_SETTING_EXTENSIONS_ENABLED,
                                 mt_settings_get_extensions_enabled(window->settings),
                                 window);
+    mt_window_add_editor_switch(behavior_group,
+                                _("Check for updates automatically"),
+                                _("Checks the GitHub release page when Vellum starts"),
+                                MT_EDITOR_SETTING_AUTO_CHECK_UPDATES,
+                                mt_settings_get_auto_check_updates(window->settings),
+                                window);
     {
         AdwActionRow *clear_row;
 
@@ -6087,7 +6202,7 @@ mt_window_action_extensions(GSimpleAction *action, GVariant *parameter, gpointer
     else
     {
         adw_preferences_group_set_description(group,
-                                              _("Extensions can be disabled without deleting them. Imported user extensions have a trash button for deletion; built-in extensions can be disabled but remain part of the application. Native modules and source packages must come from trusted sources."));
+                                              _("Extensions can be disabled without deleting them. Any extension can be removed: user extensions are deleted from disk, built-in extensions are hidden until vellum is reinstalled. Native modules and source packages must come from trusted sources."));
     }
     import_button = gtk_button_new_with_label(_("Import"));
     gtk_widget_set_valign(import_button, GTK_ALIGN_CENTER);
@@ -6180,22 +6295,19 @@ mt_window_action_extensions(GSimpleAction *action, GVariant *parameter, gpointer
             gtk_box_append(GTK_BOX(action_box), configure_button);
         }
 
-        if (mt_plugin_manager_is_user_managed(manager, index))
-        {
-            delete_button = gtk_button_new_from_icon_name("user-trash-symbolic");
-            gtk_widget_add_css_class(delete_button, "flat");
-            gtk_widget_add_css_class(delete_button, "destructive-action");
-            gtk_widget_set_valign(delete_button, GTK_ALIGN_CENTER);
-            gtk_widget_set_tooltip_text(delete_button, _("Delete extension"));
-            g_object_set_data(G_OBJECT(delete_button),
-                              "vellum-extension-index",
-                              GUINT_TO_POINTER(index));
-            g_signal_connect(delete_button,
-                             "clicked",
-                             G_CALLBACK(mt_window_extension_delete_clicked),
-                             window);
-            gtk_box_append(GTK_BOX(action_box), delete_button);
-        }
+        delete_button = gtk_button_new_from_icon_name("user-trash-symbolic");
+        gtk_widget_add_css_class(delete_button, "flat");
+        gtk_widget_add_css_class(delete_button, "destructive-action");
+        gtk_widget_set_valign(delete_button, GTK_ALIGN_CENTER);
+        gtk_widget_set_tooltip_text(delete_button, _("Delete extension"));
+        g_object_set_data(G_OBJECT(delete_button),
+                          "vellum-extension-index",
+                          GUINT_TO_POINTER(index));
+        g_signal_connect(delete_button,
+                         "clicked",
+                         G_CALLBACK(mt_window_extension_delete_clicked),
+                         window);
+        gtk_box_append(GTK_BOX(action_box), delete_button);
 
         adw_action_row_add_suffix(row, action_box);
         adw_preferences_group_add(group, GTK_WIDGET(row));
@@ -6416,6 +6528,161 @@ mt_window_update_check_clicked(GtkButton *button, gpointer user_data)
 }
 
 static void
+mt_auto_update_check_free(MtAutoUpdateCheck *check)
+{
+    if (check == NULL)
+    {
+        return;
+    }
+    if (check->cancellable != NULL)
+    {
+        g_cancellable_cancel(check->cancellable);
+    }
+    g_clear_object(&check->cancellable);
+    g_clear_object(&check->message);
+    g_clear_object(&check->session);
+    g_free(check);
+}
+
+/* 启动后的静默检查：仅在发现更新时弹 Toast，其余情况一律不打扰用户。 */
+static void
+mt_window_auto_update_check_finished(GObject *source, GAsyncResult *result, gpointer user_data)
+{
+    MtAutoUpdateCheck *check;
+    GBytes *bytes;
+    GError *error;
+    guint status;
+
+    check = user_data;
+    error = NULL;
+    bytes = soup_session_send_and_read_finish(SOUP_SESSION(source), result, &error);
+    status = SOUP_STATUS_NONE;
+    if (check->message != NULL)
+    {
+        status = soup_message_get_status(check->message);
+    }
+
+    if (check->window != NULL && check->window->auto_update_check == check)
+    {
+        check->window->auto_update_check = NULL;
+    }
+
+    if (error == NULL && status >= 200 && status < 300 && bytes != NULL)
+    {
+        JsonParser *parser;
+        JsonNode *root;
+        const gchar *tag;
+
+        parser = json_parser_new();
+        if (json_parser_load_from_data(parser,
+                                       g_bytes_get_data(bytes, NULL),
+                                       g_bytes_get_size(bytes),
+                                       NULL))
+        {
+            root = json_parser_get_root(parser);
+            tag = NULL;
+            if (root != NULL && JSON_NODE_HOLDS_OBJECT(root))
+            {
+                JsonObject *object;
+
+                object = json_node_get_object(root);
+                tag = json_object_get_string_member_with_default(object, "tag_name", NULL);
+            }
+            if (tag != NULL && *tag != '\0' &&
+                mt_version_compare(tag, VELLUM_VERSION) > 0)
+            {
+                MtWindow *window;
+
+                window = check->window;
+                if (window != NULL && !window->disposed &&
+                    ADW_IS_TOAST_OVERLAY(window->toast_overlay))
+                {
+                    AdwToast *toast;
+                    gchar *text;
+
+                    text = g_strdup_printf(_("New version available: %s"), tag);
+                    toast = adw_toast_new(text);
+                    g_free(text);
+                    adw_toast_set_button_label(toast, _("View"));
+                    adw_toast_set_detailed_action_name(toast, "win.open-releases");
+                    adw_toast_overlay_add_toast(window->toast_overlay, toast);
+                }
+            }
+        }
+        g_object_unref(parser);
+    }
+
+    g_bytes_unref(bytes);
+    g_clear_error(&error);
+    mt_auto_update_check_free(check);
+}
+
+static void
+mt_window_auto_update_check_start(MtWindow *window)
+{
+    MtAutoUpdateCheck *check;
+
+    if (window == NULL || window->disposed || window->auto_update_check != NULL)
+    {
+        return;
+    }
+
+    check = g_new0(MtAutoUpdateCheck, 1);
+    check->window = window;
+    check->session = soup_session_new();
+    g_object_set(check->session, "timeout", 20, NULL);
+    check->cancellable = g_cancellable_new();
+    check->message = soup_message_new("GET",
+                                      "https://api.github.com/repos/lqy306/Vellum/releases/latest");
+    soup_message_headers_append(soup_message_get_request_headers(check->message),
+                                "Accept",
+                                "application/vnd.github+json");
+    soup_message_headers_append(soup_message_get_request_headers(check->message),
+                                "User-Agent",
+                                "Vellum-update-check");
+    window->auto_update_check = check;
+    soup_session_send_and_read_async(check->session,
+                                     check->message,
+                                     G_PRIORITY_DEFAULT,
+                                     check->cancellable,
+                                     mt_window_auto_update_check_finished,
+                                     check);
+}
+
+static gboolean
+mt_window_auto_update_check_idle(gpointer user_data)
+{
+    MtWindow *window;
+
+    window = user_data;
+    window->auto_update_source_id = 0;
+    if (!window->disposed &&
+        mt_settings_get_auto_check_updates(window->settings))
+    {
+        mt_window_auto_update_check_start(window);
+    }
+    return G_SOURCE_REMOVE;
+}
+
+void
+mt_window_action_open_releases(GSimpleAction *action, GVariant *parameter, gpointer user_data)
+{
+    MtWindow *window;
+    GtkUriLauncher *launcher;
+
+    (void)action;
+    (void)parameter;
+    window = user_data;
+    launcher = gtk_uri_launcher_new("https://github.com/lqy306/Vellum/releases/latest");
+    gtk_uri_launcher_launch(launcher,
+                            GTK_WINDOW(window->window),
+                            NULL,
+                            NULL,
+                            NULL);
+    g_object_unref(launcher);
+}
+
+static void
 mt_window_open_uri_clicked(GtkButton *button, gpointer user_data)
 {
     const gchar *uri;
@@ -6459,7 +6726,7 @@ mt_window_action_about(GSimpleAction *action, GVariant *parameter, gpointer user
 
     window = user_data;
     dialog = ADW_WINDOW(adw_window_new());
-    gtk_window_set_title(GTK_WINDOW(dialog), _("About Vellum"));
+    gtk_window_set_title(GTK_WINDOW(dialog), _("About vellum"));
     gtk_window_set_default_size(GTK_WINDOW(dialog), 420, 480);
     gtk_window_set_transient_for(GTK_WINDOW(dialog), GTK_WINDOW(window->window));
     gtk_window_set_modal(GTK_WINDOW(dialog), TRUE);
@@ -6479,7 +6746,7 @@ mt_window_action_about(GSimpleAction *action, GVariant *parameter, gpointer user
     gtk_widget_set_halign(icon, GTK_ALIGN_CENTER);
     gtk_box_append(GTK_BOX(content), icon);
 
-    name = gtk_label_new("Vellum");
+    name = gtk_label_new("vellum");
     gtk_widget_add_css_class(name, "title-1");
     gtk_widget_set_halign(name, GTK_ALIGN_CENTER);
     gtk_box_append(GTK_BOX(content), name);
@@ -6525,7 +6792,7 @@ mt_window_action_about(GSimpleAction *action, GVariant *parameter, gpointer user
                      NULL);
     gtk_box_append(GTK_BOX(content), repo_button);
 
-    footer = gtk_label_new(_("Vellum is licensed under BSD-2-Clause."));
+    footer = gtk_label_new(_("vellum is licensed under BSD-2-Clause."));
     gtk_widget_add_css_class(footer, "dim-label");
     gtk_widget_add_css_class(footer, "caption");
     gtk_widget_set_halign(footer, GTK_ALIGN_CENTER);

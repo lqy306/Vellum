@@ -32,6 +32,7 @@ const MtPluginInfo *mt_plugin_manager_get_info(MtPluginManager *manager, guint i
 const gchar *mt_plugin_manager_get_path(MtPluginManager *manager, guint index);
 gboolean mt_plugin_manager_is_user_managed(MtPluginManager *manager, guint index);
 gboolean mt_plugin_manager_is_enabled(MtPluginManager *manager, guint index);
+gboolean mt_plugin_manager_has_plugin(MtPluginManager *manager, const gchar *id);
 gboolean mt_plugin_manager_set_enabled(MtPluginManager *manager,
                                        guint index,
                                        gboolean enabled,

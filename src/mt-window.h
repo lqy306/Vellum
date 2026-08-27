@@ -61,10 +61,17 @@ struct _MtWindow
     GtkCheckButton *menu_theme_light;
     GtkCheckButton *menu_theme_dark;
     GtkButton *menu_zoom_label;
+    /* 主菜单模型与新手引导入口所在的分区；插件加载状态变化时动态增删。 */
+    GMenu *primary_menu;
+    GMenu *welcome_menu_section;
+    gboolean welcome_menu_present;
     /* 配色切换的异步分片应用状态（大文档下避免全量重绘卡死）。 */
     gpointer scheme_apply;
     guint snapshot_source_id;
     guint language_source_id;
+    /* 启动时自动检查更新的延迟计时器与进行中的请求。 */
+    guint auto_update_source_id;
+    gpointer auto_update_check;
     gulong style_manager_handler_id;
     gboolean disposed;
 };
@@ -95,6 +102,8 @@ void mt_window_set_plugin_panel(MtWindow *window,
 void mt_window_hide_plugin_panel(MtWindow *window,
                                  const gchar *id,
                                  MtPluginPanelLocation location);
+/* 插件加载状态变化后刷新主菜单（例如新手引导入口的显示与隐藏）。 */
+void mt_window_sync_plugin_menu(MtWindow *window);
 
 void mt_window_action_new(GSimpleAction *action, GVariant *parameter, gpointer user_data);
 void mt_window_action_open(GSimpleAction *action, GVariant *parameter, gpointer user_data);
@@ -110,6 +119,7 @@ void mt_window_action_preferences(GSimpleAction *action, GVariant *parameter, gp
 void mt_window_action_shortcuts(GSimpleAction *action, GVariant *parameter, gpointer user_data);
 void mt_window_action_extensions(GSimpleAction *action, GVariant *parameter, gpointer user_data);
 void mt_window_action_about(GSimpleAction *action, GVariant *parameter, gpointer user_data);
+void mt_window_action_open_releases(GSimpleAction *action, GVariant *parameter, gpointer user_data);
 
 G_END_DECLS
 

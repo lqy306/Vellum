@@ -14,7 +14,7 @@ typedef struct _GtkWindow GtkWindow;
 
 G_BEGIN_DECLS
 
-#define MT_PLUGIN_API_VERSION 1
+#define MT_PLUGIN_API_VERSION 2
 
 typedef struct _MtPluginHost MtPluginHost;
 typedef struct _MtPluginInfo MtPluginInfo;
@@ -92,6 +92,9 @@ struct _MtPluginHost
     void (*show_toast)(MtPluginHost *host, const gchar *message);
     void (*show_inline_completion)(MtPluginHost *host, const gchar *text);
     void (*clear_inline_completion)(MtPluginHost *host);
+    /* 请求宿主卸载并移除指定插件（含内置插件）。用于插件引导用户
+     * 完成向导后自我删除：确认后插件会从列表隐藏且重启后不再加载。 */
+    void (*request_plugin_removal)(MtPluginHost *host, const gchar *plugin_id);
     gboolean (*add_preference_switch)(MtPluginHost *host,
                                       const gchar *group_title,
                                       const gchar *title,

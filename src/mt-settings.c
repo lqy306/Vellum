@@ -100,6 +100,7 @@ mt_settings_new(void)
     settings->auto_indent = TRUE;
     settings->restore_session = TRUE;
     settings->extensions_enabled = TRUE;
+    settings->auto_check_updates = TRUE;
     settings->custom_font = FALSE;
     settings->insert_spaces = FALSE;
     settings->font_scale = 1.0;
@@ -179,6 +180,7 @@ mt_settings_new(void)
     settings->auto_indent = mt_settings_get_boolean_or_default(key_file, "Editor", "auto-indent", settings->auto_indent);
     settings->restore_session = mt_settings_get_boolean_or_default(key_file, "Editor", "restore-session", settings->restore_session);
     settings->extensions_enabled = mt_settings_get_boolean_or_default(key_file, "Interface", "extensions-enabled", settings->extensions_enabled);
+    settings->auto_check_updates = mt_settings_get_boolean_or_default(key_file, "Interface", "auto-check-updates", settings->auto_check_updates);
     settings->custom_font = mt_settings_get_boolean_or_default(key_file, "Editor", "custom-font", settings->custom_font);
     settings->insert_spaces = mt_settings_get_boolean_or_default(key_file, "Editor", "insert-spaces", settings->insert_spaces);
 
@@ -241,6 +243,7 @@ mt_settings_save(MtSettings *settings)
     g_key_file_set_integer(key_file, "Interface", "appearance", settings->appearance);
     g_key_file_set_string(key_file, "Interface", "language", settings->language);
     g_key_file_set_boolean(key_file, "Interface", "extensions-enabled", settings->extensions_enabled);
+    g_key_file_set_boolean(key_file, "Interface", "auto-check-updates", settings->auto_check_updates);
     g_key_file_set_string(key_file, "Editor", "font-family", settings->font_family);
     g_key_file_set_string(key_file, "Editor", "style-scheme", settings->style_scheme);
     g_key_file_set_integer(key_file, "Editor", "tab-width", settings->tab_width);
@@ -414,6 +417,7 @@ MT_SETTINGS_BOOLEAN_ACCESSORS(word_wrap, word_wrap)
 MT_SETTINGS_BOOLEAN_ACCESSORS(auto_indent, auto_indent)
 MT_SETTINGS_BOOLEAN_ACCESSORS(restore_session, restore_session)
 MT_SETTINGS_BOOLEAN_ACCESSORS(extensions_enabled, extensions_enabled)
+MT_SETTINGS_BOOLEAN_ACCESSORS(auto_check_updates, auto_check_updates)
 MT_SETTINGS_BOOLEAN_ACCESSORS(custom_font, custom_font)
 MT_SETTINGS_BOOLEAN_ACCESSORS(insert_spaces, insert_spaces)
 

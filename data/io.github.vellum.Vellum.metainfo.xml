@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <component type="desktop-application">
   <id>io.github.vellum.Vellum</id>
-  <name>Vellum</name>
+  <name>vellum</name>
   <summary>A focused GTK4 text editor</summary>
   <metadata_license>CC0-1.0</metadata_license>
   <project_license>BSD-2-Clause</project_license>
@@ -24,6 +24,13 @@
     <name>Vellum contributors</name>
   </developer>
   <releases>
+    <release version="1.0.0" date="2026-08-27">
+      <description>
+        <p>Unify the application display name as vellum in all languages.</p>
+        <p>Allow removing built-in extensions from the Extensions window, with removal persisted across restarts.</p>
+        <p>Add a welcome guide plugin that introduces the editor and asks to remove itself after the tour.</p>
+      </description>
+    </release>
     <release version="0.7.1" date="2026-08-26">
       <description>
         <p>Guard AI completion requests with lifecycle generations and make inline candidate overlays follow their owning document safely across tab switches and document destruction.</p>

@@ -42,7 +42,7 @@ format-version=1
 id=$plugin_id
 name=$display_name
 version=0
-plugin-api=1
+plugin-api=2
 license=BSD-2-Clause
 payload=source
 

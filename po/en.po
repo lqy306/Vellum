@@ -64,8 +64,8 @@ msgid "Export Extension"
 msgstr "Export Extension"
 
 #: src/mt-window.c:503
-msgid "Extension deleted from disk. It will unload after restart."
-msgstr "Extension deleted from disk. It will unload after restart."
+msgid "Extension removed"
+msgstr "Extension removed"
 
 #: src/mt-window.c:509
 #, c-format
@@ -356,8 +356,28 @@ msgid "_Extensions"
 msgstr "_Extensions"
 
 #: src/mt-window.c:2728
-msgid "_About Vellum"
-msgstr "_About Vellum"
+msgid "_About vellum"
+msgstr "_About vellum"
+
+#: src/mt-window.c:2780
+msgid "About vellum"
+msgstr "About vellum"
+
+#: src/mt-window.c:2782
+msgid "vellum is licensed under BSD-2-Clause."
+msgstr "vellum is licensed under BSD-2-Clause."
+
+#: src/mt-window.c:3900
+msgid "Welcome Guide"
+msgstr "Welcome Guide"
+
+#: src/mt-window.c:672
+msgid "The extension file will be deleted from disk."
+msgstr "The extension file will be deleted from disk."
+
+#: src/mt-window.c:674
+msgid "This built-in extension will be hidden and unloaded. It cannot be restored from the application."
+msgstr "This built-in extension will be hidden and unloaded. It cannot be restored from the application."
 
 #: src/mt-window.c:2797
 #, c-format
@@ -691,6 +711,14 @@ msgstr "Enable extensions"
 msgid "When disabled, Vellum starts as a compact core editor; restart to apply"
 msgstr ""
 
+#: src/mt-window.c:5979
+msgid "Check for updates automatically"
+msgstr "Check for updates automatically"
+
+#: src/mt-window.c:5980
+msgid "Checks the GitHub release page when Vellum starts"
+msgstr "Checks the GitHub release page when Vellum starts"
+
 #: src/mt-window.c:4538
 msgid "Clear History"
 msgstr "Clear History"
@@ -720,10 +748,10 @@ msgstr ""
 
 #: src/mt-window.c:4736
 msgid ""
-"Extensions can be disabled without deleting them. Imported user extensions "
-"have a trash button for deletion; built-in extensions can be disabled but "
-"remain part of the application. Native modules and source packages must come "
-"from trusted sources."
+"Extensions can be disabled without deleting them. Any extension can be "
+"removed: user extensions are deleted from disk, built-in extensions are "
+"hidden until vellum is reinstalled. Native modules and source packages must "
+"come from trusted sources."
 msgstr ""
 
 #: src/mt-window.c:4738
@@ -757,6 +785,57 @@ msgstr "Delete extension"
 #: src/mt-window.c:4871
 msgid "A focused GTK4 text editor."
 msgstr "A focused GTK4 text editor."
+
+#: src/mt-window.c:6390
+#, c-format
+msgid "Check failed: %s"
+msgstr "Check failed: %s"
+
+#: src/mt-window.c:6400
+msgid "No published releases yet"
+msgstr "No published releases yet"
+
+#: src/mt-window.c:6406
+#, c-format
+msgid "Check failed: HTTP %u"
+msgstr "Check failed: HTTP %u"
+
+#: src/mt-window.c:6440 src/mt-window.c:6592
+#, c-format
+msgid "New version available: %s"
+msgstr "New version available: %s"
+
+#: src/mt-window.c:6448
+msgid "You are up to date"
+msgstr "You are up to date"
+
+#: src/mt-window.c:6454 src/mt-window.c:6459
+msgid "Unable to read release information"
+msgstr "Unable to read release information"
+
+#: src/mt-window.c:6466
+msgid "Check failed: no response"
+msgstr "Check failed: no response"
+
+#: src/mt-window.c:6486
+msgid "Checking for updates…"
+msgstr "Checking for updates…"
+
+#: src/mt-window.c:6595
+msgid "View"
+msgstr "View"
+
+#: src/mt-window.c:6749
+msgid "Check for Updates"
+msgstr "Check for Updates"
+
+#: src/mt-window.c:6760
+msgid "Open Download Page"
+msgstr "Open Download Page"
+
+#: src/mt-window.c:6772
+msgid "GitHub Repository"
+msgstr "GitHub Repository"
 
 #: src/plugins/ai-completion-plugin.c:294
 msgid "AI endpoint must begin with https:// or http://"

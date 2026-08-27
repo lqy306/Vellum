@@ -10,12 +10,8 @@ project(
   ]
 )
 
-# 构建日期版本（YYYY.MM.DD），仅用于“关于 → 检查更新”的比较，不对外展示。
-date_cmd = run_command('date', '+%Y.%m.%d', check : false)
-vellum_version = date_cmd.stdout().strip()
-if vellum_version == ''
-  vellum_version = '0'
-endif
+# 语义化版本：1.0.0 起使用固定版本号；仅用于“关于 → 检查更新”的比较。
+vellum_version = '1.0.0'
 vellum_gettext_package = 'vellum'
 vellum_datadir = join_paths(get_option('prefix'), get_option('datadir'))
 vellum_localedir = join_paths(vellum_datadir, 'locale')

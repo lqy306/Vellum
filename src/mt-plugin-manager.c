@@ -50,9 +50,13 @@ struct _MtPluginManager
     MtPluginHost host;
     GPtrArray *plugins;
     GHashTable *disabled_ids;
+    GHashTable *removed_ids;
     MtLoadedPlugin *loading_plugin;
     GPtrArray *preference_switches;
 };
+
+static void mt_plugin_manager_request_plugin_removal(MtPluginHost *host,
+                                                     const gchar *plugin_id);
 
 static void
 mt_plugin_manager_plugin_action_activated(GSimpleAction *action,
@@ -454,7 +458,7 @@ mt_plugin_manager_state_path(void)
 }
 
 static void
-mt_plugin_manager_load_disabled_ids(MtPluginManager *manager)
+mt_plugin_manager_load_state(MtPluginManager *manager)
 {
     GKeyFile *settings;
     gchar *path;
@@ -478,45 +482,77 @@ mt_plugin_manager_load_disabled_ids(MtPluginManager *manager)
             }
             g_strfreev(ids);
         }
+        ids = g_key_file_get_string_list(settings, "Extensions", "removed", &count, NULL);
+        if (ids != NULL)
+        {
+            for (index = 0; index < count; index++)
+            {
+                if (ids[index][0] != '\0')
+                {
+                    g_hash_table_add(manager->removed_ids, g_strdup(ids[index]));
+                }
+            }
+            g_strfreev(ids);
+        }
     }
     g_free(path);
     g_key_file_unref(settings);
 }
 
 static gboolean
-mt_plugin_manager_save_disabled_ids(MtPluginManager *manager, GError **error)
+mt_plugin_manager_save_state(MtPluginManager *manager, GError **error)
 {
     GKeyFile *settings;
     gchar *path;
-    GList *keys;
+    GList *disabled_keys;
+    GList *removed_keys;
     GList *item;
-    gchar **ids;
-    gsize count;
+    gchar **disabled_ids;
+    gchar **removed_ids;
+    gsize disabled_count;
+    gsize removed_count;
     gchar *contents;
     gsize length;
     gboolean saved;
 
     settings = g_key_file_new();
-    keys = g_hash_table_get_keys(manager->disabled_ids);
-    count = g_list_length(keys);
-    ids = g_new0(gchar *, count + 1);
-    item = keys;
-    count = 0;
+    disabled_keys = g_hash_table_get_keys(manager->disabled_ids);
+    disabled_count = g_list_length(disabled_keys);
+    disabled_ids = g_new0(gchar *, disabled_count + 1);
+    item = disabled_keys;
+    disabled_count = 0;
     while (item != NULL)
     {
-        ids[count++] = item->data;
+        disabled_ids[disabled_count++] = item->data;
         item = item->next;
     }
     g_key_file_set_string_list(settings,
                                "Extensions",
                                "disabled",
-                               (const gchar * const *)ids,
-                               count);
+                               (const gchar * const *)disabled_ids,
+                               disabled_count);
+    removed_keys = g_hash_table_get_keys(manager->removed_ids);
+    removed_count = g_list_length(removed_keys);
+    removed_ids = g_new0(gchar *, removed_count + 1);
+    item = removed_keys;
+    removed_count = 0;
+    while (item != NULL)
+    {
+        removed_ids[removed_count++] = item->data;
+        item = item->next;
+    }
+    g_key_file_set_string_list(settings,
+                               "Extensions",
+                               "removed",
+                               (const gchar * const *)removed_ids,
+                               removed_count);
     contents = g_key_file_to_data(settings, &length, error);
     if (contents == NULL)
     {
-        g_free(ids);
-        g_list_free(keys);
+        g_free(disabled_ids);
+        g_free(removed_ids);
+        g_list_free(disabled_keys);
+        g_list_free(removed_keys);
         g_key_file_unref(settings);
         return FALSE;
     }
@@ -529,8 +565,10 @@ mt_plugin_manager_save_disabled_ids(MtPluginManager *manager, GError **error)
     }
     g_free(path);
     g_free(contents);
-    g_free(ids);
-    g_list_free(keys);
+    g_free(disabled_ids);
+    g_free(removed_ids);
+    g_list_free(disabled_keys);
+    g_list_free(removed_keys);
     g_key_file_unref(settings);
 
     return saved;
@@ -557,6 +595,44 @@ mt_plugin_manager_remove_plugin_actions(MtPluginManager *manager, MtLoadedPlugin
     }
     g_ptr_array_set_size(plugin->action_names, 0);
     g_ptr_array_set_size(plugin->key_handlers, 0);
+}
+
+static gboolean
+mt_plugin_manager_mark_removed(MtPluginManager *manager,
+                               MtLoadedPlugin *plugin,
+                               GError **error)
+{
+    if (g_hash_table_contains(manager->removed_ids, plugin->info->id))
+    {
+        return TRUE;
+    }
+
+    g_hash_table_add(manager->removed_ids, g_strdup(plugin->info->id));
+    if (!mt_plugin_manager_save_state(manager, error))
+    {
+        g_hash_table_remove(manager->removed_ids, plugin->info->id);
+        return FALSE;
+    }
+
+    return TRUE;
+}
+
+/* 立即卸载插件：先通知插件停用并移除其动作，再把它从列表里摘掉。
+ * 模块改为常驻内存，避免卸载后仍有悬空回调导致崩溃。 */
+static void
+mt_plugin_manager_unload_plugin(MtPluginManager *manager, MtLoadedPlugin *plugin)
+{
+    if (plugin->enabled && plugin->deactivate != NULL)
+    {
+        plugin->deactivate(&manager->host);
+    }
+    mt_plugin_manager_remove_plugin_actions(manager, plugin);
+    plugin->enabled = FALSE;
+    if (plugin->module != NULL)
+    {
+        g_module_make_resident(plugin->module);
+    }
+    g_ptr_array_remove(manager->plugins, plugin);
 }
 
 static gboolean
@@ -605,6 +681,13 @@ mt_plugin_manager_load_module(MtPluginManager *manager,
                   MT_PLUGIN_API_VERSION);
         g_module_close(module);
         return FALSE;
+    }
+
+    if (g_hash_table_contains(manager->removed_ids, info->id))
+    {
+        g_message("Vellum plugin removed by user: %s (%s)", info->name, info->id);
+        g_module_close(module);
+        return TRUE;
     }
 
     plugin = g_new0(MtLoadedPlugin, 1);
@@ -791,8 +874,9 @@ mt_plugin_manager_new(MtApplication *application)
     manager->application = application;
     manager->plugins = g_ptr_array_new_with_free_func((GDestroyNotify)mt_loaded_plugin_free);
     manager->disabled_ids = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, NULL);
+    manager->removed_ids = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, NULL);
     manager->preference_switches = g_ptr_array_new_with_free_func((GDestroyNotify)mt_preference_switch_free);
-    mt_plugin_manager_load_disabled_ids(manager);
+    mt_plugin_manager_load_state(manager);
     manager->host.api_version = MT_PLUGIN_API_VERSION;
     manager->host.private_data = manager;
     manager->host.add_action = mt_plugin_manager_add_action;
@@ -811,6 +895,7 @@ mt_plugin_manager_new(MtApplication *application)
     manager->host.show_toast = mt_plugin_manager_show_toast;
     manager->host.show_inline_completion = mt_plugin_manager_show_inline_completion;
     manager->host.clear_inline_completion = mt_plugin_manager_clear_inline_completion;
+    manager->host.request_plugin_removal = mt_plugin_manager_request_plugin_removal;
     manager->host.add_preference_switch = mt_plugin_manager_add_preference_switch;
 
     if (!g_module_supported())
@@ -855,6 +940,7 @@ mt_plugin_manager_free(MtPluginManager *manager)
     g_ptr_array_unref(manager->plugins);
     g_ptr_array_unref(manager->preference_switches);
     g_hash_table_unref(manager->disabled_ids);
+    g_hash_table_unref(manager->removed_ids);
     g_free(manager);
 }
 
@@ -933,7 +1019,7 @@ mt_plugin_manager_set_enabled(MtPluginManager *manager,
     if (!enabled)
     {
         g_hash_table_add(manager->disabled_ids, g_strdup(plugin->info->id));
-        if (!mt_plugin_manager_save_disabled_ids(manager, error))
+        if (!mt_plugin_manager_save_state(manager, error))
         {
             g_hash_table_remove(manager->disabled_ids, plugin->info->id);
             return FALSE;
@@ -948,7 +1034,7 @@ mt_plugin_manager_set_enabled(MtPluginManager *manager,
     }
 
     g_hash_table_remove(manager->disabled_ids, plugin->info->id);
-    if (!mt_plugin_manager_save_disabled_ids(manager, error))
+    if (!mt_plugin_manager_save_state(manager, error))
     {
         g_hash_table_add(manager->disabled_ids, g_strdup(plugin->info->id));
         return FALSE;
@@ -959,7 +1045,7 @@ mt_plugin_manager_set_enabled(MtPluginManager *manager,
     {
         manager->loading_plugin = NULL;
         g_hash_table_add(manager->disabled_ids, g_strdup(plugin->info->id));
-        mt_plugin_manager_save_disabled_ids(manager, NULL);
+        mt_plugin_manager_save_state(manager, NULL);
         g_set_error(error, G_IO_ERROR, G_IO_ERROR_FAILED,
                     "The extension cannot be reactivated because its module entry points are unavailable");
         return FALSE;
@@ -976,7 +1062,7 @@ mt_plugin_manager_set_enabled(MtPluginManager *manager,
             manager->loading_plugin = NULL;
             mt_plugin_manager_remove_plugin_actions(manager, plugin);
             g_hash_table_add(manager->disabled_ids, g_strdup(plugin->info->id));
-            mt_plugin_manager_save_disabled_ids(manager, NULL);
+            mt_plugin_manager_save_state(manager, NULL);
             if (activation_error != NULL)
             {
                 g_propagate_error(error, activation_error);
@@ -1150,18 +1236,95 @@ mt_plugin_manager_remove(MtPluginManager *manager, guint index, GError **error)
         return FALSE;
     }
 
-    if (!plugin->user_managed)
+    /* 用户安装的插件连同磁盘文件一起删除；内置插件无法改动系统目录，
+     * 改为持久化标记，加载时直接跳过。 */
+    if (plugin->user_managed)
     {
-        g_set_error(error,
-                    G_IO_ERROR,
-                    G_IO_ERROR_PERMISSION_DENIED,
-                    "Built-in extensions cannot be removed from the application directory");
+        file = g_file_new_for_path(plugin->path);
+        removed = g_file_delete(file, NULL, error);
+        g_object_unref(file);
+        if (!removed)
+        {
+            return FALSE;
+        }
+    }
+
+    if (!mt_plugin_manager_mark_removed(manager, plugin, error))
+    {
         return FALSE;
     }
 
-    file = g_file_new_for_path(plugin->path);
-    removed = g_file_delete(file, NULL, error);
-    g_object_unref(file);
+    mt_plugin_manager_unload_plugin(manager, plugin);
 
-    return removed;
+    return TRUE;
+}
+
+gboolean
+mt_plugin_manager_has_plugin(MtPluginManager *manager, const gchar *id)
+{
+    guint index;
+
+    if (manager == NULL || id == NULL)
+    {
+        return FALSE;
+    }
+
+    for (index = 0; index < manager->plugins->len; index++)
+    {
+        MtLoadedPlugin *plugin;
+
+        plugin = g_ptr_array_index(manager->plugins, index);
+        if (plugin->enabled && plugin->info != NULL &&
+            g_strcmp0(plugin->info->id, id) == 0)
+        {
+            return TRUE;
+        }
+    }
+
+    return FALSE;
+}
+
+static void
+mt_plugin_manager_request_plugin_removal(MtPluginHost *host, const gchar *plugin_id)
+{
+    MtPluginManager *manager;
+    MtLoadedPlugin *plugin;
+    MtWindow *window;
+    guint index;
+    GError *error;
+
+    manager = host->private_data;
+    plugin = NULL;
+    for (index = 0; index < manager->plugins->len; index++)
+    {
+        MtLoadedPlugin *candidate;
+
+        candidate = g_ptr_array_index(manager->plugins, index);
+        if (g_strcmp0(candidate->info->id, plugin_id) == 0)
+        {
+            plugin = candidate;
+            break;
+        }
+    }
+    if (plugin == NULL || !plugin->enabled)
+    {
+        return;
+    }
+
+    error = NULL;
+    if (!mt_plugin_manager_mark_removed(manager, plugin, &error))
+    {
+        g_warning("Unable to persist extension removal: %s",
+                  error != NULL ? error->message : "unknown error");
+        g_clear_error(&error);
+        return;
+    }
+
+    mt_plugin_manager_unload_plugin(manager, plugin);
+
+    window = mt_application_get_active_window(manager->application);
+    if (window != NULL)
+    {
+        mt_window_sync_plugin_menu(window);
+    }
 }

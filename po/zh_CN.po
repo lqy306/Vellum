@@ -64,8 +64,8 @@ msgid "Export Extension"
 msgstr "导出扩展"
 
 #: src/mt-window.c:503
-msgid "Extension deleted from disk. It will unload after restart."
-msgstr "扩展文件已从磁盘删除，将在重启后卸载。"
+msgid "Extension removed"
+msgstr "扩展已删除"
 
 #: src/mt-window.c:509
 #, c-format
@@ -357,8 +357,28 @@ msgid "_Extensions"
 msgstr "扩展"
 
 #: src/mt-window.c:2728
-msgid "_About Vellum"
-msgstr "关于 Vellum"
+msgid "_About vellum"
+msgstr "关于 vellum"
+
+#: src/mt-window.c:2780
+msgid "About vellum"
+msgstr "关于 vellum"
+
+#: src/mt-window.c:2782
+msgid "vellum is licensed under BSD-2-Clause."
+msgstr "vellum 采用 BSD-2-Clause 许可证发布。"
+
+#: src/mt-window.c:3900
+msgid "Welcome Guide"
+msgstr "新手引导"
+
+#: src/mt-window.c:672
+msgid "The extension file will be deleted from disk."
+msgstr "扩展文件将从磁盘中删除。"
+
+#: src/mt-window.c:674
+msgid "This built-in extension will be hidden and unloaded. It cannot be restored from the application."
+msgstr "内置扩展将被隐藏并卸载，无法从应用中恢复。"
 
 #: src/mt-window.c:2797
 #, c-format
@@ -688,6 +708,14 @@ msgstr "启用扩展"
 msgid "When disabled, Vellum starts as a compact core editor; restart to apply"
 msgstr "关闭后，Vellum 将以紧凑的核心编辑器启动；重启后生效"
 
+#: src/mt-window.c:5979
+msgid "Check for updates automatically"
+msgstr "自动检查更新"
+
+#: src/mt-window.c:5980
+msgid "Checks the GitHub release page when Vellum starts"
+msgstr "Vellum 启动时自动检查 GitHub 发布页"
+
 #: src/mt-window.c:4538
 msgid "Clear History"
 msgstr "清除历史"
@@ -718,13 +746,13 @@ msgstr ""
 
 #: src/mt-window.c:4736
 msgid ""
-"Extensions can be disabled without deleting them. Imported user extensions "
-"have a trash button for deletion; built-in extensions can be disabled but "
-"remain part of the application. Native modules and source packages must come "
-"from trusted sources."
+"Extensions can be disabled without deleting them. Any extension can be "
+"removed: user extensions are deleted from disk, built-in extensions are "
+"hidden until vellum is reinstalled. Native modules and source packages must "
+"come from trusted sources."
 msgstr ""
-"扩展可在不删除的情况下禁用。用户导入的扩展可用垃圾桶按钮删除；内置扩展可以禁"
-"用，但仍属于应用程序的一部分。原生模块和源码包必须来自可信来源。"
+"扩展可在不删除的情况下禁用。任何扩展都可以移除：用户扩展会从磁盘删除，内置扩"
+"展会隐藏，直到重新安装 vellum。原生模块和源码包必须来自可信来源。"
 
 #: src/mt-window.c:4738
 msgid "Import"
@@ -757,6 +785,57 @@ msgstr "删除扩展"
 #: src/mt-window.c:4871
 msgid "A focused GTK4 text editor."
 msgstr "专注的 GTK4 文本编辑器。"
+
+#: src/mt-window.c:6390
+#, c-format
+msgid "Check failed: %s"
+msgstr "检查失败：%s"
+
+#: src/mt-window.c:6400
+msgid "No published releases yet"
+msgstr "尚无已发布的版本"
+
+#: src/mt-window.c:6406
+#, c-format
+msgid "Check failed: HTTP %u"
+msgstr "检查失败：HTTP %u"
+
+#: src/mt-window.c:6440 src/mt-window.c:6592
+#, c-format
+msgid "New version available: %s"
+msgstr "发现新版本：%s"
+
+#: src/mt-window.c:6448
+msgid "You are up to date"
+msgstr "已是最新版本"
+
+#: src/mt-window.c:6454 src/mt-window.c:6459
+msgid "Unable to read release information"
+msgstr "无法读取版本信息"
+
+#: src/mt-window.c:6466
+msgid "Check failed: no response"
+msgstr "检查失败：无响应"
+
+#: src/mt-window.c:6486
+msgid "Checking for updates…"
+msgstr "正在检查更新…"
+
+#: src/mt-window.c:6595
+msgid "View"
+msgstr "查看"
+
+#: src/mt-window.c:6749
+msgid "Check for Updates"
+msgstr "检查更新"
+
+#: src/mt-window.c:6760
+msgid "Open Download Page"
+msgstr "打开下载页面"
+
+#: src/mt-window.c:6772
+msgid "GitHub Repository"
+msgstr "GitHub 仓库"
 
 #: src/plugins/ai-completion-plugin.c:294
 msgid "AI endpoint must begin with https:// or http://"

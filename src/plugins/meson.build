@@ -11,6 +11,16 @@ shared_module(
 )
 
 shared_module(
+  'welcome-plugin',
+  'welcome-plugin.c',
+  include_directories : include_directories('..'),
+  dependencies : [gtk_dep, adw_dep, gio_dep, gmodule_dep],
+  name_prefix : '',
+  install : true,
+  install_dir : plugin_install_dir
+)
+
+shared_module(
   'word-count-plugin',
   'word-count-plugin.c',
   include_directories : include_directories('..'),
