@@ -9,6 +9,8 @@
     <p>Vellum is a clean, focused text editor built with GTK4, Libadwaita and GtkSourceView.</p>
     <p>It supports multiple documents, syntax highlighting, search and replace, local draft recovery, and C plugins.</p>
   </description>
+  <url type="homepage">https://github.com/lqy306/Vellum</url>
+  <url type="bugtracker">https://github.com/lqy306/Vellum/issues</url>
   <launchable type="desktop-id">io.github.vellum.Vellum.desktop</launchable>
   <provides>
     <binary>vellum</binary>
