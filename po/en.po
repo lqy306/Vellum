@@ -1,0 +1,1090 @@
+# English translations for Vellum.
+# Copyright (C) 2026 Vellum contributors
+# This file is distributed under the BSD-2-Clause license.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Vellum\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-08-27 09:33+0800\n"
+"PO-Revision-Date: 2026-08-26 00:00+0000\n"
+"Last-Translator: Vellum contributors\n"
+"Language-Team: English\n"
+"Language: en\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: src/mt-document.c:238 src/mt-document.c:432 src/mt-document.c:450
+msgid "Untitled"
+msgstr "Untitled"
+
+#: src/mt-document.c:860
+msgid "Recovered draft"
+msgstr "Recovered draft"
+
+#: src/mt-window.c:275
+#, c-format
+msgid "Editor font set to %s"
+msgstr "Editor font set to %s"
+
+#: src/mt-window.c:285
+#, c-format
+msgid "Unable to select font: %s"
+msgstr "Unable to select font: %s"
+
+#: src/mt-window.c:306
+msgid "Choose Editor Font"
+msgstr "Choose Editor Font"
+
+#: src/mt-window.c:391
+msgid "Extension imported. Reopen Extensions to refresh the list."
+msgstr "Extension imported. Reopen Extensions to refresh the list."
+
+#: src/mt-window.c:392
+msgid "Extension exported"
+msgstr "Extension exported"
+
+#: src/mt-window.c:398
+#, c-format
+msgid "Extension operation failed: %s"
+msgstr "Extension operation failed: %s"
+
+#: src/mt-window.c:420
+msgid "Import Extension"
+msgstr "Import Extension"
+
+#: src/mt-window.c:422
+msgid "Vellum Extension Package (.vut)"
+msgstr "Vellum Extension Package (.vut)"
+
+#: src/mt-window.c:461
+msgid "Export Extension"
+msgstr "Export Extension"
+
+#: src/mt-window.c:503
+msgid "Extension deleted from disk. It will unload after restart."
+msgstr "Extension deleted from disk. It will unload after restart."
+
+#: src/mt-window.c:509
+#, c-format
+msgid "Unable to delete extension: %s"
+msgstr "Unable to delete extension: %s"
+
+#: src/mt-window.c:548
+msgid "Delete extension?"
+msgstr "Delete extension?"
+
+#: src/mt-window.c:549
+msgid "The extension file will be removed and unload after restart."
+msgstr "The extension file will be removed and unload after restart."
+
+#: src/mt-window.c:550 src/mt-window.c:1507 src/mt-window.c:2831
+msgid "Cancel"
+msgstr "Cancel"
+
+#: src/mt-window.c:551
+msgid "Delete"
+msgstr "Delete"
+
+#: src/mt-window.c:936 src/mt-window.c:2233 src/mt-window.c:3072
+msgid "Plain Text"
+msgstr "Plain Text"
+
+#: src/mt-window.c:1111
+#, c-format
+msgid "Ln %d, Col %d"
+msgstr "Ln %d, Col %d"
+
+#: src/mt-window.c:1260
+msgid "Reloading file from disk…"
+msgstr "Reloading file from disk…"
+
+#: src/mt-window.c:1287
+#, c-format
+msgid "Unable to open file: %s"
+msgstr "Unable to open file: %s"
+
+#: src/mt-window.c:1299
+msgid "File opened"
+msgstr "File opened"
+
+#: src/mt-window.c:1322 src/mt-window.c:1438 src/mt-window.c:3629
+#, c-format
+msgid "Unable to save file: %s"
+msgstr "Unable to save file: %s"
+
+#: src/mt-window.c:1333
+msgid "Saved"
+msgstr "Saved"
+
+#: src/mt-window.c:1361
+#, c-format
+msgid "Unable to select files: %s"
+msgstr "Unable to select files: %s"
+
+#: src/mt-window.c:1387 src/mt-window.c:3736 src/mt-window.c:3895
+#: src/mt-window.c:3930
+msgid "Saving is already in progress"
+msgstr "Saving is already in progress"
+
+#: src/mt-window.c:1398 src/mt-window.c:3907
+msgid "Saving…"
+msgstr "Saving…"
+
+#: src/mt-window.c:1406
+#, c-format
+msgid "Unable to choose save location: %s"
+msgstr "Unable to choose save location: %s"
+
+#: src/mt-window.c:1505
+msgid "Save changes?"
+msgstr "Save changes?"
+
+#: src/mt-window.c:1506
+msgid "This document has unsaved changes."
+msgstr "This document has unsaved changes."
+
+#: src/mt-window.c:1508
+msgid "Discard"
+msgstr "Discard"
+
+#: src/mt-window.c:1515 src/mt-window.c:4152
+#: src/plugins/ai-completion-plugin.c:1122 src/plugins/build-run-plugin.c:898
+msgid "Save"
+msgstr "Save"
+
+#: src/mt-window.c:1616
+msgid "No matches found"
+msgstr "No matches found"
+
+#: src/mt-window.c:1758
+msgid "Adwaita"
+msgstr "Adwaita"
+
+#: src/mt-window.c:1762
+msgid "Classic"
+msgstr "Classic"
+
+#: src/mt-window.c:1766
+msgid "Cobalt"
+msgstr "Cobalt"
+
+#: src/mt-window.c:1770
+msgid "Kate"
+msgstr "Kate"
+
+#: src/mt-window.c:1774
+msgid "Oblivion"
+msgstr "Oblivion"
+
+#: src/mt-window.c:1778
+msgid "Solarized"
+msgstr "Solarized"
+
+#: src/mt-window.c:1782
+msgid "Tango"
+msgstr "Tango"
+
+#: src/mt-window.c:1785
+msgid "Automatic (Adwaita)"
+msgstr "Automatic (Adwaita)"
+
+#: src/mt-window.c:1978
+msgid "Choose Code Theme"
+msgstr "Choose Code Theme"
+
+#: src/mt-window.c:1989
+msgid "Code Themes"
+msgstr "Code Themes"
+
+#: src/mt-window.c:1992
+msgid ""
+"Choose a color scheme for source code. The preview uses the same "
+"GtkSourceView scheme as the editor."
+msgstr ""
+
+#: src/mt-window.c:2019
+msgid ""
+"Theme colors are provided by installed GtkSourceView schemes; Vellum does "
+"not copy third-party theme assets."
+msgstr ""
+
+#: src/mt-window.c:2054
+msgid "Language will apply after restart"
+msgstr "Language will apply after restart"
+
+#: src/mt-window.c:2218
+msgid "Unknown location"
+msgstr "Unknown location"
+
+#: src/mt-window.c:2225 src/mt-window.c:2538
+msgid "Not saved yet"
+msgstr "Not saved yet"
+
+#: src/mt-window.c:2249
+msgid "Classic Mac (CR)"
+msgstr "Classic Mac (CR)"
+
+#: src/mt-window.c:2252
+msgid "Windows (CRLF)"
+msgstr "Windows (CRLF)"
+
+#: src/mt-window.c:2256
+msgid "Unix (LF)"
+msgstr "Unix (LF)"
+
+#: src/mt-window.c:2525
+msgid "File Name"
+msgstr "File Name"
+
+#: src/mt-window.c:2534
+msgid "Location"
+msgstr "Location"
+
+#: src/mt-window.c:2544
+msgid "Type"
+msgstr "Type"
+
+#: src/mt-window.c:2550
+msgid "Encoding"
+msgstr "Encoding"
+
+#: src/mt-window.c:2556
+msgid "Newline"
+msgstr "Newline"
+
+#: src/mt-window.c:2564
+msgid "Indentation"
+msgstr "Indentation"
+
+#: src/mt-window.c:2567
+msgid "Auto Indentation"
+msgstr "Auto Indentation"
+
+#: src/mt-window.c:2577
+msgid "Tabs"
+msgstr "Tabs"
+
+#: src/mt-window.c:2578
+msgid "Spaces"
+msgstr "Spaces"
+
+#: src/mt-window.c:2580
+msgid "Character"
+msgstr "Character"
+
+#: src/mt-window.c:2592
+msgid "Spaces Per Tab"
+msgstr "Spaces Per Tab"
+
+#: src/mt-window.c:2604
+msgid "Spaces Per Indent"
+msgstr "Spaces Per Indent"
+
+#: src/mt-window.c:2617
+msgid "Statistics"
+msgstr "Statistics"
+
+#: src/mt-window.c:2619
+msgid "Lines"
+msgstr "Lines"
+
+#: src/mt-window.c:2625
+msgid "Words"
+msgstr "Words"
+
+#: src/mt-window.c:2631
+msgid "Characters, No Spaces"
+msgstr "Characters, No Spaces"
+
+#: src/mt-window.c:2637
+msgid "All Characters"
+msgstr "All Characters"
+
+#: src/mt-window.c:2658
+msgid "_New"
+msgstr "_New"
+
+#: src/mt-window.c:2666
+msgid "_Save"
+msgstr "_Save"
+
+#: src/mt-window.c:2670
+msgid "Save _As…"
+msgstr "Save _As…"
+
+#: src/mt-window.c:2674
+msgid "_Close"
+msgstr "_Close"
+
+#: src/mt-window.c:2682
+msgid "_Find…"
+msgstr "_Find…"
+
+#: src/mt-window.c:2686
+msgid "_Replace…"
+msgstr "_Replace…"
+
+#: src/mt-window.c:2694
+msgid "Zoom _In"
+msgstr "Zoom _In"
+
+#: src/mt-window.c:2698
+msgid "Zoom _Out"
+msgstr "Zoom _Out"
+
+#: src/mt-window.c:2702
+msgid "Reset _Zoom"
+msgstr "Reset _Zoom"
+
+#: src/mt-window.c:2710
+msgid "_Document Properties"
+msgstr "_Document Properties"
+
+#: src/mt-window.c:2718
+msgid "_Preferences"
+msgstr "_Preferences"
+
+#: src/mt-window.c:2722
+msgid "_Keyboard Shortcuts"
+msgstr "_Keyboard Shortcuts"
+
+#: src/mt-window.c:2725
+msgid "_Extensions"
+msgstr "_Extensions"
+
+#: src/mt-window.c:2728
+msgid "_About Vellum"
+msgstr "_About Vellum"
+
+#: src/mt-window.c:2797
+#, c-format
+msgid "Cleared %u draft"
+msgid_plural "Cleared %u drafts"
+msgstr[0] "Cleared %u draft"
+msgstr[1] "Cleared %u drafts"
+
+#: src/mt-window.c:2804
+msgid "No history to clear"
+msgstr "No history to clear"
+
+#: src/mt-window.c:2820
+msgid ""
+"All recoverable drafts will be deleted permanently. Open documents are not "
+"affected."
+msgstr ""
+"All recoverable drafts will be deleted permanently. Open documents are not "
+"affected."
+
+#: src/mt-window.c:2828
+msgid "Clear History?"
+msgstr "Clear History?"
+
+#: src/mt-window.c:2832
+msgid "Clear"
+msgstr "Clear"
+
+#: src/mt-window.c:2950 src/mt-window.c:4150
+msgid "New document"
+msgstr "New document"
+
+#: src/mt-window.c:2951
+msgid "Open file"
+msgstr "Open file"
+
+#: src/mt-window.c:2965
+msgid "Document Properties"
+msgstr "Document Properties"
+
+#: src/mt-window.c:2979
+msgid "File changed on disk"
+msgstr "File changed on disk"
+
+#: src/mt-window.c:2980
+msgid "The file was changed by another program."
+msgstr "The file was changed by another program."
+
+#: src/mt-window.c:2981
+msgid "Discard Changes and Reload"
+msgstr "Discard Changes and Reload"
+
+#: src/mt-window.c:2997
+msgid "Dismiss external file change notification"
+msgstr "Dismiss external file change notification"
+
+#: src/mt-window.c:3053 src/mt-window.c:4158
+msgid "Find"
+msgstr "Find"
+
+#: src/mt-window.c:3054
+msgid "Replace with"
+msgstr "Replace with"
+
+#: src/mt-window.c:3059
+msgid "Replace"
+msgstr "Replace"
+
+#: src/mt-window.c:3382
+#, c-format
+msgid "Recovered %u draft"
+msgid_plural "Recovered %u drafts"
+msgstr[0] "Recovered %u draft"
+msgstr[1] "Recovered %u drafts"
+
+#: src/mt-window.c:3731
+msgid "Save an untitled document with :w before closing"
+msgstr "Save an untitled document with :w before closing"
+
+#: src/mt-window.c:3747
+msgid "Saving before closing…"
+msgstr "Saving before closing…"
+
+#: src/mt-window.c:3866
+msgid "Open Files"
+msgstr "Open Files"
+
+#: src/mt-window.c:3935 src/mt-window.c:4153
+msgid "Save As"
+msgstr "Save As"
+
+#: src/mt-window.c:4063
+msgid "Set Keyboard Shortcut"
+msgstr "Set Keyboard Shortcut"
+
+#: src/mt-window.c:4072
+msgid "Press a new shortcut"
+msgstr "Press a new shortcut"
+
+#: src/mt-window.c:4075
+msgid ""
+"Press Escape to cancel. The change applies immediately and is saved for the "
+"next start."
+msgstr ""
+
+#: src/mt-window.c:4114
+msgid "Change shortcut"
+msgstr "Change shortcut"
+
+#: src/mt-window.c:4145
+msgid "Keyboard Shortcuts"
+msgstr "Keyboard Shortcuts"
+
+#: src/mt-window.c:4149
+msgid "Document"
+msgstr "Document"
+
+#: src/mt-window.c:4151
+msgid "Open files"
+msgstr "Open files"
+
+#: src/mt-window.c:4154
+msgid "Close document"
+msgstr "Close document"
+
+#: src/mt-window.c:4157
+msgid "Editing"
+msgstr "Editing"
+
+#: src/mt-window.c:4159
+msgid "Find and replace"
+msgstr "Find and replace"
+
+#: src/mt-window.c:4160
+msgid "Zoom in"
+msgstr "Zoom in"
+
+#: src/mt-window.c:4161
+msgid "Zoom out"
+msgstr "Zoom out"
+
+#: src/mt-window.c:4162
+msgid "Reset zoom"
+msgstr "Reset zoom"
+
+#: src/mt-window.c:4163
+msgid "AI completion"
+msgstr "AI completion"
+
+#: src/mt-window.c:4166
+msgid "Optional Extensions"
+msgstr "Optional Extensions"
+
+#: src/mt-window.c:4167
+msgid "Insert timestamp"
+msgstr "Insert timestamp"
+
+#: src/mt-window.c:4168
+msgid "Document statistics"
+msgstr "Document statistics"
+
+#: src/mt-window.c:4169
+msgid "Test links"
+msgstr "Test links"
+
+#: src/mt-window.c:4170
+msgid "Project sidebar"
+msgstr "Project sidebar"
+
+#: src/mt-window.c:4171 src/plugins/build-run-plugin.c:656
+msgid "Build"
+msgstr "Build"
+
+#: src/mt-window.c:4172 src/plugins/build-run-plugin.c:657
+msgid "Run"
+msgstr "Run"
+
+#: src/mt-window.c:4173
+msgid "Build and run"
+msgstr "Build and run"
+
+#: src/mt-window.c:4224
+msgid "Zoom reset to 100%"
+msgstr "Zoom reset to 100%"
+
+#: src/mt-window.c:4283
+msgid "Extension loading will change the next time Vellum starts"
+msgstr "Extension loading will change the next time Vellum starts"
+
+#: src/mt-window.c:4375
+msgid "Preferences"
+msgstr "Preferences"
+
+#: src/mt-window.c:4379
+msgid "Interface"
+msgstr "Interface"
+
+#: src/mt-window.c:4382
+msgid "Follow system"
+msgstr "Follow system"
+
+#: src/mt-window.c:4383
+msgid "Light"
+msgstr "Light"
+
+#: src/mt-window.c:4384
+msgid "Dark"
+msgstr "Dark"
+
+#: src/mt-window.c:4386
+msgid "Appearance"
+msgstr "Appearance"
+
+#: src/mt-window.c:4392
+msgid "Code Theme"
+msgstr "Code Theme"
+
+#: src/mt-window.c:4395 src/mt-window.c:4431
+msgid "Choose"
+msgstr "Choose"
+
+#: src/mt-window.c:4406
+msgid "System language"
+msgstr "System language"
+
+#: src/mt-window.c:4407
+msgid "English"
+msgstr "English"
+
+#: src/mt-window.c:4408
+msgid "Simplified Chinese"
+msgstr "Simplified Chinese"
+
+#: src/mt-window.c:4410
+msgid "Language"
+msgstr "Language"
+
+#: src/mt-window.c:4418
+msgid "Use custom font"
+msgstr "Use custom font"
+
+#: src/mt-window.c:4420
+msgid "When disabled, the system monospace font is used"
+msgstr "When disabled, the system monospace font is used"
+
+#: src/mt-window.c:4429
+msgid "Editor Font"
+msgstr "Editor Font"
+
+#: src/mt-window.c:4445
+msgid "Editor font scale"
+msgstr "Editor font scale"
+
+#: src/mt-window.c:4452
+msgid "Tab display width"
+msgstr "Tab display width"
+
+#: src/mt-window.c:4454
+msgid "Controls tab columns only; Tab inserts a real tab character"
+msgstr "Controls tab columns only; Tab inserts a real tab character"
+
+#: src/mt-window.c:4461
+msgid "Display"
+msgstr "Display"
+
+#: src/mt-window.c:4463
+msgid "Show line numbers"
+msgstr "Show line numbers"
+
+#: src/mt-window.c:4469
+msgid "Highlight current line"
+msgstr "Highlight current line"
+
+#: src/mt-window.c:4475
+msgid "Show overview map"
+msgstr "Show overview map"
+
+#: src/mt-window.c:4476
+msgid "A compact map is displayed beside each document"
+msgstr "A compact map is displayed beside each document"
+
+#: src/mt-window.c:4481
+msgid "Check spelling"
+msgstr "Check spelling"
+
+#: src/mt-window.c:4482
+msgid "Underlines misspelled words"
+msgstr ""
+
+#: src/mt-window.c:4488
+msgid "Wrapping and Indentation"
+msgstr "Wrapping and Indentation"
+
+#: src/mt-window.c:4490
+msgid "Show right margin"
+msgstr "Show right margin"
+
+#: src/mt-window.c:4496
+msgid "Right margin column"
+msgstr "Right margin column"
+
+#: src/mt-window.c:4502
+msgid "Automatic word wrap"
+msgstr "Automatic word wrap"
+
+#: src/mt-window.c:4508
+msgid "Automatic indentation"
+msgstr "Automatic indentation"
+
+#: src/mt-window.c:4514
+msgid "Indent width"
+msgstr "Indent width"
+
+#: src/mt-window.c:4521
+msgid "Behavior"
+msgstr "Behavior"
+
+#: src/mt-window.c:4523
+msgid "Restore previous session"
+msgstr "Restore previous session"
+
+#: src/mt-window.c:4524
+msgid "Restore recoverable drafts when Vellum starts"
+msgstr "Restore recoverable drafts when Vellum starts"
+
+#: src/mt-window.c:4529
+msgid "Enable extensions"
+msgstr "Enable extensions"
+
+#: src/mt-window.c:4530
+msgid "When disabled, Vellum starts as a compact core editor; restart to apply"
+msgstr ""
+
+#: src/mt-window.c:4538
+msgid "Clear History"
+msgstr "Clear History"
+
+#: src/mt-window.c:4540
+msgid "Delete all recoverable drafts"
+msgstr "Delete all recoverable drafts"
+
+#: src/mt-window.c:4696
+#, c-format
+msgid "Unable to change extension state: %s"
+msgstr "Unable to change extension state: %s"
+
+#: src/mt-window.c:4724
+msgid "Extensions"
+msgstr "Extensions"
+
+#: src/mt-window.c:4727
+msgid "Loaded Extensions"
+msgstr "Loaded Extensions"
+
+#: src/mt-window.c:4731
+msgid ""
+"Extensions are disabled. Enable them in Preferences and restart Vellum to "
+"load or manage extensions."
+msgstr ""
+
+#: src/mt-window.c:4736
+msgid ""
+"Extensions can be disabled without deleting them. Imported user extensions "
+"have a trash button for deletion; built-in extensions can be disabled but "
+"remain part of the application. Native modules and source packages must come "
+"from trusted sources."
+msgstr ""
+
+#: src/mt-window.c:4738
+msgid "Import"
+msgstr "Import"
+
+#: src/mt-window.c:4755
+msgid "Extension loading is disabled for this session"
+msgstr "Extension loading is disabled for this session"
+
+#: src/mt-window.c:4756
+msgid "No extensions are currently loaded"
+msgstr "No extensions are currently loaded"
+
+#: src/mt-window.c:4796
+msgid "Enable extension"
+msgstr "Enable extension"
+
+#: src/mt-window.c:4801
+msgid "Export extension"
+msgstr "Export extension"
+
+#: src/mt-window.c:4816
+msgid "Configure extension"
+msgstr "Configure extension"
+
+#: src/mt-window.c:4835
+msgid "Delete extension"
+msgstr "Delete extension"
+
+#: src/mt-window.c:4871
+msgid "A focused GTK4 text editor."
+msgstr "A focused GTK4 text editor."
+
+#: src/plugins/ai-completion-plugin.c:294
+msgid "AI endpoint must begin with https:// or http://"
+msgstr "AI endpoint must begin with https:// or http://"
+
+#: src/plugins/ai-completion-plugin.c:300
+msgid "AI model and API key are required"
+msgstr "AI model and API key are required"
+
+#: src/plugins/ai-completion-plugin.c:306
+msgid "AI completion settings saved"
+msgstr "AI completion settings saved"
+
+#: src/plugins/ai-completion-plugin.c:314
+#, c-format
+msgid "Unable to save AI settings: %s"
+msgstr "Unable to save AI settings: %s"
+
+#: src/plugins/ai-completion-plugin.c:727
+#, c-format
+msgid "AI completion request failed: %s"
+msgstr "AI completion request failed: %s"
+
+#: src/plugins/ai-completion-plugin.c:728
+msgid "No response received"
+msgstr "No response received"
+
+#: src/plugins/ai-completion-plugin.c:747
+#, c-format
+msgid "AI service returned HTTP %u: %s"
+msgstr "AI service returned HTTP %u: %s"
+
+#: src/plugins/ai-completion-plugin.c:783
+msgid "AI completion ready: press Tab to accept or Escape to dismiss"
+msgstr "AI completion ready: press Tab to accept or Escape to dismiss"
+
+#: src/plugins/ai-completion-plugin.c:795
+#, c-format
+msgid "Unable to parse AI completion: %s"
+msgstr "Unable to parse AI completion: %s"
+
+#: src/plugins/ai-completion-plugin.c:850
+msgid "Configure an AI endpoint, model and API key in Extensions first"
+msgstr "Configure an AI endpoint, model and API key in Extensions first"
+
+#: src/plugins/ai-completion-plugin.c:869
+msgid "Type some text before requesting AI completion"
+msgstr "Type some text before requesting AI completion"
+
+#: src/plugins/ai-completion-plugin.c:905
+msgid "AI endpoint URL is invalid"
+msgstr "AI endpoint URL is invalid"
+
+#: src/plugins/ai-completion-plugin.c:949
+msgid "Requesting AI completion…"
+msgstr "Requesting AI completion…"
+
+#: src/plugins/ai-completion-plugin.c:1032
+msgid "AI Completion"
+msgstr "AI Completion"
+
+#: src/plugins/ai-completion-plugin.c:1033
+msgid "Automatic AI completion"
+msgstr "Automatic AI completion"
+
+#: src/plugins/ai-completion-plugin.c:1034
+#: src/plugins/ai-completion-plugin.c:1116
+msgid ""
+"Wait for a short pause after typing, then request a completion without "
+"pressing a shortcut."
+msgstr ""
+"Wait for a short pause after typing, then request a completion without "
+"pressing a shortcut."
+
+#: src/plugins/ai-completion-plugin.c:1085
+msgid "AI Completion Settings"
+msgstr "AI Completion Settings"
+
+#: src/plugins/ai-completion-plugin.c:1090
+msgid "OpenAI-Compatible Service"
+msgstr "OpenAI-Compatible Service"
+
+#: src/plugins/ai-completion-plugin.c:1092
+msgid ""
+"Enter a full Chat Completions URL, an OpenAI-compatible URL ending in /v1, "
+"or a bare service host. Text around the cursor is sent to this service."
+msgstr ""
+"Enter a full Chat Completions URL, an OpenAI-compatible URL ending in /v1, "
+"or a bare service host. Text around the cursor is sent to this service."
+
+#: src/plugins/ai-completion-plugin.c:1098
+msgid "API Endpoint URL"
+msgstr "API Endpoint URL"
+
+#: src/plugins/ai-completion-plugin.c:1103
+msgid "Model"
+msgstr "Model"
+
+#: src/plugins/ai-completion-plugin.c:1108
+msgid "API Key"
+msgstr "API Key"
+
+#: src/plugins/ai-completion-plugin.c:1114
+msgid "Suggest automatically while typing"
+msgstr "Suggest automatically while typing"
+
+#: src/plugins/ai-completion-plugin.c:1121
+msgid "Save AI Settings"
+msgstr "Save AI Settings"
+
+#: src/plugins/build-run-plugin.c:290
+msgid "Build completed"
+msgstr "Build completed"
+
+#: src/plugins/build-run-plugin.c:290
+msgid "Program exited successfully"
+msgstr "Program exited successfully"
+
+#: src/plugins/build-run-plugin.c:303
+#, c-format
+msgid "Command exited with status %d"
+msgstr "Command exited with status %d"
+
+#: src/plugins/build-run-plugin.c:331
+#, c-format
+msgid "Command failed to start or finish: %s"
+msgstr "Command failed to start or finish: %s"
+
+#: src/plugins/build-run-plugin.c:418
+msgid "A build or run command is already active"
+msgstr "A build or run command is already active"
+
+#: src/plugins/build-run-plugin.c:425
+msgid "Save the current source file before building or running"
+msgstr "Save the current source file before building or running"
+
+#: src/plugins/build-run-plugin.c:434
+msgid "Configure a build command first"
+msgstr "Configure a build command first"
+
+#: src/plugins/build-run-plugin.c:435
+msgid "Configure a run command first"
+msgstr "Configure a run command first"
+
+#: src/plugins/build-run-plugin.c:456
+#, c-format
+msgid "Unable to parse command: %s"
+msgstr "Unable to parse command: %s"
+
+#: src/plugins/build-run-plugin.c:474
+msgid "Building"
+msgstr "Building"
+
+#: src/plugins/build-run-plugin.c:474
+msgid "Running"
+msgstr "Running"
+
+#: src/plugins/build-run-plugin.c:495
+#, c-format
+msgid "Unable to start command: %s"
+msgstr "Unable to start command: %s"
+
+#: src/plugins/build-run-plugin.c:570
+msgid "Command stop requested\n"
+msgstr "Command stop requested\n"
+
+#: src/plugins/build-run-plugin.c:640
+#, c-format
+msgid "Build & Run — %s"
+msgstr "Build & Run — %s"
+
+#: src/plugins/build-run-plugin.c:648 src/plugins/build-run-plugin.c:655
+msgid "Build & Run"
+msgstr "Build & Run"
+
+#: src/plugins/build-run-plugin.c:658
+msgid "Build + Run"
+msgstr "Build + Run"
+
+#: src/plugins/build-run-plugin.c:672
+msgid "Stop Active Command"
+msgstr "Stop Active Command"
+
+#: src/plugins/build-run-plugin.c:673
+msgid "Clear Output"
+msgstr "Clear Output"
+
+#: src/plugins/build-run-plugin.c:674
+msgid "Hide Build Output"
+msgstr "Hide Build Output"
+
+#: src/plugins/build-run-plugin.c:706
+msgid ""
+"Commands use direct argument parsing, not a shell. Available placeholders: $"
+"{file}, ${dir}, ${name}, ${root} (${name} is the source file name without "
+"its extension).\n"
+msgstr ""
+"Commands use direct argument parsing, not a shell. Available placeholders: $"
+"{file}, ${dir}, ${name}, ${root} (${name} is the source file name without "
+"its extension).\n"
+
+#: src/plugins/build-run-plugin.c:762
+msgid "Build and run settings saved"
+msgstr "Build and run settings saved"
+
+#: src/plugins/build-run-plugin.c:769
+#, c-format
+msgid "Unable to save build settings: %s"
+msgstr "Unable to save build settings: %s"
+
+#: src/plugins/build-run-plugin.c:869
+msgid "Build & Run Settings"
+msgstr "Build & Run Settings"
+
+#: src/plugins/build-run-plugin.c:874
+msgid "Explicit Commands"
+msgstr "Explicit Commands"
+
+#: src/plugins/build-run-plugin.c:876
+msgid ""
+"Commands run only after F9, F10 or F11. They are parsed into arguments "
+"without a shell. Use ${file}, ${dir}, ${name}, or ${root}; ${name} is the "
+"source file name without its extension. Quote placeholders when paths may "
+"contain spaces."
+msgstr ""
+"Commands run only after F9, F10 or F11. They are parsed into arguments "
+"without a shell. Use ${file}, ${dir}, ${name}, or ${root}; ${name} is the "
+"source file name without its extension. Quote placeholders when paths may "
+"contain spaces."
+
+#: src/plugins/build-run-plugin.c:884
+msgid "Working Directory (optional)"
+msgstr "Working Directory (optional)"
+
+#: src/plugins/build-run-plugin.c:885
+msgid "Build Command"
+msgstr "Build Command"
+
+#: src/plugins/build-run-plugin.c:886
+msgid "Run Command"
+msgstr "Run Command"
+
+#: src/plugins/build-run-plugin.c:895
+msgid "Save Build & Run Settings"
+msgstr "Save Build & Run Settings"
+
+#: src/plugins/link-check-plugin.c:130
+#, c-format
+msgid "Link test complete: %u reachable, %u failed"
+msgstr "Link test complete: %u reachable, %u failed"
+
+#: src/plugins/link-check-plugin.c:229
+msgid "No HTTP or HTTPS links found in the current document"
+msgstr "No HTTP or HTTPS links found in the current document"
+
+#: src/plugins/link-check-plugin.c:236
+msgid "Testing the first 32 unique links"
+msgstr "Testing the first 32 unique links"
+
+#: src/plugins/link-check-plugin.c:240
+msgid "Testing links…"
+msgstr "Testing links…"
+
+#: src/plugins/project-sidebar-plugin.c:250
+msgid "No project folder selected"
+msgstr "No project folder selected"
+
+#: src/plugins/project-sidebar-plugin.c:262
+msgid "Project sidebar is limited to the first 600 items"
+msgstr "Project sidebar is limited to the first 600 items"
+
+#: src/plugins/project-sidebar-plugin.c:331
+#, c-format
+msgid "Unable to save project folder: %s"
+msgstr "Unable to save project folder: %s"
+
+#: src/plugins/project-sidebar-plugin.c:343
+#, c-format
+msgid "Unable to choose project folder: %s"
+msgstr "Unable to choose project folder: %s"
+
+#: src/plugins/project-sidebar-plugin.c:359
+#: src/plugins/project-sidebar-plugin.c:416
+msgid "Choose Project Folder"
+msgstr "Choose Project Folder"
+
+#: src/plugins/project-sidebar-plugin.c:402
+msgid "Project Files"
+msgstr "Project Files"
+
+#: src/plugins/project-sidebar-plugin.c:417
+msgid "Refresh Project Files"
+msgstr "Refresh Project Files"
+
+#: src/plugins/project-sidebar-plugin.c:418
+msgid "Hide Project Sidebar"
+msgstr "Hide Project Sidebar"
+
+#: src/plugins/vim-mode-plugin.c:40
+msgid "Vi: Normal mode"
+msgstr "Vi: Normal mode"
+
+#: src/plugins/vim-mode-plugin.c:49
+msgid "Vi: Insert mode"
+msgstr "Vi: Insert mode"
+
+#: src/plugins/vim-mode-plugin.c:95
+msgid "Vi commands: :w, :wq, :x, :q, :q!, :help"
+msgstr "Vi commands: :w, :wq, :x, :q, :q!, :help"
+
+#: src/plugins/vim-mode-plugin.c:101
+#, c-format
+msgid "Unsupported Vi command: :%s"
+msgstr "Unsupported Vi command: :%s"
+
+#: src/plugins/vim-mode-plugin.c:150
+msgid "Vi Command"
+msgstr "Vi Command"
+
+#: src/plugins/vim-mode-plugin.c:162
+msgid "w, wq, x, q, q!, help"
+msgstr "w, wq, x, q, q!, help"
+
+#: src/plugins/vim-mode-plugin.c:342
+msgid ""
+"Vi mode enabled: press i to insert, Escape for normal mode, and : for "
+"commands"
+msgstr ""
+
+#~ msgid "_Open…"
+#~ msgstr "_Open…"

@@ -1,0 +1,14 @@
+src/main.c
+src/mt-application.c
+src/mt-document.c
+src/mt-plugin-manager.c
+src/mt-settings.c
+src/mt-vut-package.c
+src/mt-window.c
+src/plugins/ai-completion-plugin.c
+src/plugins/build-run-plugin.c
+src/plugins/link-check-plugin.c
+src/plugins/project-sidebar-plugin.c
+src/plugins/timestamp-plugin.c
+src/plugins/vim-mode-plugin.c
+src/plugins/word-count-plugin.c

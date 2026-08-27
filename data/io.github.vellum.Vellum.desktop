@@ -1,0 +1,14 @@
+[Desktop Entry]
+Name=Vellum
+Name[zh_CN]=极简文本编辑器
+Comment=A focused GTK4 text editor
+Comment[zh_CN]=专注的 GTK4 文本编辑器
+Exec=vellum %U
+Icon=io.github.vellum.Vellum
+Terminal=false
+Type=Application
+StartupNotify=true
+Categories=Utility;TextEditor;GTK;
+MimeType=text/plain;text/x-csrc;text/x-chdr;text/x-python;application/json;application/xml;
+Keywords=Text;Editor;Write;Code;
+Keywords[zh_CN]=文本;编辑器;写作;代码;

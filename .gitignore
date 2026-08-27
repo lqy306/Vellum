@@ -1,0 +1,26 @@
+# Meson/Ninja build artifacts
+/build/
+/build-*/
+
+# Generated release artifacts and temporary AppDir staging
+/dist/
+
+# Runtime smoke-test state
+/runtime-*/
+
+# Transient build logs
+/*.log
+
+# Downloaded packaging tool; helper scripts remain versioned
+/tools/appimagetool-*.AppImage
+
+# Generated binary payloads
+*.mo
+*.AppImage
+*.zip
+*.tar.gz
+
+# Editor and system temporary files
+*~
+*.swp
+.DS_Store

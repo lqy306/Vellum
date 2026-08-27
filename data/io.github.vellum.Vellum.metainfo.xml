@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>io.github.vellum.Vellum</id>
+  <name>Vellum</name>
+  <summary>A focused GTK4 text editor</summary>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>BSD-2-Clause</project_license>
+  <description>
+    <p>Vellum is a clean, focused text editor built with GTK4, Libadwaita and GtkSourceView.</p>
+    <p>It supports multiple documents, syntax highlighting, search and replace, local draft recovery, and C plugins.</p>
+  </description>
+  <launchable type="desktop-id">io.github.vellum.Vellum.desktop</launchable>
+  <provides>
+    <binary>vellum</binary>
+    <id>io.github.vellum.Vellum.desktop</id>
+  </provides>
+  <categories>
+    <category>Utility</category>
+    <category>TextEditor</category>
+  </categories>
+  <developer id="io.github.vellum">
+    <name>Vellum contributors</name>
+  </developer>
+  <releases>
+    <release version="0.7.1" date="2026-08-26">
+      <description>
+        <p>Guard AI completion requests with lifecycle generations and make inline candidate overlays follow their owning document safely across tab switches and document destruction.</p>
+        <p>Add a restartable core-only mode that loads no extensions, stabilize automatic local Markdown Mode detection against hidden markup, and include a restricted TUI GTK debugging helper for repeatable regression checks.</p>
+        <p>Refine external-file change notifications into a two-line banner below the header bar.</p>
+      </description>
+    </release>
+    <release version="0.7.0" date="2026-08-26">
+      <description>
+        <p>Add editable persistent shortcuts, zoom reset, automatic local Markdown Mode, and a 50%-opacity inline AI completion candidate accepted with Tab or dismissed with Escape.</p>
+        <p>Add safe external-file change notifications with discard-and-reload, a Vi-compatible command prompt, a standalone Build &amp; Run tool window, lifecycle guards, and an original Vellum application icon.</p>
+      </description>
+    </release>
+    <release version="0.6.2" date="2026-08-26">
+      <description>
+        <p>Replace document saving with a standard GIO asynchronous replace operation so file-system writes no longer block the editor interface.</p>
+        <p>Add save-in-progress protection and visible save status, including a regression test for the actual window save action.</p>
+      </description>
+    </release>
+    <release version="0.6.1" date="2026-08-26">
+      <description>
+        <p>Add an independent visual code-theme chooser with live GtkSourceView C syntax previews and persistent selection.</p>
+        <p>Escape extension metadata before rendering it as Adwaita markup, fixing Build &amp; Run settings warnings; make extension controls compact icon actions with tooltips.</p>
+      </description>
+    </release>
+    <release version="0.6.0" date="2026-08-26">
+      <description>
+        <p>Add validated .vut ZIP extension packages and ship all built-in extensions as auditable source packages that can be rebuilt for the local Linux architecture.</p>
+        <p>Add persistent extension enable switches, Project Sidebar, Build &amp; Run, Markdown Preview, Vim Mode, an overview map, editor display and indentation preferences, and a keyboard shortcut reference.</p>
+      </description>
+    </release>
+    <release version="0.5.0" date="2026-08-26">
+      <description>
+        <p>Add configurable real-tab display widths, live content-aware language recognition, and heuristic red error underlines for unbalanced brackets and quotes.</p>
+        <p>Add the manual Test Links extension, make saved OpenAI-compatible /v1 addresses work for AI Completion, and ship the project under BSD-2-Clause after a source and asset audit.</p>
+      </description>
+    </release>
+    <release version="0.3.0" date="2026-08-26">
+      <description>
+        <p>Rework the dark editor surface around Libadwaita and GtkSourceView Adwaita-dark, add extension import/export/removal/configuration, and add a user-configured AI completion extension.</p>
+      </description>
+    </release>
+    <release version="0.2.0" date="2026-08-26">
+      <description>
+        <p>Add explicit English and Simplified Chinese language packs, custom editor fonts, enhanced dark source themes, content-aware language recognition, and extension management.</p>
+      </description>
+    </release>
+    <release version="0.1.0" date="2026-08-26"/>
+  </releases>
+  <content_rating type="oars-1.1"/>
+</component>
