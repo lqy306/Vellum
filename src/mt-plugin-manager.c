@@ -662,13 +662,6 @@ mt_plugin_manager_host_install_next(GTask *outer_task)
         g_object_unref(outer_task);
         return;
     }
-    /* 已安装则直接成功，无需重复下载 */
-    if (mt_plugin_manager_has_plugin(manager, install->plugin_id))
-    {
-        g_task_return_boolean(outer_task, TRUE);
-        g_object_unref(outer_task);
-        return;
-    }
     mt_plugin_manager_marketplace_install_async(manager, entry, install->prefer_source, NULL,
                                                 mt_plugin_manager_host_install_done,
                                                 outer_task);
