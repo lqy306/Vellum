@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: vellum\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-08-28 11:51+0800\n"
+"POT-Creation-Date: 2026-08-28 14:05+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -89,7 +89,6 @@ msgid ""
 msgstr ""
 
 #: src/mt-window.c:679 src/mt-window.c:1840 src/mt-window.c:4120
-#: src/plugins/ai-completion-plugin.c:1080
 msgid "Cancel"
 msgstr ""
 
@@ -169,7 +168,6 @@ msgid "Discard"
 msgstr ""
 
 #: src/mt-window.c:1848 src/mt-window-shortcuts.c:190
-#: src/plugins/ai-completion-plugin.c:2522 src/plugins/build-run-plugin.c:898
 msgid "Save"
 msgstr ""
 
@@ -765,66 +763,76 @@ msgid ""
 "development packages)"
 msgstr ""
 
-#: src/mt-window.c:6244
+#: src/mt-window.c:6158
+msgid "Source Build Environment"
+msgstr ""
+
+#: src/mt-window.c:6160
+msgid ""
+"Source packages are built locally with make, cc and pkg-config. Install the "
+"required development packages first:"
+msgstr ""
+
+#: src/mt-window.c:6271
 #, c-format
 msgid "Check failed: %s"
 msgstr ""
 
-#: src/mt-window.c:6254
+#: src/mt-window.c:6281
 msgid "No published releases yet"
 msgstr ""
 
-#: src/mt-window.c:6260
+#: src/mt-window.c:6287
 #, c-format
 msgid "Check failed: HTTP %u"
 msgstr ""
 
-#: src/mt-window.c:6294 src/mt-window.c:6438
+#: src/mt-window.c:6321 src/mt-window.c:6465
 #, c-format
 msgid "New version available: %s"
 msgstr ""
 
-#: src/mt-window.c:6302
+#: src/mt-window.c:6329
 msgid "You are up to date"
 msgstr ""
 
-#: src/mt-window.c:6308 src/mt-window.c:6313
+#: src/mt-window.c:6335 src/mt-window.c:6340
 msgid "Unable to read release information"
 msgstr ""
 
-#: src/mt-window.c:6320
+#: src/mt-window.c:6347
 msgid "Check failed: no response"
 msgstr ""
 
-#: src/mt-window.c:6340
+#: src/mt-window.c:6367
 msgid "Checking for updates…"
 msgstr ""
 
-#: src/mt-window.c:6441
+#: src/mt-window.c:6468
 msgid "View"
 msgstr ""
 
-#: src/mt-window.c:6564
+#: src/mt-window.c:6591
 msgid "About Vellum"
 msgstr ""
 
-#: src/mt-window.c:6589
+#: src/mt-window.c:6616
 msgid "A focused GTK4 text editor."
 msgstr ""
 
-#: src/mt-window.c:6595
+#: src/mt-window.c:6622
 msgid "Check for Updates"
 msgstr ""
 
-#: src/mt-window.c:6606
+#: src/mt-window.c:6633
 msgid "Open Download Page"
 msgstr ""
 
-#: src/mt-window.c:6618
+#: src/mt-window.c:6645
 msgid "GitHub Repository"
 msgstr ""
 
-#: src/mt-window.c:6630
+#: src/mt-window.c:6657
 msgid "vellum is licensed under BSD-2-Clause."
 msgstr ""
 
@@ -914,11 +922,11 @@ msgstr ""
 msgid "Project sidebar"
 msgstr ""
 
-#: src/mt-window-shortcuts.c:210 src/plugins/build-run-plugin.c:656
+#: src/mt-window-shortcuts.c:210
 msgid "Build"
 msgstr ""
 
-#: src/mt-window-shortcuts.c:211 src/plugins/build-run-plugin.c:657
+#: src/mt-window-shortcuts.c:211
 msgid "Run"
 msgstr ""
 
@@ -1100,464 +1108,175 @@ msgstr ""
 msgid "Delete all recoverable drafts"
 msgstr ""
 
-#: src/plugins/ai-completion-plugin.c:476
-msgid "Code"
+#: data/io.github.vellum.Vellum.desktop:2
+#: data/io.github.vellum.Vellum.metainfo.xml:4
+msgid "Vellum"
 msgstr ""
 
-#: src/plugins/ai-completion-plugin.c:478
-msgid "Web"
+#: data/io.github.vellum.Vellum.desktop:4
+#: data/io.github.vellum.Vellum.metainfo.xml:5
+msgid "A focused GTK4 text editor"
 msgstr ""
 
-#: src/plugins/ai-completion-plugin.c:480
-msgid "Config"
+#: data/io.github.vellum.Vellum.desktop:13
+msgid "Text;Editor;Write;Code;"
 msgstr ""
 
-#: src/plugins/ai-completion-plugin.c:482
-msgid "Text"
-msgstr ""
-
-#: src/plugins/ai-completion-plugin.c:484
-msgid "Other"
-msgstr ""
-
-#: src/plugins/ai-completion-plugin.c:1062
-msgid "AI endpoint must begin with https:// or http://"
-msgstr ""
-
-#: src/plugins/ai-completion-plugin.c:1068
-msgid "AI model and API key are required"
-msgstr ""
-
-#: src/plugins/ai-completion-plugin.c:1078
-msgid "Frequent AI summaries may use many tokens"
-msgstr ""
-
-#: src/plugins/ai-completion-plugin.c:1079
+#: data/io.github.vellum.Vellum.metainfo.xml:9
 msgid ""
-"The selected interval is below 30 modified lines. Automatic summaries can "
-"send code to your configured AI service very often and may significantly "
-"increase token consumption."
+"Vellum is a clean, focused text editor built with GTK4, Libadwaita and "
+"GtkSourceView."
 msgstr ""
 
-#: src/plugins/ai-completion-plugin.c:1081
-msgid "Enable Anyway"
-msgstr ""
-
-#: src/plugins/ai-completion-plugin.c:1093
-msgid "AI completion settings saved"
-msgstr ""
-
-#: src/plugins/ai-completion-plugin.c:1101
-#, c-format
-msgid "Unable to save AI settings: %s"
-msgstr ""
-
-#: src/plugins/ai-completion-plugin.c:1848
-msgid "AI service returned an empty completion"
-msgstr ""
-
-#: src/plugins/ai-completion-plugin.c:1857
-#: src/plugins/ai-completion-plugin.c:1878
-msgid "AI completion ready: press Tab to accept or Escape to dismiss"
-msgstr ""
-
-#: src/plugins/ai-completion-plugin.c:1886
-#, c-format
-msgid "Unable to parse AI completion: %s"
-msgstr ""
-
-#: src/plugins/ai-completion-plugin.c:1905
-#, c-format
-msgid "AI service returned HTTP %u: %s"
-msgstr ""
-
-#: src/plugins/ai-completion-plugin.c:1947
-msgid "AI completion response was too large"
-msgstr ""
-
-#: src/plugins/ai-completion-plugin.c:1975
-#: src/plugins/ai-completion-plugin.c:2032
-#, c-format
-msgid "AI completion request failed: %s"
-msgstr ""
-
-#: src/plugins/ai-completion-plugin.c:2033
-msgid "No response received"
-msgstr ""
-
-#: src/plugins/ai-completion-plugin.c:2213
-msgid "AI completion is disabled for this file type in the Extensions settings"
-msgstr ""
-
-#: src/plugins/ai-completion-plugin.c:2237 src/plugins/ai-code-summary.c:638
-msgid "Configure an AI endpoint, model and API key in Extensions first"
-msgstr ""
-
-#: src/plugins/ai-completion-plugin.c:2256
-msgid "Type some text before requesting AI completion"
-msgstr ""
-
-#: src/plugins/ai-completion-plugin.c:2294 src/plugins/ai-code-summary.c:674
-msgid "AI endpoint URL is invalid"
-msgstr ""
-
-#: src/plugins/ai-completion-plugin.c:2338
-msgid "Requesting AI completion…"
-msgstr ""
-
-#: src/plugins/ai-completion-plugin.c:2425
-msgid "AI Completion"
-msgstr ""
-
-#: src/plugins/ai-completion-plugin.c:2426
-msgid "Automatic AI completion"
-msgstr ""
-
-#: src/plugins/ai-completion-plugin.c:2427
-#: src/plugins/ai-completion-plugin.c:2511
+#: data/io.github.vellum.Vellum.metainfo.xml:10
 msgid ""
-"Wait for a short pause after typing, then request a completion without "
-"pressing a shortcut."
+"It supports multiple documents, syntax highlighting, search and replace, "
+"local draft recovery, and C plugins."
 msgstr ""
 
-#: src/plugins/ai-completion-plugin.c:2480
-msgid "AI Completion Settings"
+#: data/io.github.vellum.Vellum.metainfo.xml:24
+msgid "Vellum contributors"
 msgstr ""
 
-#: src/plugins/ai-completion-plugin.c:2485
-msgid "OpenAI-Compatible Service"
-msgstr ""
-
-#: src/plugins/ai-completion-plugin.c:2487
+#: data/io.github.vellum.Vellum.metainfo.xml:29
 msgid ""
-"Enter a full Chat Completions URL, an OpenAI-compatible URL ending in /v1, "
-"or a bare service host. Text around the cursor is sent to this service."
+"Fix AI inline completion ghost text not disappearing on accept or reject."
 msgstr ""
 
-#: src/plugins/ai-completion-plugin.c:2493
-msgid "API Endpoint URL"
-msgstr ""
-
-#: src/plugins/ai-completion-plugin.c:2498
-msgid "Model"
-msgstr ""
-
-#: src/plugins/ai-completion-plugin.c:2503
-msgid "API Key"
-msgstr ""
-
-#: src/plugins/ai-completion-plugin.c:2509
-msgid "Suggest automatically while typing"
-msgstr ""
-
-#: src/plugins/ai-completion-plugin.c:2521
-msgid "Save AI Settings"
-msgstr ""
-
-#: src/plugins/ai-completion-plugin.c:2554
-msgid "Document Types for AI Completion"
-msgstr ""
-
-#: src/plugins/ai-completion-plugin.c:2556
+#: data/io.github.vellum.Vellum.metainfo.xml:30
 msgid ""
-"AI completion is available only for the checked document types. Unchecked "
-"types are skipped for both automatic and shortcut-triggered completion."
+"Restrict automatic AI completion to code documents to avoid chat-like "
+"suggestions."
 msgstr ""
 
-#: src/plugins/ai-completion-plugin.c:2660
-msgid "No GtkSourceView language definitions were found on this system."
-msgstr ""
-
-#: src/plugins/ai-completion-plugin.c:2754
-msgid "File Type"
-msgstr ""
-
-#: src/plugins/ai-completion-plugin.c:2766
-msgid "Remarks"
-msgstr ""
-
-#: src/plugins/ai-code-summary.c:319
-msgid "AI Auto Summary"
-msgstr ""
-
-#: src/plugins/ai-code-summary.c:321
+#: data/io.github.vellum.Vellum.metainfo.xml:31
 msgid ""
-"Create a compact local summary after a configurable amount of code editing. "
-"The latest summary is sent with later AI requests for the same document."
+"Make auto-pair brackets work in both normal and Vi insert mode, with a new "
+"preference toggle."
 msgstr ""
 
-#: src/plugins/ai-code-summary.c:325
-msgid "Enable automatic code summary"
+#: data/io.github.vellum.Vellum.metainfo.xml:32
+msgid "Add Vi mode yy (yank line), cc (change line) and p (paste)."
 msgstr ""
 
-#: src/plugins/ai-code-summary.c:327
+#: data/io.github.vellum.Vellum.metainfo.xml:33
 msgid ""
-"Summarize the whole document after the configured number of modified lines "
-"and send it with later AI requests."
+"Clean up draft snapshots on discard, snapshot on exit, and skip empty drafts."
 msgstr ""
 
-#: src/plugins/ai-code-summary.c:334
-msgid "Modified lines between automatic summaries"
+#: data/io.github.vellum.Vellum.metainfo.xml:38
+msgid "Unify the application display name as Vellum in all languages."
 msgstr ""
 
-#: src/plugins/ai-code-summary.c:336
+#: data/io.github.vellum.Vellum.metainfo.xml:39
 msgid ""
-"The recommended minimum is 30 lines; lower values can greatly increase token "
-"use."
+"Allow removing built-in extensions from the Extensions window, with removal "
+"persisted across restarts."
 msgstr ""
 
-#: src/plugins/ai-code-summary.c:359
-msgid "Tip: file-header comment when summaries are disabled"
-msgstr ""
-
-#: src/plugins/ai-code-summary.c:360
+#: data/io.github.vellum.Vellum.metainfo.xml:40
 msgid ""
-"If you disable auto-summary to reduce API costs, please add a clear header "
-"comment at the top of each source file describing what it does, its public "
-"interface, and any non-obvious invariants. This helps both human readers and "
-"AI tools understand the file without reading every line."
+"Add a welcome guide plugin that introduces the editor and asks to remove "
+"itself after the tour."
 msgstr ""
 
-#: src/plugins/ai-code-summary.c:549
-#, c-format
-msgid "AI code summary failed: %s"
-msgstr ""
-
-#: src/plugins/ai-code-summary.c:555
-msgid "AI code summary service returned an error"
-msgstr ""
-
-#: src/plugins/ai-code-summary.c:568
-#, c-format
-msgid "Unable to parse AI code summary: %s"
-msgstr ""
-
-#: src/plugins/ai-code-summary.c:580
-msgid "AI code summary updated and will be included with later AI requests"
-msgstr ""
-
-#: src/plugins/ai-code-summary.c:619
-msgid "AI code summaries are available only for recognized code documents"
-msgstr ""
-
-#: src/plugins/ai-code-summary.c:656
-msgid "Add some code before generating an AI summary"
-msgstr ""
-
-#: src/plugins/ai-code-summary.c:707
-msgid "Generating AI code summary…"
-msgstr ""
-
-#: src/plugins/build-run-plugin.c:290
-msgid "Build completed"
-msgstr ""
-
-#: src/plugins/build-run-plugin.c:290
-msgid "Program exited successfully"
-msgstr ""
-
-#: src/plugins/build-run-plugin.c:303
-#, c-format
-msgid "Command exited with status %d"
-msgstr ""
-
-#: src/plugins/build-run-plugin.c:331
-#, c-format
-msgid "Command failed to start or finish: %s"
-msgstr ""
-
-#: src/plugins/build-run-plugin.c:418
-msgid "A build or run command is already active"
-msgstr ""
-
-#: src/plugins/build-run-plugin.c:425
-msgid "Save the current source file before building or running"
-msgstr ""
-
-#: src/plugins/build-run-plugin.c:434
-msgid "Configure a build command first"
-msgstr ""
-
-#: src/plugins/build-run-plugin.c:435
-msgid "Configure a run command first"
-msgstr ""
-
-#: src/plugins/build-run-plugin.c:456
-#, c-format
-msgid "Unable to parse command: %s"
-msgstr ""
-
-#: src/plugins/build-run-plugin.c:474
-msgid "Building"
-msgstr ""
-
-#: src/plugins/build-run-plugin.c:474
-msgid "Running"
-msgstr ""
-
-#: src/plugins/build-run-plugin.c:495
-#, c-format
-msgid "Unable to start command: %s"
-msgstr ""
-
-#: src/plugins/build-run-plugin.c:570
-msgid "Command stop requested\n"
-msgstr ""
-
-#: src/plugins/build-run-plugin.c:640
-#, c-format
-msgid "Build & Run — %s"
-msgstr ""
-
-#: src/plugins/build-run-plugin.c:648 src/plugins/build-run-plugin.c:655
-msgid "Build & Run"
-msgstr ""
-
-#: src/plugins/build-run-plugin.c:658
-msgid "Build + Run"
-msgstr ""
-
-#: src/plugins/build-run-plugin.c:672
-msgid "Stop Active Command"
-msgstr ""
-
-#: src/plugins/build-run-plugin.c:673
-msgid "Clear Output"
-msgstr ""
-
-#: src/plugins/build-run-plugin.c:674
-msgid "Hide Build Output"
-msgstr ""
-
-#: src/plugins/build-run-plugin.c:706
+#: data/io.github.vellum.Vellum.metainfo.xml:45
 msgid ""
-"Commands use direct argument parsing, not a shell. Available placeholders: $"
-"{file}, ${dir}, ${name}, ${root} (${name} is the source file name without "
-"its extension).\n"
+"Guard AI completion requests with lifecycle generations and make inline "
+"candidate overlays follow their owning document safely across tab switches "
+"and document destruction."
 msgstr ""
 
-#: src/plugins/build-run-plugin.c:762
-msgid "Build and run settings saved"
-msgstr ""
-
-#: src/plugins/build-run-plugin.c:769
-#, c-format
-msgid "Unable to save build settings: %s"
-msgstr ""
-
-#: src/plugins/build-run-plugin.c:869
-msgid "Build & Run Settings"
-msgstr ""
-
-#: src/plugins/build-run-plugin.c:874
-msgid "Explicit Commands"
-msgstr ""
-
-#: src/plugins/build-run-plugin.c:876
+#: data/io.github.vellum.Vellum.metainfo.xml:46
 msgid ""
-"Commands run only after F9, F10 or F11. They are parsed into arguments "
-"without a shell. Use ${file}, ${dir}, ${name}, or ${root}; ${name} is the "
-"source file name without its extension. Quote placeholders when paths may "
-"contain spaces."
+"Add a restartable core-only mode that loads no extensions, stabilize "
+"automatic local Markdown Mode detection against hidden markup, and include a "
+"restricted TUI GTK debugging helper for repeatable regression checks."
 msgstr ""
 
-#: src/plugins/build-run-plugin.c:884
-msgid "Working Directory (optional)"
-msgstr ""
-
-#: src/plugins/build-run-plugin.c:885
-msgid "Build Command"
-msgstr ""
-
-#: src/plugins/build-run-plugin.c:886
-msgid "Run Command"
-msgstr ""
-
-#: src/plugins/build-run-plugin.c:895
-msgid "Save Build & Run Settings"
-msgstr ""
-
-#: src/plugins/link-check-plugin.c:130
-#, c-format
-msgid "Link test complete: %u reachable, %u failed"
-msgstr ""
-
-#: src/plugins/link-check-plugin.c:229
-msgid "No HTTP or HTTPS links found in the current document"
-msgstr ""
-
-#: src/plugins/link-check-plugin.c:236
-msgid "Testing the first 32 unique links"
-msgstr ""
-
-#: src/plugins/link-check-plugin.c:240
-msgid "Testing links…"
-msgstr ""
-
-#: src/plugins/project-sidebar-plugin.c:250
-msgid "No project folder selected"
-msgstr ""
-
-#: src/plugins/project-sidebar-plugin.c:262
-msgid "Project sidebar is limited to the first 600 items"
-msgstr ""
-
-#: src/plugins/project-sidebar-plugin.c:331
-#, c-format
-msgid "Unable to save project folder: %s"
-msgstr ""
-
-#: src/plugins/project-sidebar-plugin.c:343
-#, c-format
-msgid "Unable to choose project folder: %s"
-msgstr ""
-
-#: src/plugins/project-sidebar-plugin.c:359
-#: src/plugins/project-sidebar-plugin.c:416
-msgid "Choose Project Folder"
-msgstr ""
-
-#: src/plugins/project-sidebar-plugin.c:402
-msgid "Project Files"
-msgstr ""
-
-#: src/plugins/project-sidebar-plugin.c:417
-msgid "Refresh Project Files"
-msgstr ""
-
-#: src/plugins/project-sidebar-plugin.c:418
-msgid "Hide Project Sidebar"
-msgstr ""
-
-#: src/plugins/vim-mode-plugin.c:44
-msgid "Vi: Normal mode"
-msgstr ""
-
-#: src/plugins/vim-mode-plugin.c:55
-msgid "Vi: Insert mode"
-msgstr ""
-
-#: src/plugins/vim-mode-plugin.c:102
+#: data/io.github.vellum.Vellum.metainfo.xml:47
 msgid ""
-"Vi commands: :w, :wq, :x, :q, :q!, :help; normal keys: h j k l w b 0 $ G gg "
-"i a o x d d d y y c c p u"
+"Refine external-file change notifications into a two-line banner below the "
+"header bar."
 msgstr ""
 
-#: src/plugins/vim-mode-plugin.c:108
-#, c-format
-msgid "Unsupported Vi command: :%s"
-msgstr ""
-
-#: src/plugins/vim-mode-plugin.c:157
-msgid "Vi Command"
-msgstr ""
-
-#: src/plugins/vim-mode-plugin.c:169
-msgid "w, wq, x, q, q!, help"
-msgstr ""
-
-#: src/plugins/vim-mode-plugin.c:379
+#: data/io.github.vellum.Vellum.metainfo.xml:52
 msgid ""
-"Vi mode enabled: press i to insert, Escape for normal mode, and : for "
-"commands"
+"Add editable persistent shortcuts, zoom reset, automatic local Markdown "
+"Mode, and a 50%-opacity inline AI completion candidate accepted with Tab or "
+"dismissed with Escape."
+msgstr ""
+
+#: data/io.github.vellum.Vellum.metainfo.xml:53
+msgid ""
+"Add safe external-file change notifications with discard-and-reload, a Vi-"
+"compatible command prompt, a standalone Build & Run tool window, lifecycle "
+"guards, and an original Vellum application icon."
+msgstr ""
+
+#: data/io.github.vellum.Vellum.metainfo.xml:58
+msgid ""
+"Replace document saving with a standard GIO asynchronous replace operation "
+"so file-system writes no longer block the editor interface."
+msgstr ""
+
+#: data/io.github.vellum.Vellum.metainfo.xml:59
+msgid ""
+"Add save-in-progress protection and visible save status, including a "
+"regression test for the actual window save action."
+msgstr ""
+
+#: data/io.github.vellum.Vellum.metainfo.xml:64
+msgid ""
+"Add an independent visual code-theme chooser with live GtkSourceView C "
+"syntax previews and persistent selection."
+msgstr ""
+
+#: data/io.github.vellum.Vellum.metainfo.xml:65
+msgid ""
+"Escape extension metadata before rendering it as Adwaita markup, fixing "
+"Build & Run settings warnings; make extension controls compact icon actions "
+"with tooltips."
+msgstr ""
+
+#: data/io.github.vellum.Vellum.metainfo.xml:70
+msgid ""
+"Add validated .vut ZIP extension packages and ship all built-in extensions "
+"as auditable source packages that can be rebuilt for the local Linux "
+"architecture."
+msgstr ""
+
+#: data/io.github.vellum.Vellum.metainfo.xml:71
+msgid ""
+"Add persistent extension enable switches, Project Sidebar, Build & Run, "
+"Markdown Preview, Vim Mode, an overview map, editor display and indentation "
+"preferences, and a keyboard shortcut reference."
+msgstr ""
+
+#: data/io.github.vellum.Vellum.metainfo.xml:76
+msgid ""
+"Add configurable real-tab display widths, live content-aware language "
+"recognition, and heuristic red error underlines for unbalanced brackets and "
+"quotes."
+msgstr ""
+
+#: data/io.github.vellum.Vellum.metainfo.xml:77
+msgid ""
+"Add the manual Test Links extension, make saved OpenAI-compatible /v1 "
+"addresses work for AI Completion, and ship the project under BSD-2-Clause "
+"after a source and asset audit."
+msgstr ""
+
+#: data/io.github.vellum.Vellum.metainfo.xml:82
+msgid ""
+"Rework the dark editor surface around Libadwaita and GtkSourceView Adwaita-"
+"dark, add extension import/export/removal/configuration, and add a user-"
+"configured AI completion extension."
+msgstr ""
+
+#: data/io.github.vellum.Vellum.metainfo.xml:87
+msgid ""
+"Add explicit English and Simplified Chinese language packs, custom editor "
+"fonts, enhanced dark source themes, content-aware language recognition, and "
+"extension management."
 msgstr ""
