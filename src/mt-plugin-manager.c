@@ -72,17 +72,19 @@ struct _MtPluginManager
 };
 
 /* 内置扩展引导下载：包内不再自带扩展，首次启动从 GitHub Releases 拉取
- * 二进制到用户插件目录（用户管理 → 删除即真删除文件）。 */
+ * 二进制或源码到用户插件目录（用户管理 → 删除即真删除文件）。
+ * 源码模式下载 .vut 并本机编译，与扩展市场源码安装同一链路。 */
 struct _MtPluginBootstrap
 {
     MtPluginManager *manager;
     SoupSession *session;
-    GPtrArray *names;      /* 待下载的文件名（含 .so 后缀） */
+    GPtrArray *names;      /* 待下载的文件名（含 .so 或 .vut 后缀） */
     guint index;
     const gchar *current;  /* 正在下载的文件名（借用 names 的引用） */
     gchar *directory;      /* 用户插件目录 */
     guint downloaded;
     gboolean cancelled;
+    gboolean prefer_source;
 };
 
 typedef struct
@@ -102,6 +104,75 @@ static const MtPluginBootstrapEntry mt_plugin_bootstrap_entries[] = {
     { "screenshot-plugin",      "io.github.vellum.screenshot" },
     { "welcome-plugin",         "io.github.vellum.welcome" }
 };
+
+#include <sys/utsname.h>
+
+static gboolean
+mt_bootstrap_is_x64(void)
+{
+    struct utsname info;
+
+    if (uname(&info) != 0)
+        return FALSE;
+    return g_strcmp0(info.machine, "x86_64") == 0 ||
+           g_strcmp0(info.machine, "amd64") == 0;
+}
+
+static gboolean
+mt_bootstrap_should_prefer_source(void)
+{
+    GKeyFile *key_file;
+    gchar *path;
+    gboolean prefer_source;
+
+    /* 非 x64 强制源码 */
+    if (!mt_bootstrap_is_x64())
+        return TRUE;
+
+    path = g_build_filename(g_get_user_config_dir(), "vellum", "install-pref.ini", NULL);
+    key_file = g_key_file_new();
+    prefer_source = FALSE;
+    if (g_key_file_load_from_file(key_file, path, G_KEY_FILE_NONE, NULL))
+    {
+        GError *error;
+
+        error = NULL;
+        prefer_source = g_key_file_get_boolean(key_file, "Install", "prefer-source", &error);
+        if (error != NULL)
+        {
+            prefer_source = FALSE;
+            g_clear_error(&error);
+        }
+    }
+    g_key_file_unref(key_file);
+    g_free(path);
+    return prefer_source;
+}
+
+static const gchar *
+mt_bootstrap_source_asset_for(const gchar *file)
+{
+    /* 映射 binary file -> source vut 名（与 collect 脚本一致） */
+    if (g_strcmp0(file, "timestamp-plugin") == 0)
+        return "timestamp-linux-source.vut";
+    if (g_strcmp0(file, "word-count-plugin") == 0)
+        return "document-statistics-linux-source.vut";
+    if (g_strcmp0(file, "ai-completion-plugin") == 0)
+        return "ai-completion-linux-source.vut";
+    if (g_strcmp0(file, "link-check-plugin") == 0)
+        return "link-check-linux-source.vut";
+    if (g_strcmp0(file, "project-sidebar-plugin") == 0)
+        return "project-sidebar-linux-source.vut";
+    if (g_strcmp0(file, "build-run-plugin") == 0)
+        return "build-run-linux-source.vut";
+    if (g_strcmp0(file, "vim-mode-plugin") == 0)
+        return "vim-mode-linux-source.vut";
+    if (g_strcmp0(file, "screenshot-plugin") == 0)
+        return "screenshot-linux-source.vut";
+    if (g_strcmp0(file, "welcome-plugin") == 0)
+        return "welcome-linux-source.vut";
+    return NULL;
+}
 
 static void mt_plugin_manager_request_plugin_removal(MtPluginHost *host,
                                                      const gchar *plugin_id);
@@ -1033,28 +1104,82 @@ mt_plugin_manager_bootstrap_response(GObject *source,
     MtPluginBootstrap *bootstrap;
     GBytes *bytes;
     GError *error;
-    gchar *path;
 
     bootstrap = user_data;
     error = NULL;
     bytes = soup_session_send_and_read_finish(SOUP_SESSION(source), result, &error);
     if (!bootstrap->cancelled && bytes != NULL && error == NULL)
     {
-        path = g_build_filename(bootstrap->directory, bootstrap->current, NULL);
-        if (g_file_set_contents(path,
-                                g_bytes_get_data(bytes, NULL),
-                                g_bytes_get_size(bytes),
-                                &error))
+        if (bootstrap->prefer_source)
         {
-            g_chmod(path, 0600);
-            bootstrap->downloaded++;
+            gchar *tmp_path;
+            gint fd;
+            GError *tmp_error;
+
+            tmp_error = NULL;
+            fd = g_file_open_tmp("vellum-bootstrap-XXXXXX.vut", &tmp_path, &tmp_error);
+            if (fd >= 0)
+            {
+                close(fd);
+                if (g_file_set_contents(tmp_path,
+                                        g_bytes_get_data(bytes, NULL),
+                                        g_bytes_get_size(bytes),
+                                        &tmp_error))
+                {
+                    GFile *file;
+                    GError *import_error;
+
+                    file = g_file_new_for_path(tmp_path);
+                    import_error = NULL;
+                    if (mt_plugin_manager_import(bootstrap->manager, file, &import_error))
+                    {
+                        bootstrap->downloaded++;
+                    }
+                    else
+                    {
+                        g_message("Unable to import source extension '%s': %s",
+                                  bootstrap->current,
+                                  import_error != NULL ? import_error->message : "unknown error");
+                        g_clear_error(&import_error);
+                    }
+                    g_object_unref(file);
+                }
+                else
+                {
+                    g_message("Unable to save source extension '%s': %s",
+                              bootstrap->current, tmp_error->message);
+                }
+                g_remove(tmp_path);
+                g_free(tmp_path);
+                g_clear_error(&tmp_error);
+            }
+            else
+            {
+                g_message("Unable to create temp file for '%s': %s",
+                          bootstrap->current, tmp_error->message);
+                g_clear_error(&tmp_error);
+            }
         }
         else
         {
-            g_message("Unable to save extension '%s': %s",
-                      bootstrap->current, error->message);
+            gchar *path;
+
+            path = g_build_filename(bootstrap->directory, bootstrap->current, NULL);
+            if (g_file_set_contents(path,
+                                    g_bytes_get_data(bytes, NULL),
+                                    g_bytes_get_size(bytes),
+                                    &error))
+            {
+                g_chmod(path, 0600);
+                bootstrap->downloaded++;
+            }
+            else
+            {
+                g_message("Unable to save extension '%s': %s",
+                          bootstrap->current, error->message);
+            }
+            g_free(path);
         }
-        g_free(path);
     }
     else if (!bootstrap->cancelled)
     {
@@ -1129,6 +1254,7 @@ mt_plugin_manager_bootstrap_start(MtPluginManager *manager)
     bootstrap->names = g_ptr_array_new_with_free_func(g_free);
     bootstrap->directory = g_build_filename(g_get_user_data_dir(),
                                             "vellum", "plugins", NULL);
+    bootstrap->prefer_source = mt_bootstrap_should_prefer_source();
 
     for (index = 0; index < G_N_ELEMENTS(mt_plugin_bootstrap_entries); index++)
     {
@@ -1151,8 +1277,22 @@ mt_plugin_manager_bootstrap_start(MtPluginManager *manager)
             continue;
         }
         g_free(path);
-        g_ptr_array_add(bootstrap->names,
-                        g_strdup_printf("%s." G_MODULE_SUFFIX, entry->file));
+        if (bootstrap->prefer_source)
+        {
+            const gchar *source_asset;
+
+            source_asset = mt_bootstrap_source_asset_for(entry->file);
+            if (source_asset != NULL)
+                g_ptr_array_add(bootstrap->names, g_strdup(source_asset));
+            else
+                g_ptr_array_add(bootstrap->names,
+                                g_strdup_printf("%s." G_MODULE_SUFFIX, entry->file));
+        }
+        else
+        {
+            g_ptr_array_add(bootstrap->names,
+                            g_strdup_printf("%s." G_MODULE_SUFFIX, entry->file));
+        }
     }
 
     if (bootstrap->names->len == 0)
