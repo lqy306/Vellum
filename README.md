@@ -27,9 +27,9 @@
 | 体验 | GNOME/Adwaita 标题栏、浅色/深色/跟随系统、状态提示 | 遵循 Libadwaita 原生表面；深色编辑区完全使用 GtkSourceView 官方 `Adwaita-dark` 方案，不以自定义紫黑 CSS 覆盖 token 色 |
 | 代码主题 | 可视化主题卡片、实时 C 语法预览、持久化选择 | “首选项 → 代码主题 → 选择”以两列卡片列出系统已安装的 GtkSourceView 方案；点击即应用，Vellum 不复制第三方主题资源 |
 | 国际化 | English 与简体中文 | 独立 `en.po` 与 `zh_CN.po` 语言包；语言偏好下次启动生效 |
-| 插件 | 基于 `GModule` 的动态扩展、持久化启停与删除、导入/导出、配置与版本协商 | 所有内置扩展以源码 `.vut` 包分发；附带时间戳、统计、AI 补全（含自动代码摘要）、链接测试、项目侧边栏、构建运行、Vi Mode 与新手引导。首选项可关闭全部扩展，重启后只运行核心编辑器。 |
-| AI 补全 | 用户自填 OpenAI 兼容服务 URL、模型与 API 密钥；手动请求或输入停顿后自动请求 | 自动把裸主机地址归一化为 `/chat/completions`，也接受完整 URL 或 `/v1` 基础地址；请求同时携带光标前（前缀）与光标后（后缀）上下文；结果以约 50% 透明内联候选显示，`Tab` 接受、`Escape` 取消，候选不写入文件。对支持该字段的服务会请求非思考模式以降低内联延迟。 |
-| AI 代码总结 | 按文件类型独立开关（源码/脚本/Web/结构化数据），达到可配置累计修改行数后自动发送摘要供补全上下文复用 | 摘要仅保存在内存中，不写入磁盘；每轮新文档独立计算基线；低于 30 行触发间隔时在配置界面给出 token 消耗警告。`Ctrl+Alt+S` 可手动生成一次。 |
+| 插件 | 基于 `GModule` 的动态扩展、持久化启停与删除、导入/导出、配置与版本协商 | 内置扩展（时间戳、统计、AI 补全（含自动代码摘要）、链接测试、项目侧边栏、构建运行、Vi Mode 与新手引导）以**二进制与源码两种形态**随 GitHub Release 分发：deb/rpm/AppImage 不再自带，首次启动自动从 Release 拉取；扩展窗口内置**扩展市场**（核心模块不可卸载），支持多个扩展源、浏览目录并安装/卸载（删除即真删除文件）。首选项可关闭全部扩展，重启后只运行核心编辑器。 |
+| AI 补全 | 用户自填 OpenAI 兼容服务 URL、模型与 API 密钥；手动请求或输入停顿后自动请求；按文档类型启用 | 自动把裸主机地址归一化为 `/chat/completions`，也接受完整 URL 或 `/v1` 基础地址；请求同时携带光标前（前缀）与光标后（后缀）上下文，并以 SSE 流式接收；结果以约 50% 透明内联候选显示，随 token 到达渐进更新，`Tab` 接受完整多行补全（自动裁掉与光标后已有文本重叠的部分）、`Escape` 取消，候选不写入文件。设置页顶部为全部大类（代码/Web/配置/文本/其他）的整类开关，分隔线之下是原生 GTK4 三列表格（方形复选框 + 文件类型 + 备注）；未勾选的文档类型不触发补全（自动与快捷键都不生效）。对支持该字段的服务会请求非思考模式以降低内联延迟。 |
+| AI 自动总结 | 开关 + 修改行数间隔（默认 120 行）；编辑达到设定行数后自动总结全文，随后续补全请求一并发送 | 摘要仅保存在内存中，不写入磁盘；每轮新文档独立计算基线；间隔低于 30 行保存时给出 token 消耗警告。`Ctrl+Alt+S` 可手动生成一次（不受开关影响）。 |
 | 链接测试 | 手动提取并检查当前文档中的 HTTP/HTTPS URL | `Ctrl+Shift+L` 最多顺序请求 32 个唯一链接，以小范围 Range GET 汇总可达/失败数量 |
 | 工作流扩展 | 项目侧边栏、独立构建运行窗口与 Vi Mode | 侧边栏只枚举用户选择的目录；构建/运行只执行用户显式配置的直接参数命令并在独立工具窗口显示输出；Vi 模式可随时禁用 |
 
@@ -45,14 +45,15 @@
 ├── po/                      # gettext 翻译文件
 ├── screenshots/             # README 界面截图
 ├── src/
-│   ├── plugins/             # 内置动态插件
 │   ├── mt-application.*     # 应用生命周期、动作与插件加载
 │   ├── mt-window.*          # GNOME 风格主窗口与编辑命令
 │   ├── mt-document.*        # 文档、文件 I/O、快照恢复
-│   ├── mt-plugin.*          # 插件加载器与主机 API
+│   ├── mt-plugin.*          # 插件加载器与主机 API（含 ABI 头 mt-plugin.h）
 │   └── mt-settings.*        # 无 GSettings schema 依赖的用户偏好
 └── meson.build              # 根构建描述
 ```
+
+> 内置扩展源码已分离至独立仓库 [lqy306/Vellum-extensions](https://github.com/lqy306/Vellum-extensions)（`src/plugins/`、`Makefile`、`packaging/`），本仓库仅保留编辑器本体与插件加载框架。
 
 ## 构建依赖
 
@@ -106,7 +107,7 @@ LANGUAGE=zh_CN.UTF-8 ./build/src/vellum
 ~/.local/share/vellum/plugins/
 ```
 
-内置扩展源码包由 `packaging/vut/build-source-packages.sh` 生成至 `dist/vut-source/`。`.vut` 是包含 `vellum-extension.ini`、扩展源码、`mt-plugin.h` 和 Makefile 的 ZIP 包；源码包导入时会校验 OS、插件 API、路径和声明工具，并在私有临时目录使用参数数组启动 `make`/`cc`。Linux 源码包要求 `make`、`cc`、`pkg-config` 与其清单列出的 GTK/GLib 等开发依赖；`architecture=any` 与 `abi=any` 允许在同一 OS 为当前 CPU 重新构建，但不能让 `.so` 跨 Windows、Linux、BSD 或直接跨 ABI 使用。完整字段与安全边界见 `docs/docs_vut_extension_format.md`。
+内置扩展的两种分发形态（9 个 `.so` 二进制、9 个 `.vut` 源码包）与目录文件 `extensions.json` 在**独立的扩展仓库** [lqy306/Vellum-extensions](https://github.com/lqy306/Vellum-extensions) 中由 `packaging/collect-plugin-assets.sh` 收集至 `dist/plugin-assets/` 并发布到 Release——程序与扩展分开维护：编辑器本体（本仓库）发版不再附带扩展，扩展修复/新增在扩展仓库独立发版。首次启动或扩展市场从该仓库按目录拉取；源码包导入后由本机 `make`/`cc` 重建，需要 `make`、`cc`、`pkg-config` 及清单列出的 GTK/GLib 开发包（Debian/Ubuntu 大致为 `sudo apt install make gcc pkg-config libgtk-4-dev libadwaita-1-dev libsoup-3.0-dev libjson-glib-dev`）。扩展市场支持多个扩展源：默认即扩展仓库，可在 `~/.config/vellum/market-sources.ini` 的 `[Sources] urls=`（分号分隔）追加更多源。`.vut` 是包含 `vellum-extension.ini`、扩展源码、`mt-plugin.h` 和 Makefile 的 ZIP 包；源码包导入时会校验 OS、插件 API、路径和声明工具，并在私有临时目录使用参数数组启动 `make`/`cc`。Linux 源码包要求 `make`、`cc`、`pkg-config` 与其清单列出的 GTK/GLib 等开发依赖；`architecture=any` 与 `abi=any` 允许在同一 OS 为当前 CPU 重新构建，但不能让 `.so` 跨 Windows、Linux、BSD 或直接跨 ABI 使用。完整字段与安全边界见 `docs/docs_vut_extension_format.md`（扩展仓库亦有一份）。
 
 主菜单的“扩展”页面会列出模块名称、说明、版本与启用开关。禁用会移除扩展的动作、快捷键和面板，但不删除其文件；启用与删除状态保存于用户配置目录。导出、配置和删除使用带工具提示的紧凑图标操作。任何扩展都可以删除：用户导入模块连同磁盘文件一起删除；内置模块从列表中隐藏并立即卸载，重启后不再加载，且无法从应用内恢复。新手引导插件在导览完成后会请求自我删除；若选择保留，主菜单会显示“新手引导”入口。关闭“启用扩展”总开关并重启后，扩展页会明确显示当前为核心模式且不允许导入或加载模块。模块名称和说明会在写入 Adwaita 偏好行前安全转义，因此 `Build & Run` 等包含 `&` 的名称不会再触发 markup 警告。原生源码扩展不会被沙箱隔离，必须只导入可信来源。
 
@@ -114,7 +115,7 @@ LANGUAGE=zh_CN.UTF-8 ./build/src/vellum
 
 在“扩展”页面选择 **AI Completion → 配置**，输入完整的 OpenAI 兼容 Chat Completions URL、模型名称和 API 密钥。密钥会保存在当前用户配置目录下的 `vellum/ai-completion.ini`，写入后设置为仅当前用户可读写的 `0600` 权限。建议使用 HTTPS；为支持本机兼容服务，界面同时接受 `http://` 地址。
 
-> AI 补全是**手动触发**功能。只有按下 `Ctrl+Shift+Space` 时，光标之前最多 8,000 个字符才会被发送给用户配置的服务。请仅配置自己信任的服务地址，并避免将不应离开本机的敏感内容发送到第三方。
+> AI 补全支持**手动与自动**两种触发：按下 `Ctrl+Shift+Space` 立即请求；或在代码文档中停顿约 350 ms 后自动请求（可在扩展配置中关闭）。请求时光标之前最多 8,000 个字符、光标之后最多 2,000 个字符会被发送给用户配置的服务。请仅配置自己信任的服务地址，并避免将不应离开本机的敏感内容发送到第三方。
 
 ## TUI 调试与图形回归
 

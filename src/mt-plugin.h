@@ -122,6 +122,9 @@ struct _MtPluginHost
                                       const gchar *plugin_id,
                                       gboolean enabled,
                                       GError **error);
+    /* 当前活动文档的 GtkSourceView 语言 ID；非代码文档返回 NULL。
+     * AI 补全等按文档类型启停的扩展依赖它区分具体格式。 */
+    const gchar *(*get_document_language_id)(MtPluginHost *host);
 };
 
 struct _MtPluginInfo

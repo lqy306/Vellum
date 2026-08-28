@@ -39,5 +39,3 @@ vellum_tui_debug_executable = executable(
   dependencies : [gtk_dep, adw_dep, sourceview_dep, spelling_dep, gio_dep, gmodule_dep, soup_dep, json_dep, zlib_dep],
   install : true
 )
-
-subdir('plugins')

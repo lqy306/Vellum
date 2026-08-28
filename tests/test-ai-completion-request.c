@@ -22,7 +22,9 @@ struct _TestHost
     MtPluginKeyCallback key_handler;
     gchar *context;
     gchar *suffix;
+    const gchar *language_id;
     gchar *candidate;
+    gchar *accepted_text;
     gboolean accepted;
     guint toast_count;
 };
@@ -86,6 +88,8 @@ host_insert_text(MtPluginHost *host, const gchar *text)
 
     test = host->private_data;
     test->accepted = text != NULL && *text != '\0';
+    g_free(test->accepted_text);
+    test->accepted_text = g_strdup(text != NULL ? text : "");
 }
 
 static void
@@ -117,6 +121,15 @@ host_clear_inline_completion(MtPluginHost *host)
     g_clear_pointer(&test->candidate, g_free);
 }
 
+static const gchar *
+host_get_document_language_id(MtPluginHost *host)
+{
+    TestHost *test;
+
+    test = host->private_data;
+    return test->language_id;
+}
+
 static gboolean
 host_add_key_handler(MtPluginHost *host,
                      MtPluginKeyCallback handler,
@@ -139,16 +152,24 @@ server_handler(SoupServer *server,
                GHashTable *query,
                gpointer user_data)
 {
-    const gchar *body;
+    /* 模拟 OpenAI 兼容服务的 SSE 流式响应：补全分多个 data 事件到达。 */
+    static const gchar *body =
+        "data: {\"choices\":[{\"delta\":{\"content\":\" \"}}]}\n"
+        "\n"
+        "data: {\"choices\":[{\"delta\":{\"content\":\"completion\"}}]}\n"
+        "\n"
+        "data: {\"choices\":[{\"delta\":{\"content\":\"\\n// next line\"}}]}\n"
+        "\n"
+        "data: [DONE]\n"
+        "\n";
 
     (void)server;
     (void)path;
     (void)query;
     (void)user_data;
-    body = "{\"choices\":[{\"message\":{\"content\":\" completion\"}}]}";
     soup_server_message_set_status(message, SOUP_STATUS_OK, NULL);
     soup_server_message_set_response(message,
-                                     "application/json",
+                                     "text/event-stream",
                                      SOUP_MEMORY_STATIC,
                                      body,
                                      strlen(body));
@@ -208,10 +229,24 @@ start_server(SoupServer **server_out)
     return uri;
 }
 
+static void write_ai_config_disabled(const gchar *endpoint,
+                                     const gchar *model,
+                                     const gchar *api_key,
+                                     const gchar *disabled_languages);
+
 static void
 write_ai_config(const gchar *endpoint,
                 const gchar *model,
                 const gchar *api_key)
+{
+    write_ai_config_disabled(endpoint, model, api_key, NULL);
+}
+
+static void
+write_ai_config_disabled(const gchar *endpoint,
+                         const gchar *model,
+                         const gchar *api_key,
+                         const gchar *disabled_languages)
 {
     gchar *directory;
     gchar *path;
@@ -220,10 +255,12 @@ write_ai_config(const gchar *endpoint,
     directory = g_build_filename(g_get_user_config_dir(), "vellum", NULL);
     g_mkdir_with_parents(directory, 0700);
     path = g_build_filename(directory, "ai-completion.ini", NULL);
-    contents = g_strdup_printf("[AI Completion]\nendpoint=%s\nmodel=%s\napi-key=%s\n",
+    contents = g_strdup_printf("[AI Completion]\nendpoint=%s\nmodel=%s\napi-key=%s\n"
+                               "disabled-languages=%s\n",
                                endpoint,
                                model,
-                               api_key);
+                               api_key,
+                               disabled_languages != NULL ? disabled_languages : "");
     g_assert_true(g_file_set_contents(path, contents, -1, NULL));
     g_chmod(path, 0600);
     g_free(contents);
@@ -284,6 +321,7 @@ main(void)
     memset(&test, 0, sizeof(test));
     test.context = g_strdup("int main");
     test.suffix = g_strdup("{");
+    test.language_id = "c";
     test.host.api_version = MT_PLUGIN_API_VERSION;
     test.host.private_data = &test;
     test.host.add_action = host_add_action;
@@ -295,6 +333,7 @@ main(void)
     test.host.show_inline_completion = host_show_inline_completion;
     test.host.clear_inline_completion = host_clear_inline_completion;
     test.host.add_key_handler = host_add_key_handler;
+    test.host.get_document_language_id = host_get_document_language_id;
 
     module = g_module_open(g_getenv("VELLUM_AI_TEST_PLUGIN"), G_MODULE_BIND_LAZY);
     if (module == NULL)
@@ -327,17 +366,40 @@ main(void)
     }
     else
     {
+        /* 预览只显示首行，接受必须插入完整的多行补全（对齐真实插件）。 */
         g_assert_cmpstr(test.candidate, ==, " completion");
+        g_assert_cmpstr(test.accepted_text, ==, NULL);
     }
     g_assert_nonnull(test.key_handler);
     g_assert_true(test.key_handler(&test.host, GDK_KEY_Tab, 0, 0, NULL));
     g_assert_true(test.accepted);
+    if (!live_service)
+    {
+        g_assert_cmpstr(test.accepted_text, ==, " completion\n// next line");
+    }
 
     if (!live_service)
     {
+        /* 阶段二：在设置里禁用当前文档类型（c）后，手动请求被拦截。 */
+        guint toasts_before;
+
+        g_clear_pointer(&test.candidate, g_free);
+        g_clear_pointer(&test.accepted_text, g_free);
+        test.accepted = FALSE;
+        deactivate(&test.host);
+        write_ai_config_disabled(endpoint, "test-model", "test-key", "c");
+        error = NULL;
+        g_assert_true(activate(&test.host, &error));
+        g_assert_no_error(error);
+        toasts_before = test.toast_count;
         test.completion_action(NULL, NULL, test.completion_action_data);
+        run_for(400);
+        g_assert_null(test.candidate);
+        g_assert_false(test.accepted);
+        g_assert_cmpuint(test.toast_count, >, toasts_before);
+        deactivate(&test.host);
     }
-    if (deactivate != NULL)
+    else if (deactivate != NULL)
     {
         deactivate(&test.host);
     }
@@ -353,6 +415,7 @@ main(void)
     g_free(test.context);
     g_free(test.suffix);
     g_free(test.candidate);
+    g_free(test.accepted_text);
     g_remove(g_build_filename(config_home, "vellum", "ai-completion.ini", NULL));
     g_rmdir(g_build_filename(config_home, "vellum", NULL));
     g_rmdir(config_home);

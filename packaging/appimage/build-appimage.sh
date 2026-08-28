@@ -34,6 +34,8 @@ fi
 
 mkdir -p "$APPDIR/usr"
 cp -a "$STAGED_PREFIX/." "$APPDIR/usr/"
+# 包内不自带扩展：扩展从 GitHub Release 拉取，剔除随 install 装入的插件
+rm -rf "$APPDIR"/usr/lib/*/vellum/plugins "$APPDIR"/usr/lib/vellum/plugins 2>/dev/null || true
 cp "$PROJECT_ROOT/data/io.github.vellum.Vellum.desktop" "$APPDIR/"
 cp "$PROJECT_ROOT/data/io.github.vellum.Vellum.svg" "$APPDIR/"
 cp "$PROJECT_ROOT/data/icons/hicolor/scalable/apps/io.github.vellum.Vellum.svg" \

@@ -5,6 +5,7 @@
  */
 
 #include "mt-window-private.h"
+#include "mt-plugin-manager.h"
 
 #include <adwaita.h>
 #include <json-glib/json-glib.h>
@@ -241,6 +242,32 @@ mt_tui_save_to_path(MtTuiSession *session, const gchar *path)
     return TRUE;
 }
 
+static void
+mt_tui_market_refresh_done(GObject *source, GAsyncResult *result, gpointer user_data)
+{
+    MtTuiSession *session;
+    MtPluginManager *manager;
+    GPtrArray *market;
+    GError *error;
+
+    (void)source;
+    session = user_data;
+    manager = session->window->plugin_manager;
+    error = NULL;
+    if (manager != NULL && mt_plugin_manager_marketplace_refresh_finish(manager, result, &error))
+    {
+        market = mt_plugin_manager_get_marketplace(manager);
+        mt_tui_emit_result(TRUE, "market-refresh",
+                           g_strdup_printf("%u entries", market != NULL ? market->len : 0));
+    }
+    else
+    {
+        mt_tui_emit_result(FALSE, "market-refresh",
+                           error != NULL ? error->message : "(no error)");
+        g_clear_error(&error);
+    }
+}
+
 static gboolean
 mt_tui_run_action(MtTuiSession *session, const gchar *action)
 {
@@ -272,6 +299,17 @@ mt_tui_run_action(MtTuiSession *session, const gchar *action)
     {
         return mt_window_run_editor_command(session->window, MT_PLUGIN_EDITOR_FORCE_CLOSE);
     }
+    else if (g_strcmp0(action, "market-refresh") == 0)
+    {
+        if (session->window->plugin_manager == NULL)
+        {
+            return FALSE;
+        }
+        mt_plugin_manager_marketplace_refresh_async(session->window->plugin_manager,
+                                                    NULL,
+                                                    mt_tui_market_refresh_done,
+                                                    session);
+    }
     else
     {
         return FALSE;
@@ -295,7 +333,7 @@ mt_tui_handle_line(MtTuiSession *session, gchar *line)
     {
         mt_tui_emit_result(TRUE,
                            "help",
-                           "STATE | NEW | TEXT <C-escaped text> | INSERT <C-escaped text> | OPEN <absolute path> | SAVE <absolute path> | ACTION <new|find|replace|zoom-in|zoom-out|zoom-reset|force-close> | WAIT <milliseconds> | QUIT");
+                           "STATE | NEW | TEXT <C-escaped text> | INSERT <C-escaped text> | OPEN <absolute path> | SAVE <absolute path> | ACTION <new|find|replace|zoom-in|zoom-out|zoom-reset|force-close|market-refresh> | WAIT <milliseconds> | QUIT");
         return TRUE;
     }
     if (g_strcmp0(line, "STATE") == 0)

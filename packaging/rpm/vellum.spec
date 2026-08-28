@@ -49,7 +49,6 @@ meson install -C build --destdir %{buildroot}
 %files
 %{_bindir}/vellum
 %{_bindir}/vellum-tui-debug
-%{_libdir}/vellum/plugins/*.so
 %{_datadir}/applications/io.github.vellum.Vellum.desktop
 %{_datadir}/metainfo/io.github.vellum.Vellum.metainfo.xml
 %{_datadir}/icons/hicolor/scalable/apps/io.github.vellum.Vellum.svg

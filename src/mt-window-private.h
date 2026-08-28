@@ -40,6 +40,7 @@ struct _MtWindow
     GdkDisplay *display;
     MtSettings *settings;
     gpointer plugin_manager;
+    GtkWidget *extensions_window;
     GtkToggleButton *properties_button;
     gpointer properties;
     guint properties_source_id;

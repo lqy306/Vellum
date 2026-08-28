@@ -25,8 +25,41 @@ typedef struct _MtPreferenceSwitch
     GDestroyNotify destroy_notify;
 } MtPreferenceSwitch;
 
+/* 扩展市场条目：来自某个扩展源（目录）的插件。base 为该源资产下载地址。 */
+typedef struct _MtMarketplaceEntry
+{
+    gchar *id;
+    gchar *name;
+    gchar *description;
+    gchar *version;
+    gchar *binary;   /* 二进制资产名（相对 base），可为 NULL */
+    gchar *source;   /* 源码包资产名（相对 base），可为 NULL */
+    gchar *base;     /* 所属源的资产下载地址 */
+} MtMarketplaceEntry;
+
 MtPluginManager *mt_plugin_manager_new(MtApplication *application);
 void mt_plugin_manager_free(MtPluginManager *manager);
+/* —— 扩展市场：核心内置、不可卸载；支持多个扩展源（类似 apt 多源）。 —— */
+GPtrArray *mt_plugin_manager_get_marketplace(MtPluginManager *manager);
+void mt_plugin_manager_marketplace_refresh_async(MtPluginManager *manager,
+                                                 GCancellable *cancellable,
+                                                 GAsyncReadyCallback callback,
+                                                 gpointer user_data);
+gboolean mt_plugin_manager_marketplace_refresh_finish(MtPluginManager *manager,
+                                                      GAsyncResult *result,
+                                                      GError **error);
+void mt_plugin_manager_marketplace_install_async(MtPluginManager *manager,
+                                                 MtMarketplaceEntry *entry,
+                                                 gboolean prefer_source,
+                                                 GCancellable *cancellable,
+                                                 GAsyncReadyCallback callback,
+                                                 gpointer user_data);
+gboolean mt_plugin_manager_marketplace_install_finish(MtPluginManager *manager,
+                                                      GAsyncResult *result,
+                                                      GError **error);
+gboolean mt_plugin_manager_marketplace_uninstall(MtPluginManager *manager,
+                                                 MtMarketplaceEntry *entry,
+                                                 GError **error);
 guint mt_plugin_manager_get_count(MtPluginManager *manager);
 const MtPluginInfo *mt_plugin_manager_get_info(MtPluginManager *manager, guint index);
 const gchar *mt_plugin_manager_get_path(MtPluginManager *manager, guint index);

@@ -5761,6 +5761,143 @@ mt_window_extension_enabled_state_set(GtkSwitch *toggle,
     return TRUE;
 }
 
+/* —— 扩展市场：核心内置模块，浏览多个扩展源并安装/卸载 —— */
+
+static void
+mt_window_reopen_extensions(MtWindow *window)
+{
+    if (window->extensions_window != NULL && GTK_IS_WIDGET(window->extensions_window))
+    {
+        gtk_window_destroy(GTK_WINDOW(window->extensions_window));
+        window->extensions_window = NULL;
+    }
+    mt_window_action_extensions(NULL, NULL, window);
+}
+
+static void
+mt_window_market_refresh_ready(GObject *source, GAsyncResult *result, gpointer user_data)
+{
+    MtWindow *window;
+    MtPluginManager *manager;
+    GError *error;
+
+    (void)source;
+    window = user_data;
+    manager = window->plugin_manager;
+    error = NULL;
+    if (mt_plugin_manager_marketplace_refresh_finish(manager, result, &error))
+    {
+        mt_window_show_toast(window, _("Extension catalog refreshed"));
+    }
+    else
+    {
+        gchar *message;
+
+        message = g_strdup_printf(_("Unable to refresh extension catalog: %s"),
+                                  error != NULL ? error->message : _("Unknown error"));
+        mt_window_show_toast(window, message);
+        g_free(message);
+        g_clear_error(&error);
+    }
+    mt_window_reopen_extensions(window);
+}
+
+static void
+mt_window_market_refresh_clicked(GtkButton *button, gpointer user_data)
+{
+    MtWindow *window;
+    MtPluginManager *manager;
+
+    (void)button;
+    window = user_data;
+    manager = window->plugin_manager;
+    mt_plugin_manager_marketplace_refresh_async(manager, NULL,
+                                                mt_window_market_refresh_ready,
+                                                window);
+}
+
+static void
+mt_window_market_install_ready(GObject *source, GAsyncResult *result, gpointer user_data)
+{
+    MtWindow *window;
+    MtPluginManager *manager;
+    GError *error;
+
+    (void)source;
+    window = user_data;
+    manager = window->plugin_manager;
+    error = NULL;
+    if (mt_plugin_manager_marketplace_install_finish(manager, result, &error))
+    {
+        mt_window_show_toast(window, _("Extension installed from the marketplace"));
+    }
+    else
+    {
+        gchar *message;
+
+        message = g_strdup_printf(_("Unable to install extension: %s"),
+                                  error != NULL ? error->message : _("Unknown error"));
+        mt_window_show_toast(window, message);
+        g_free(message);
+        g_clear_error(&error);
+    }
+    mt_window_reopen_extensions(window);
+}
+
+static void
+mt_window_market_install_clicked(GtkButton *button, gpointer user_data)
+{
+    MtWindow *window;
+    MtPluginManager *manager;
+    MtMarketplaceEntry *entry;
+    gboolean prefer_source;
+
+    window = user_data;
+    manager = window->plugin_manager;
+    entry = g_object_get_data(G_OBJECT(button), "vellum-market-entry");
+    if (entry == NULL)
+    {
+        return;
+    }
+    prefer_source = g_object_get_data(G_OBJECT(button), "vellum-market-source") != NULL;
+    mt_plugin_manager_marketplace_install_async(manager, entry, prefer_source, NULL,
+                                                mt_window_market_install_ready,
+                                                window);
+}
+
+static void
+mt_window_market_uninstall_clicked(GtkButton *button, gpointer user_data)
+{
+    MtWindow *window;
+    MtPluginManager *manager;
+    MtMarketplaceEntry *entry;
+    GError *error;
+
+    window = user_data;
+    manager = window->plugin_manager;
+    entry = g_object_get_data(G_OBJECT(button), "vellum-market-entry");
+    if (entry == NULL)
+    {
+        return;
+    }
+    error = NULL;
+    if (mt_plugin_manager_marketplace_uninstall(manager, entry, &error))
+    {
+        mt_window_show_toast(window, _("Extension uninstalled"));
+    }
+    else
+    {
+        gchar *message;
+
+        message = g_strdup_printf(_("Unable to uninstall extension: %s"),
+                                  error != NULL ? error->message : _("Unknown error"));
+        mt_window_show_toast(window, message);
+        g_free(message);
+        g_clear_error(&error);
+    }
+    mt_window_reopen_extensions(window);
+}
+
 void
 mt_window_action_extensions(GSimpleAction *action, GVariant *parameter, gpointer user_data)
 {
@@ -5778,7 +5915,13 @@ mt_window_action_extensions(GSimpleAction *action, GVariant *parameter, gpointer
 
     window = user_data;
     manager = window->plugin_manager;
+    if (window->extensions_window != NULL && GTK_IS_WIDGET(window->extensions_window))
+    {
+        gtk_window_destroy(GTK_WINDOW(window->extensions_window));
+        window->extensions_window = NULL;
+    }
     extensions_window = ADW_PREFERENCES_WINDOW(adw_preferences_window_new());
+    window->extensions_window = GTK_WIDGET(extensions_window);
     gtk_window_set_transient_for(GTK_WINDOW(extensions_window), GTK_WINDOW(window->window));
     gtk_window_set_modal(GTK_WINDOW(extensions_window), TRUE);
     gtk_window_set_title(GTK_WINDOW(extensions_window), _("Extensions"));
@@ -5907,6 +6050,106 @@ mt_window_action_extensions(GSimpleAction *action, GVariant *parameter, gpointer
     }
 
     adw_preferences_page_add(page, group);
+
+    {
+        /* 扩展市场：核心内置模块，不可卸载；列出多个扩展源的目录。 */
+        AdwPreferencesGroup *market_group;
+        GPtrArray *marketplace;
+        GtkWidget *refresh_button;
+        guint market_index;
+
+        market_group = ADW_PREFERENCES_GROUP(adw_preferences_group_new());
+        adw_preferences_group_set_title(market_group, _("Extension Marketplace"));
+        adw_preferences_group_set_description(market_group,
+                                              _("Browse extensions from the configured sources (GitHub release by default). Binary and source packages are both offered; source packages need make, cc, pkg-config and the GTK/GLib development packages listed in the package."));
+        refresh_button = gtk_button_new_with_label(_("Refresh"));
+        gtk_widget_set_valign(refresh_button, GTK_ALIGN_CENTER);
+        adw_preferences_group_set_header_suffix(market_group, refresh_button);
+        g_signal_connect(refresh_button,
+                         "clicked",
+                         G_CALLBACK(mt_window_market_refresh_clicked),
+                         window);
+
+        marketplace = mt_plugin_manager_get_marketplace(manager);
+        if (marketplace == NULL || marketplace->len == 0)
+        {
+            AdwActionRow *row;
+
+            row = ADW_ACTION_ROW(adw_action_row_new());
+            adw_preferences_row_set_title(ADW_PREFERENCES_ROW(row),
+                                          _("Extension catalog not loaded yet"));
+            adw_action_row_set_subtitle(ADW_ACTION_ROW(row),
+                                        _("Press Refresh to download the extension catalog from the configured sources."));
+            adw_preferences_group_add(market_group, GTK_WIDGET(row));
+        }
+        for (market_index = 0;
+             marketplace != NULL && market_index < marketplace->len;
+             market_index++)
+        {
+            MtMarketplaceEntry *entry;
+            AdwActionRow *row;
+            GtkWidget *button;
+            GtkWidget *source_button;
+            GtkWidget *action_box;
+            gchar *subtitle;
+            gboolean installed;
+
+            entry = g_ptr_array_index(marketplace, market_index);
+            installed = mt_plugin_manager_has_plugin(manager, entry->id);
+            row = ADW_ACTION_ROW(adw_action_row_new());
+            mt_window_set_plain_row_title(ADW_PREFERENCES_ROW(row),
+                                          entry->name != NULL ? entry->name : entry->id);
+            subtitle = g_strdup_printf("%s · %s%s",
+                                       entry->description != NULL ? entry->description : "",
+                                       entry->version != NULL ? entry->version : "",
+                                       (entry->source != NULL && *entry->source != '\0') ?
+                                       _(" · source available") : "");
+            mt_window_set_plain_action_subtitle(row, subtitle);
+            g_free(subtitle);
+
+            action_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 4);
+            gtk_widget_set_valign(action_box, GTK_ALIGN_CENTER);
+            button = gtk_button_new_with_label(installed ? _("Uninstall") : _("Install"));
+            gtk_widget_set_valign(button, GTK_ALIGN_CENTER);
+            gtk_widget_add_css_class(button, installed ? "destructive-action" : "suggested-action");
+            g_object_set_data(G_OBJECT(button), "vellum-market-entry", entry);
+            if (installed)
+            {
+                g_signal_connect(button,
+                                 "clicked",
+                                 G_CALLBACK(mt_window_market_uninstall_clicked),
+                                 window);
+            }
+            else
+            {
+                g_signal_connect(button,
+                                 "clicked",
+                                 G_CALLBACK(mt_window_market_install_clicked),
+                                 window);
+            }
+            gtk_box_append(GTK_BOX(action_box), button);
+
+            if (!installed && entry->source != NULL && *entry->source != '\0')
+            {
+                source_button = gtk_button_new_with_label(_("Source"));
+                gtk_widget_set_valign(source_button, GTK_ALIGN_CENTER);
+                gtk_widget_set_tooltip_text(source_button,
+                                            _("Install from source (requires make, cc, pkg-config and the listed development packages)"));
+                g_object_set_data(G_OBJECT(source_button), "vellum-market-entry", entry);
+                g_object_set_data(G_OBJECT(source_button), "vellum-market-source", GINT_TO_POINTER(1));
+                g_signal_connect(source_button,
+                                 "clicked",
+                                 G_CALLBACK(mt_window_market_install_clicked),
+                                 window);
+                gtk_box_append(GTK_BOX(action_box), source_button);
+            }
+
+            adw_action_row_add_suffix(row, action_box);
+            adw_preferences_group_add(market_group, GTK_WIDGET(row));
+        }
+        adw_preferences_page_add(page, market_group);
+    }
+
     adw_preferences_window_add(extensions_window, page);
     gtk_window_present(GTK_WINDOW(extensions_window));
 }

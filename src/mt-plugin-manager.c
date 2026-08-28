@@ -8,6 +8,8 @@
 
 #include <gmodule.h>
 #include <glib/gstdio.h>
+#include <json-glib/json-glib.h>
+#include <libsoup/soup.h>
 
 #ifndef VELLUM_PLUGIN_DIR
 #define VELLUM_PLUGIN_DIR "/usr/lib/vellum/plugins"
@@ -53,6 +55,8 @@ struct _MtLoadedPlugin
     GPtrArray *document_change_handlers;
 };
 
+typedef struct _MtPluginBootstrap MtPluginBootstrap;
+
 struct _MtPluginManager
 {
     MtApplication *application;
@@ -62,6 +66,41 @@ struct _MtPluginManager
     GHashTable *removed_ids;
     MtLoadedPlugin *loading_plugin;
     GPtrArray *preference_switches;
+    MtPluginBootstrap *bootstrap;
+    gboolean bootstrap_needed;
+    GPtrArray *marketplace;   /* MtMarketplaceEntry*，NULL = 尚未拉取目录 */
+};
+
+/* 内置扩展引导下载：包内不再自带扩展，首次启动从 GitHub Releases 拉取
+ * 二进制到用户插件目录（用户管理 → 删除即真删除文件）。 */
+struct _MtPluginBootstrap
+{
+    MtPluginManager *manager;
+    SoupSession *session;
+    GPtrArray *names;      /* 待下载的文件名（含 .so 后缀） */
+    guint index;
+    const gchar *current;  /* 正在下载的文件名（借用 names 的引用） */
+    gchar *directory;      /* 用户插件目录 */
+    guint downloaded;
+    gboolean cancelled;
+};
+
+typedef struct
+{
+    const gchar *file;     /* 构建产物文件名（不含后缀） */
+    const gchar *id;       /* 插件稳定标识：已删除的插件不再补拉 */
+} MtPluginBootstrapEntry;
+
+static const MtPluginBootstrapEntry mt_plugin_bootstrap_entries[] = {
+    { "timestamp-plugin",       "io.github.vellum.timestamp" },
+    { "word-count-plugin",      "io.github.vellum.document-statistics" },
+    { "ai-completion-plugin",   "io.github.vellum.ai-completion" },
+    { "link-check-plugin",      "io.github.vellum.link-check" },
+    { "project-sidebar-plugin", "io.github.vellum.project-sidebar" },
+    { "build-run-plugin",       "io.github.vellum.build-run" },
+    { "vim-mode-plugin",        "io.github.vellum.vim-mode" },
+    { "screenshot-plugin",      "io.github.vellum.screenshot" },
+    { "welcome-plugin",         "io.github.vellum.welcome" }
 };
 
 static void mt_plugin_manager_request_plugin_removal(MtPluginHost *host,
@@ -402,6 +441,29 @@ mt_plugin_manager_get_is_code_document(MtPluginHost *host)
     document = mt_window_get_current_document(window);
     return document != NULL &&
            gtk_source_buffer_get_language(mt_document_get_buffer(document)) != NULL;
+}
+
+static const gchar *
+mt_plugin_manager_get_document_language_id(MtPluginHost *host)
+{
+    MtPluginManager *manager;
+    MtWindow *window;
+    MtDocument *document;
+    GtkSourceLanguage *language;
+
+    manager = host->private_data;
+    window = mt_application_get_active_window(manager->application);
+    if (window == NULL)
+    {
+        return NULL;
+    }
+    document = mt_window_get_current_document(window);
+    if (document == NULL)
+    {
+        return NULL;
+    }
+    language = gtk_source_buffer_get_language(mt_document_get_buffer(document));
+    return language != NULL ? gtk_source_language_get_id(language) : NULL;
 }
 
 static void
@@ -934,6 +996,692 @@ mt_plugin_manager_resolve_system_directory(void)
     return g_strdup(VELLUM_PLUGIN_DIR);
 }
 
+/* —— 扩展引导下载：首次启动（或缺失时）从 GitHub Releases 拉取内置扩展 —— */
+
+static void
+mt_plugin_manager_bootstrap_finish(MtPluginBootstrap *bootstrap)
+{
+    MtPluginManager *manager;
+
+    manager = bootstrap->manager;
+    if (manager != NULL && manager->bootstrap == bootstrap)
+    {
+        manager->bootstrap = NULL;
+    }
+    if (!bootstrap->cancelled && bootstrap->downloaded > 0)
+    {
+        /* 重新扫描用户目录，加载刚下载的扩展。 */
+        mt_plugin_manager_load_directory(manager, bootstrap->directory, TRUE);
+        g_message("Downloaded %u Vellum extension(s) from GitHub", bootstrap->downloaded);
+    }
+    if (bootstrap->session != NULL)
+    {
+        g_object_unref(bootstrap->session);
+    }
+    g_ptr_array_unref(bootstrap->names);
+    g_free(bootstrap->directory);
+    g_free(bootstrap);
+}
+
+static void mt_plugin_manager_bootstrap_next(MtPluginBootstrap *bootstrap);
+
+static void
+mt_plugin_manager_bootstrap_response(GObject *source,
+                                     GAsyncResult *result,
+                                     gpointer user_data)
+{
+    MtPluginBootstrap *bootstrap;
+    GBytes *bytes;
+    GError *error;
+    gchar *path;
+
+    bootstrap = user_data;
+    error = NULL;
+    bytes = soup_session_send_and_read_finish(SOUP_SESSION(source), result, &error);
+    if (!bootstrap->cancelled && bytes != NULL && error == NULL)
+    {
+        path = g_build_filename(bootstrap->directory, bootstrap->current, NULL);
+        if (g_file_set_contents(path,
+                                g_bytes_get_data(bytes, NULL),
+                                g_bytes_get_size(bytes),
+                                &error))
+        {
+            g_chmod(path, 0600);
+            bootstrap->downloaded++;
+        }
+        else
+        {
+            g_message("Unable to save extension '%s': %s",
+                      bootstrap->current, error->message);
+        }
+        g_free(path);
+    }
+    else if (!bootstrap->cancelled)
+    {
+        g_message("Unable to download extension '%s': %s",
+                  bootstrap->current,
+                  error != NULL ? error->message : "no response");
+    }
+    g_clear_error(&error);
+    if (bytes != NULL)
+    {
+        g_bytes_unref(bytes);
+    }
+    mt_plugin_manager_bootstrap_next(bootstrap);
+}
+
+static void
+mt_plugin_manager_bootstrap_next(MtPluginBootstrap *bootstrap)
+{
+    const gchar *base_url;
+    gchar *url;
+    SoupMessage *message;
+
+    if (bootstrap->cancelled || bootstrap->index >= bootstrap->names->len)
+    {
+        mt_plugin_manager_bootstrap_finish(bootstrap);
+        return;
+    }
+
+    bootstrap->current = g_ptr_array_index(bootstrap->names, bootstrap->index);
+    bootstrap->index++;
+    base_url = g_getenv("VELLUM_EXTENSIONS_BOOTSTRAP_URL");
+    if (base_url == NULL || *base_url == '\0')
+    {
+        base_url = "https://github.com/lqy306/Vellum-extensions/releases/latest/download";
+    }
+    url = g_strdup_printf("%s/%s", base_url, bootstrap->current);
+    message = soup_message_new("GET", url);
+    g_free(url);
+    if (message == NULL)
+    {
+        g_message("Invalid extension download URL for '%s'", bootstrap->current);
+        mt_plugin_manager_bootstrap_next(bootstrap);
+        return;
+    }
+    soup_session_send_and_read_async(bootstrap->session,
+                                     message,
+                                     G_PRIORITY_DEFAULT,
+                                     NULL,
+                                     mt_plugin_manager_bootstrap_response,
+                                     bootstrap);
+    g_object_unref(message);
+}
+
+static void
+mt_plugin_manager_bootstrap_start(MtPluginManager *manager)
+{
+    MtPluginBootstrap *bootstrap;
+    const gchar *bootstrap_env;
+    guint index;
+
+    /* 测试或离线环境可用 VELLUM_EXTENSIONS_BOOTSTRAP=0 关闭。 */
+    bootstrap_env = g_getenv("VELLUM_EXTENSIONS_BOOTSTRAP");
+    if (bootstrap_env != NULL && g_strcmp0(bootstrap_env, "0") == 0)
+    {
+        return;
+    }
+
+    bootstrap = g_new0(MtPluginBootstrap, 1);
+    bootstrap->manager = manager;
+    bootstrap->session = soup_session_new();
+    g_object_set(bootstrap->session, "timeout", 20, NULL);
+    bootstrap->names = g_ptr_array_new_with_free_func(g_free);
+    bootstrap->directory = g_build_filename(g_get_user_data_dir(),
+                                            "vellum", "plugins", NULL);
+
+    for (index = 0; index < G_N_ELEMENTS(mt_plugin_bootstrap_entries); index++)
+    {
+        const MtPluginBootstrapEntry *entry;
+        gchar *module_name;
+        gchar *path;
+
+        entry = &mt_plugin_bootstrap_entries[index];
+        /* 用户删除过（真删除文件 + removed 标记）或已存在：不再补拉。 */
+        if (g_hash_table_contains(manager->removed_ids, entry->id))
+        {
+            continue;
+        }
+        module_name = g_strdup_printf("%s." G_MODULE_SUFFIX, entry->file);
+        path = g_build_filename(bootstrap->directory, module_name, NULL);
+        g_free(module_name);
+        if (g_file_test(path, G_FILE_TEST_IS_REGULAR))
+        {
+            g_free(path);
+            continue;
+        }
+        g_free(path);
+        g_ptr_array_add(bootstrap->names,
+                        g_strdup_printf("%s." G_MODULE_SUFFIX, entry->file));
+    }
+
+    if (bootstrap->names->len == 0)
+    {
+        g_object_unref(bootstrap->session);
+        g_ptr_array_unref(bootstrap->names);
+        g_free(bootstrap->directory);
+        g_free(bootstrap);
+        return;
+    }
+
+    g_mkdir_with_parents(bootstrap->directory, 0700);
+    manager->bootstrap = bootstrap;
+    mt_plugin_manager_bootstrap_next(bootstrap);
+}
+
+/* —— 扩展市场：核心内置、不可卸载。支持多个扩展源（类似 apt 多源），
+ *    每个源提供一个 extensions.json 目录；刷新时逐个拉取并合并去重。 —— */
+
+static void
+mt_marketplace_entry_free(gpointer data)
+{
+    MtMarketplaceEntry *entry;
+
+    entry = data;
+    g_free(entry->id);
+    g_free(entry->name);
+    g_free(entry->description);
+    g_free(entry->version);
+    g_free(entry->binary);
+    g_free(entry->source);
+    g_free(entry->base);
+    g_free(entry);
+}
+
+/* 默认源地址：可用环境变量覆盖（便于测试与私有源）。 */
+static const gchar *
+mt_plugin_manager_marketplace_default_base(void)
+{
+    const gchar *base;
+
+    base = g_getenv("VELLUM_MARKETPLACE_URL");
+    return (base != NULL && *base != '\0') ?
+           base : "https://github.com/lqy306/Vellum-extensions/releases/latest/download";
+}
+
+/* 用户配置的额外源：~/.config/vellum/market-sources.ini 的 [Sources] urls=，
+ * 分号分隔（与 disabled-languages 风格一致）。 */
+static GPtrArray *
+mt_plugin_manager_marketplace_sources(MtPluginManager *manager)
+{
+    GPtrArray *sources;
+    gchar *path;
+    GKeyFile *settings;
+    gchar *value;
+    gchar **parts;
+    gchar **part;
+
+    (void)manager;
+    sources = g_ptr_array_new_with_free_func(g_free);
+    g_ptr_array_add(sources, g_strdup(mt_plugin_manager_marketplace_default_base()));
+
+    path = g_build_filename(g_get_user_config_dir(), "vellum", "market-sources.ini", NULL);
+    settings = g_key_file_new();
+    if (g_key_file_load_from_file(settings, path, G_KEY_FILE_NONE, NULL))
+    {
+        value = g_key_file_get_string(settings, "Sources", "urls", NULL);
+        if (value != NULL && *value != '\0')
+        {
+            parts = g_strsplit(value, ";", -1);
+            for (part = parts; part != NULL && *part != NULL; part++)
+            {
+                gchar *trimmed;
+
+                trimmed = g_strdup(*part);
+                g_strstrip(trimmed);
+                if (*trimmed != '\0')
+                {
+                    g_ptr_array_add(sources, trimmed);
+                }
+                else
+                {
+                    g_free(trimmed);
+                }
+            }
+            g_strfreev(parts);
+        }
+        g_free(value);
+    }
+    g_key_file_unref(settings);
+    g_free(path);
+
+    return sources;
+}
+
+typedef struct
+{
+    MtPluginManager *manager;
+    GPtrArray *sources;   /* gchar* 源地址 */
+    guint index;
+    GPtrArray *entries;   /* 合并结果（MtMarketplaceEntry*） */
+} MtMarketplaceRefreshData;
+
+static void
+mt_marketplace_refresh_data_free(gpointer data)
+{
+    MtMarketplaceRefreshData *refresh;
+
+    refresh = data;
+    g_ptr_array_unref(refresh->sources);
+    if (refresh->entries != NULL)
+    {
+        g_ptr_array_unref(refresh->entries);
+    }
+    g_free(refresh);
+}
+
+static void mt_plugin_manager_marketplace_refresh_next(GTask *task);
+
+static void
+mt_plugin_manager_marketplace_refresh_cb(GObject *source,
+                                         GAsyncResult *result,
+                                         gpointer user_data)
+{
+    GTask *task;
+    MtMarketplaceRefreshData *data;
+    MtPluginManager *manager;
+    GBytes *bytes;
+    GError *error;
+    JsonParser *parser;
+    JsonNode *root;
+    JsonObject *object;
+    JsonArray *extensions;
+    const gchar *source_base;
+    guint index;
+
+    task = user_data;
+    data = g_task_get_task_data(task);
+    manager = data->manager;
+    error = NULL;
+    bytes = soup_session_send_and_read_finish(SOUP_SESSION(source), result, &error);
+    g_object_unref(SOUP_SESSION(source));
+    if (bytes == NULL)
+    {
+        /* 单个源失败不致命：继续下一个源。 */
+        g_message("Marketplace source '%s' failed: %s",
+                  (const gchar *)g_ptr_array_index(data->sources, data->index),
+                  error != NULL ? error->message : "no response");
+        g_clear_error(&error);
+        g_bytes_unref(bytes);
+        mt_plugin_manager_marketplace_refresh_next(task);
+        return;
+    }
+
+    source_base = g_ptr_array_index(data->sources, data->index);
+    parser = json_parser_new();
+    if (!json_parser_load_from_data(parser,
+                                    g_bytes_get_data(bytes, NULL),
+                                    g_bytes_get_size(bytes),
+                                    &error))
+    {
+        g_message("Marketplace source '%s' has invalid catalog: %s",
+                  source_base, error->message);
+        g_clear_error(&error);
+        g_object_unref(parser);
+        g_bytes_unref(bytes);
+        mt_plugin_manager_marketplace_refresh_next(task);
+        return;
+    }
+    root = json_parser_get_root(parser);
+    object = root != NULL ? json_node_get_object(root) : NULL;
+    extensions = (object != NULL && json_object_has_member(object, "extensions"))
+                 ? json_object_get_array_member(object, "extensions") : NULL;
+    if (extensions != NULL)
+    {
+        const gchar *base;
+
+        /* 每个目录可自定资产下载基址；缺省用源地址本身。 */
+        base = json_object_get_string_member(object, "base");
+        base = (base != NULL && *base != '\0') ? base : source_base;
+        for (index = 0; index < json_array_get_length(extensions); index++)
+        {
+            JsonObject *item;
+            MtMarketplaceEntry *entry;
+            const gchar *id;
+            guint existing;
+
+            item = json_array_get_object_element(extensions, index);
+            if (item == NULL)
+            {
+                continue;
+            }
+            id = json_object_get_string_member(item, "id");
+            if (id == NULL || *id == '\0')
+            {
+                continue;
+            }
+            /* 去重：同 id 先到先得。 */
+            for (existing = 0; existing < data->entries->len; existing++)
+            {
+                MtMarketplaceEntry *known;
+
+                known = g_ptr_array_index(data->entries, existing);
+                if (g_strcmp0(known->id, id) == 0)
+                {
+                    break;
+                }
+            }
+            if (existing < data->entries->len)
+            {
+                continue;
+            }
+            entry = g_new0(MtMarketplaceEntry, 1);
+            entry->id = g_strdup(id);
+            entry->name = g_strdup(json_object_get_string_member(item, "name"));
+            entry->description = g_strdup(json_object_get_string_member(item, "description"));
+            entry->version = g_strdup(json_object_get_string_member(item, "version"));
+            if (json_object_has_member(item, "binary"))
+            {
+                entry->binary = g_strdup(json_object_get_string_member(item, "binary"));
+            }
+            if (json_object_has_member(item, "source"))
+            {
+                entry->source = g_strdup(json_object_get_string_member(item, "source"));
+            }
+            entry->base = g_strdup(base);
+            g_ptr_array_add(data->entries, entry);
+        }
+    }
+    g_object_unref(parser);
+    g_bytes_unref(bytes);
+    mt_plugin_manager_marketplace_refresh_next(task);
+}
+
+static void
+mt_plugin_manager_marketplace_refresh_next(GTask *task)
+{
+    MtMarketplaceRefreshData *data;
+    MtPluginManager *manager;
+    const gchar *base;
+    gchar *url;
+    SoupMessage *message;
+    SoupSession *session;
+
+    data = g_task_get_task_data(task);
+    manager = data->manager;
+    if (data->index >= data->sources->len)
+    {
+        if (data->entries->len == 0)
+        {
+            g_task_return_new_error(task, G_IO_ERROR, G_IO_ERROR_NOT_FOUND,
+                                    "No extension catalog could be loaded");
+            g_object_unref(task);
+            return;
+        }
+        g_clear_pointer(&manager->marketplace, g_ptr_array_unref);
+        manager->marketplace = data->entries;
+        data->entries = NULL;
+        g_task_return_boolean(task, TRUE);
+        g_object_unref(task);
+        return;
+    }
+
+    base = g_ptr_array_index(data->sources, data->index);
+    data->index++;
+    url = g_strdup_printf("%s/extensions.json", base);
+    message = soup_message_new("GET", url);
+    g_free(url);
+    if (message == NULL)
+    {
+        g_message("Invalid marketplace source URL");
+        mt_plugin_manager_marketplace_refresh_next(task);
+        return;
+    }
+    session = soup_session_new();
+    g_object_set(session, "timeout", 20, NULL);
+    soup_session_send_and_read_async(session, message, G_PRIORITY_DEFAULT,
+                                     g_task_get_cancellable(task),
+                                     mt_plugin_manager_marketplace_refresh_cb,
+                                     task);
+    g_object_unref(message);
+}
+
+void
+mt_plugin_manager_marketplace_refresh_async(MtPluginManager *manager,
+                                            GCancellable *cancellable,
+                                            GAsyncReadyCallback callback,
+                                            gpointer user_data)
+{
+    GTask *task;
+    MtMarketplaceRefreshData *data;
+
+    task = g_task_new(NULL, cancellable, callback, user_data);
+    data = g_new0(MtMarketplaceRefreshData, 1);
+    data->manager = manager;
+    data->sources = mt_plugin_manager_marketplace_sources(manager);
+    data->entries = g_ptr_array_new_with_free_func(mt_marketplace_entry_free);
+    g_task_set_task_data(task, data, (GDestroyNotify)mt_marketplace_refresh_data_free);
+    mt_plugin_manager_marketplace_refresh_next(task);
+}
+
+gboolean
+mt_plugin_manager_marketplace_refresh_finish(MtPluginManager *manager,
+                                             GAsyncResult *result,
+                                             GError **error)
+{
+    (void)manager;
+    g_return_val_if_fail(G_IS_TASK(result), FALSE);
+
+    return g_task_propagate_boolean(G_TASK(result), error);
+}
+
+GPtrArray *
+mt_plugin_manager_get_marketplace(MtPluginManager *manager)
+{
+    return manager != NULL ? manager->marketplace : NULL;
+}
+
+typedef struct
+{
+    MtPluginManager *manager;
+    MtMarketplaceEntry *entry;   /* 借用 marketplace 数组中的条目 */
+    gboolean is_source;
+    gchar *asset;                /* 选中的资产名 */
+    gchar *path;                 /* 目标（二进制）或临时（源码）路径 */
+} MtMarketplaceInstallData;
+
+static void
+mt_marketplace_install_data_free(gpointer data)
+{
+    MtMarketplaceInstallData *install;
+
+    install = data;
+    g_free(install->asset);
+    g_free(install->path);
+    g_free(install);
+}
+
+static void
+mt_plugin_manager_marketplace_install_cb(GObject *source,
+                                         GAsyncResult *result,
+                                         gpointer user_data)
+{
+    GTask *task;
+    MtMarketplaceInstallData *data;
+    MtPluginManager *manager;
+    GBytes *bytes;
+    GError *error;
+
+    task = user_data;
+    data = g_task_get_task_data(task);
+    manager = data->manager;
+    error = NULL;
+    bytes = soup_session_send_and_read_finish(SOUP_SESSION(source), result, &error);
+    g_object_unref(SOUP_SESSION(source));
+    if (bytes == NULL)
+    {
+        g_task_return_error(task, error);
+        g_object_unref(task);
+        return;
+    }
+
+    if (data->is_source)
+    {
+        /* 源码包：写入临时文件后走 .vut 导入（校验 + 本机构建 + 加载）。 */
+        if (g_file_set_contents(data->path,
+                                g_bytes_get_data(bytes, NULL),
+                                g_bytes_get_size(bytes),
+                                &error))
+        {
+            GFile *file;
+            gboolean ok;
+
+            file = g_file_new_for_path(data->path);
+            ok = mt_plugin_manager_import(manager, file, &error);
+            g_object_unref(file);
+            g_remove(data->path);
+            if (ok)
+            {
+                g_task_return_boolean(task, TRUE);
+            }
+            else
+            {
+                g_task_return_error(task, error);
+            }
+        }
+        else
+        {
+            g_task_return_error(task, error);
+        }
+    }
+    else
+    {
+        /* 二进制：写入用户插件目录，清除 removed 标记后重新扫描加载。 */
+        if (g_file_set_contents(data->path,
+                                g_bytes_get_data(bytes, NULL),
+                                g_bytes_get_size(bytes),
+                                &error))
+        {
+            gchar *directory;
+
+            g_chmod(data->path, 0600);
+            g_hash_table_remove(manager->removed_ids, data->entry->id);
+            mt_plugin_manager_save_state(manager, NULL);
+            directory = g_path_get_dirname(data->path);
+            mt_plugin_manager_load_directory(manager, directory, TRUE);
+            g_free(directory);
+            g_task_return_boolean(task, TRUE);
+        }
+        else
+        {
+            g_task_return_error(task, error);
+        }
+    }
+    g_bytes_unref(bytes);
+    g_object_unref(task);
+}
+
+void
+mt_plugin_manager_marketplace_install_async(MtPluginManager *manager,
+                                            MtMarketplaceEntry *entry,
+                                            gboolean prefer_source,
+                                            GCancellable *cancellable,
+                                            GAsyncReadyCallback callback,
+                                            gpointer user_data)
+{
+    GTask *task;
+    MtMarketplaceInstallData *data;
+    const gchar *asset;
+    gchar *url;
+    SoupMessage *message;
+    SoupSession *session;
+    gint fd;
+    GError *error;
+
+    asset = prefer_source ? entry->source : entry->binary;
+    if (prefer_source && (asset == NULL || *asset == '\0'))
+    {
+        /* 该源未提供源码包：回退二进制。 */
+        asset = entry->binary;
+    }
+    if (asset == NULL || *asset == '\0')
+    {
+        g_task_report_new_error(NULL,
+                                callback,
+                                user_data,
+                                mt_plugin_manager_marketplace_install_async,
+                                G_IO_ERROR,
+                                G_IO_ERROR_NOT_SUPPORTED,
+                                "该扩展没有可用的安装包");
+        return;
+    }
+
+    task = g_task_new(NULL, cancellable, callback, user_data);
+    data = g_new0(MtMarketplaceInstallData, 1);
+    data->manager = manager;
+    data->entry = entry;
+    data->is_source = g_strcmp0(asset, entry->source) == 0;
+    data->asset = g_strdup(asset);
+    error = NULL;
+    if (data->is_source)
+    {
+        fd = g_file_open_tmp("vellum-market-XXXXXX.vut", &data->path, &error);
+        if (fd < 0)
+        {
+            g_task_return_error(task, error);
+            g_object_unref(task);
+            return;
+        }
+        close(fd);
+    }
+    else
+    {
+        data->path = g_build_filename(g_get_user_data_dir(),
+                                      "vellum", "plugins", asset, NULL);
+        g_mkdir_with_parents(g_path_get_dirname(data->path), 0700);
+    }
+    g_task_set_task_data(task, data, (GDestroyNotify)mt_marketplace_install_data_free);
+
+    url = g_strdup_printf("%s/%s", entry->base, asset);
+    message = soup_message_new("GET", url);
+    g_free(url);
+    if (message == NULL)
+    {
+        g_task_return_new_error(task, G_IO_ERROR, G_IO_ERROR_INVALID_ARGUMENT,
+                                "Invalid extension download URL");
+        g_object_unref(task);
+        return;
+    }
+    session = soup_session_new();
+    g_object_set(session, "timeout", 30, NULL);
+    soup_session_send_and_read_async(session, message, G_PRIORITY_DEFAULT, cancellable,
+                                     mt_plugin_manager_marketplace_install_cb, task);
+    g_object_unref(message);
+}
+
+gboolean
+mt_plugin_manager_marketplace_install_finish(MtPluginManager *manager,
+                                             GAsyncResult *result,
+                                             GError **error)
+{
+    (void)manager;
+    g_return_val_if_fail(G_IS_TASK(result), FALSE);
+
+    return g_task_propagate_boolean(G_TASK(result), error);
+}
+
+gboolean
+mt_plugin_manager_marketplace_uninstall(MtPluginManager *manager,
+                                        MtMarketplaceEntry *entry,
+                                        GError **error)
+{
+    guint index;
+
+    for (index = 0; index < manager->plugins->len; index++)
+    {
+        MtLoadedPlugin *plugin;
+
+        plugin = g_ptr_array_index(manager->plugins, index);
+        if (g_strcmp0(plugin->info->id, entry->id) == 0)
+        {
+            return mt_plugin_manager_remove(manager, index, error);
+        }
+    }
+    g_set_error(error, G_IO_ERROR, G_IO_ERROR_NOT_FOUND, "Extension is not installed");
+
+    return FALSE;
+}
+
 MtPluginManager *
 mt_plugin_manager_new(MtApplication *application)
 {
@@ -971,6 +1719,7 @@ mt_plugin_manager_new(MtApplication *application)
     manager->host.get_is_code_document = mt_plugin_manager_get_is_code_document;
     manager->host.add_document_change_handler = mt_plugin_manager_add_document_change_handler;
     manager->host.set_extension_enabled = mt_plugin_manager_set_extension_enabled;
+    manager->host.get_document_language_id = mt_plugin_manager_get_document_language_id;
 
     if (!g_module_supported())
     {
@@ -981,10 +1730,18 @@ mt_plugin_manager_new(MtApplication *application)
     system_directory = mt_plugin_manager_resolve_system_directory();
     mt_plugin_manager_load_directory(manager, system_directory, FALSE);
     g_free(system_directory);
+    /* 系统目录已有插件（本地 meson install 全装）时不再引导下载。 */
+    manager->bootstrap_needed = manager->plugins->len == 0;
 
     user_directory = g_build_filename(g_get_user_data_dir(), "vellum", "plugins", NULL);
     mt_plugin_manager_load_directory(manager, user_directory, TRUE);
     g_free(user_directory);
+
+    /* 包内不再自带扩展：缺失时从 GitHub Releases 拉取到用户目录。 */
+    if (manager->bootstrap_needed)
+    {
+        mt_plugin_manager_bootstrap_start(manager);
+    }
 
     return manager;
 }
@@ -996,6 +1753,23 @@ mt_plugin_manager_free(MtPluginManager *manager)
 
     if (manager == NULL)
     {
+
+    g_clear_pointer(&manager->marketplace, g_ptr_array_unref);
+    if (manager->bootstrap != NULL)
+    {
+        MtPluginBootstrap *bootstrap;
+
+        /* 取消在途下载；结构体由进行中的回调释放，避免悬空访问。 */
+        bootstrap = manager->bootstrap;
+        bootstrap->cancelled = TRUE;
+        if (bootstrap->session != NULL)
+        {
+            soup_session_abort(bootstrap->session);
+            g_object_unref(bootstrap->session);
+            bootstrap->session = NULL;
+        }
+        manager->bootstrap = NULL;
+    }
         return;
     }
 
