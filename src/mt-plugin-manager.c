@@ -537,6 +537,179 @@ mt_plugin_manager_get_document_language_id(MtPluginHost *host)
     return language != NULL ? gtk_source_language_get_id(language) : NULL;
 }
 
+static gboolean
+mt_plugin_manager_has_plugin_host(MtPluginHost *host, const gchar *plugin_id)
+{
+    MtPluginManager *manager;
+
+    manager = host->private_data;
+    return mt_plugin_manager_has_plugin(manager, plugin_id);
+}
+
+typedef struct
+{
+    MtPluginManager *manager;
+    gchar *plugin_id;
+    gboolean prefer_source;
+    GTask *outer_task;
+} HostInstallData;
+
+static void
+host_install_data_free(gpointer data)
+{
+    HostInstallData *install;
+
+    install = data;
+    g_free(install->plugin_id);
+    if (install->outer_task != NULL)
+        g_object_unref(install->outer_task);
+    g_free(install);
+}
+
+static void mt_plugin_manager_host_install_next(GTask *outer_task);
+
+static void
+mt_plugin_manager_host_install_marketplace_done(GObject *source,
+                                                GAsyncResult *result,
+                                                gpointer user_data)
+{
+    GTask *outer_task;
+    HostInstallData *install;
+    MtPluginManager *manager;
+    GError *error;
+
+    outer_task = user_data;
+    install = g_task_get_task_data(outer_task);
+    manager = install->manager;
+    error = NULL;
+    if (!mt_plugin_manager_marketplace_refresh_finish(manager, result, &error))
+    {
+        g_task_return_error(outer_task, error);
+        g_object_unref(outer_task);
+        return;
+    }
+    mt_plugin_manager_host_install_next(outer_task);
+}
+
+static void
+mt_plugin_manager_host_install_done(GObject *source,
+                                    GAsyncResult *result,
+                                    gpointer user_data)
+{
+    GTask *outer_task;
+    HostInstallData *install;
+    GError *error;
+
+    (void)source;
+    outer_task = user_data;
+    install = g_task_get_task_data(outer_task);
+    error = NULL;
+    if (!mt_plugin_manager_marketplace_install_finish(install->manager, result, &error))
+    {
+        g_task_return_error(outer_task, error);
+    }
+    else
+    {
+        /* 热更新：插件已通过 marketplace 链路加载，同步窗口菜单 */
+        if (install->manager->application != NULL)
+        {
+            MtWindow *window;
+
+            window = mt_application_get_active_window(install->manager->application);
+            if (window != NULL)
+                mt_window_sync_plugin_menu(window);
+        }
+        g_task_return_boolean(outer_task, TRUE);
+    }
+    g_object_unref(outer_task);
+}
+
+static void
+mt_plugin_manager_host_install_next(GTask *outer_task)
+{
+    HostInstallData *install;
+    MtPluginManager *manager;
+    GPtrArray *marketplace;
+    MtMarketplaceEntry *entry;
+    guint i;
+
+    install = g_task_get_task_data(outer_task);
+    manager = install->manager;
+    marketplace = mt_plugin_manager_get_marketplace(manager);
+    if (marketplace == NULL)
+    {
+        mt_plugin_manager_marketplace_refresh_async(manager, NULL,
+                                                    mt_plugin_manager_host_install_marketplace_done,
+                                                    outer_task);
+        return;
+    }
+    entry = NULL;
+    for (i = 0; i < marketplace->len; i++)
+    {
+        MtMarketplaceEntry *candidate;
+
+        candidate = g_ptr_array_index(marketplace, i);
+        if (g_strcmp0(candidate->id, install->plugin_id) == 0)
+        {
+            entry = candidate;
+            break;
+        }
+    }
+    if (entry == NULL)
+    {
+        g_task_return_new_error(outer_task, G_IO_ERROR, G_IO_ERROR_NOT_FOUND,
+                                "Extension '%s' not found in marketplace", install->plugin_id);
+        g_object_unref(outer_task);
+        return;
+    }
+    /* 已安装则直接成功，无需重复下载 */
+    if (mt_plugin_manager_has_plugin(manager, install->plugin_id))
+    {
+        g_task_return_boolean(outer_task, TRUE);
+        g_object_unref(outer_task);
+        return;
+    }
+    mt_plugin_manager_marketplace_install_async(manager, entry, install->prefer_source, NULL,
+                                                mt_plugin_manager_host_install_done,
+                                                outer_task);
+}
+
+static void
+mt_plugin_manager_install_extension_async_host(MtPluginHost *host,
+                                               const gchar *plugin_id,
+                                               gboolean prefer_source,
+                                               GCancellable *cancellable,
+                                               GAsyncReadyCallback callback,
+                                               gpointer user_data)
+{
+    MtPluginManager *manager;
+    GTask *outer_task;
+    HostInstallData *install;
+
+    manager = host->private_data;
+    outer_task = g_task_new(NULL, cancellable, callback, user_data);
+    install = g_new0(HostInstallData, 1);
+    install->manager = manager;
+    install->plugin_id = g_strdup(plugin_id);
+    install->prefer_source = prefer_source;
+    install->outer_task = NULL; /* not used */
+    g_task_set_task_data(outer_task, install, host_install_data_free);
+    /* 非 x64 时强制源码，与 bootstrap 一致 */
+    if (!mt_bootstrap_is_x64())
+        install->prefer_source = TRUE;
+    mt_plugin_manager_host_install_next(outer_task);
+}
+
+static gboolean
+mt_plugin_manager_install_extension_finish_host(MtPluginHost *host,
+                                                GAsyncResult *result,
+                                                GError **error)
+{
+    (void)host;
+    g_return_val_if_fail(G_IS_TASK(result), FALSE);
+    return g_task_propagate_boolean(G_TASK(result), error);
+}
+
 static void
 mt_plugin_manager_set_panel(MtPluginHost *host,
                             const gchar *id,
@@ -1860,6 +2033,9 @@ mt_plugin_manager_new(MtApplication *application)
     manager->host.add_document_change_handler = mt_plugin_manager_add_document_change_handler;
     manager->host.set_extension_enabled = mt_plugin_manager_set_extension_enabled;
     manager->host.get_document_language_id = mt_plugin_manager_get_document_language_id;
+    manager->host.has_plugin = mt_plugin_manager_has_plugin_host;
+    manager->host.install_extension_async = mt_plugin_manager_install_extension_async_host;
+    manager->host.install_extension_finish = mt_plugin_manager_install_extension_finish_host;
 
     if (!g_module_supported())
     {
