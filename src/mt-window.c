@@ -6148,6 +6148,33 @@ mt_window_action_extensions(GSimpleAction *action, GVariant *parameter, gpointer
             adw_preferences_group_add(market_group, GTK_WIDGET(row));
         }
         adw_preferences_page_add(page, market_group);
+
+        /* 源码安装环境说明：与欢迎引导同款，按发行版列出依赖 */
+        {
+            AdwPreferencesGroup *source_group;
+            GtkWidget *label;
+
+            source_group = ADW_PREFERENCES_GROUP(adw_preferences_group_new());
+            adw_preferences_group_set_title(source_group, _("Source Build Environment"));
+            adw_preferences_group_set_description(source_group,
+                                                  _("Source packages are built locally with make, cc and pkg-config. Install the required development packages first:"));
+            label = gtk_label_new(NULL);
+            gtk_label_set_selectable(GTK_LABEL(label), TRUE);
+            gtk_label_set_wrap(GTK_LABEL(label), TRUE);
+            gtk_label_set_xalign(GTK_LABEL(label), 0.0);
+            gtk_widget_add_css_class(label, "monospace");
+            gtk_label_set_text(GTK_LABEL(label),
+                               "Debian/Ubuntu:\n"
+                               "  sudo apt install make gcc pkg-config libgtk-4-dev libadwaita-1-dev libgtksourceview-5-dev libsoup-3.0-dev libjson-glib-dev\n"
+                               "Fedora/RHEL (Red Hat):\n"
+                               "  sudo dnf install make gcc pkgconf-pkg-config gtk4-devel libadwaita-devel gtksourceview5-devel libsoup-devel json-glib-devel\n"
+                               "Arch Linux:\n"
+                               "  sudo pacman -S make gcc pkgconf gtk4 libadwaita gtksourceview5 libsoup json-glib\n"
+                               "openSUSE:\n"
+                               "  sudo zypper install make gcc pkgconf gtk4-devel libadwaita-devel gtksourceview5-devel libsoup-devel json-glib-devel");
+            adw_preferences_group_add(source_group, label);
+            adw_preferences_page_add(page, source_group);
+        }
     }
 
     adw_preferences_window_add(extensions_window, page);

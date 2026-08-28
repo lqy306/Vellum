@@ -1839,6 +1839,9 @@ mt_plugin_manager_marketplace_install_cb(GObject *source,
             GFile *file;
             gboolean ok;
 
+            /* 热更新：源码安装前清除“已删除”标记，否则 load_module 会跳过 */
+            g_hash_table_remove(manager->removed_ids, data->entry->id);
+            mt_plugin_manager_save_state(manager, NULL);
             file = g_file_new_for_path(data->path);
             ok = mt_plugin_manager_import(manager, file, &error);
             g_object_unref(file);
