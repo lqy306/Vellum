@@ -24,6 +24,14 @@
     <name>Vellum contributors</name>
   </developer>
   <releases>
+    <release version="1.0.3" date="2026-08-28">
+      <description>
+        <p>Split editor core and extensions into separate repositories; marketplace fetches extensions on demand (source .vut or binary .so).</p>
+        <p>Welcome guide: source/binary choice with x64 detection, custom source URL (semicolon-separated), build environment check, and per-distro dev package instructions.</p>
+        <p>Fix welcome guide: checked extensions now install via hot-reload (reinstall per preference), second open no longer crashes with G_IS_OBJECT / GTK_IS_SWITCH critical.</p>
+        <p>Fix i18n: add translation for Source Build Environment, fix Chinese for source build note, update POTFILES to ignore migrated plugins.</p>
+      </description>
+    </release>
     <release version="1.0.2" date="2026-08-27">
       <description>
         <p>Fix AI inline completion ghost text not disappearing on accept or reject.</p>

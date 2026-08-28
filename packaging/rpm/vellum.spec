@@ -3,7 +3,7 @@
 # 在 Debian 系上需要 --define '_libdir /usr/lib/x86_64-linux-gnu'（RHEL/Fedora 自动使用 /usr/lib64）。
 
 Name:           vellum
-Version:        1.0.2
+Version:        1.0.3
 Release:        1%{?dist}
 Summary:        A focused GTK4 text editor
 License:        BSD-2-Clause
@@ -56,6 +56,12 @@ meson install -C build --destdir %{buildroot}
 %{_datadir}/locale/zh_CN/LC_MESSAGES/vellum.mo
 
 %changelog
+* Thu Aug 28 2026 Leo Lee <lqy.work.learning@gmail.com> - 1.0.3-1
+- Welcome guide: source/binary install choice, x64 detection, custom source URL, build-env check; hot-reload install without restart
+- Fix welcome guide: checked extensions now install (reinstall per preference) and second open no longer triggers G_IS_OBJECT / GTK_IS_SWITCH critical
+- Fix store i18n: add Source Build Environment translation, update Chinese for source build note, make POT generation ignore migrated plugins
+- Split editor core and extensions into separate repositories, extensions fetched via marketplace
+
 * Thu Aug 27 2026 Leo Lee <lqy.work.learning@gmail.com> - 1.0.2-1
 - Add AI code summary by file type (source/script/web/data), with Ctrl+Alt+S shortcut
 - Add overview map component with draggable viewport rectangle
