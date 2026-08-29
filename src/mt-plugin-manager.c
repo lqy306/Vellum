@@ -537,6 +537,17 @@ mt_plugin_manager_get_document_language_id(MtPluginHost *host)
     return language != NULL ? gtk_source_language_get_id(language) : NULL;
 }
 
+static gchar **
+mt_plugin_manager_get_open_documents(MtPluginHost *host, gsize *count)
+{
+    MtPluginManager *manager;
+    MtWindow *window;
+
+    manager = host->private_data;
+    window = mt_application_get_active_window(manager->application);
+    return window != NULL ? mt_window_get_open_document_paths(window, count) : NULL;
+}
+
 static gboolean
 mt_plugin_manager_has_plugin_host(MtPluginHost *host, const gchar *plugin_id)
 {
@@ -788,6 +799,51 @@ mt_plugin_manager_clear_inline_completion(MtPluginHost *host)
     if (window != NULL)
     {
         mt_window_clear_inline_completion(window);
+    }
+}
+
+static void
+mt_plugin_manager_show_inline_diff(MtPluginHost *host,
+                                   gint offset,
+                                   const gchar *old_text,
+                                   const gchar *new_text)
+{
+    MtPluginManager *manager;
+    MtWindow *window;
+
+    manager = host->private_data;
+    window = mt_application_get_active_window(manager->application);
+    if (window != NULL)
+    {
+        mt_window_show_inline_diff(window, offset, old_text, new_text);
+    }
+}
+
+static void
+mt_plugin_manager_clear_inline_diff(MtPluginHost *host)
+{
+    MtPluginManager *manager;
+    MtWindow *window;
+
+    manager = host->private_data;
+    window = mt_application_get_active_window(manager->application);
+    if (window != NULL)
+    {
+        mt_window_clear_inline_diff(window);
+    }
+}
+
+static void
+mt_plugin_manager_apply_inline_diff(MtPluginHost *host)
+{
+    MtPluginManager *manager;
+    MtWindow *window;
+
+    manager = host->private_data;
+    window = mt_application_get_active_window(manager->application);
+    if (window != NULL)
+    {
+        mt_window_apply_inline_diff(window);
     }
 }
 
@@ -2023,12 +2079,16 @@ mt_plugin_manager_new(MtApplication *application)
     manager->host.show_toast = mt_plugin_manager_show_toast;
     manager->host.show_inline_completion = mt_plugin_manager_show_inline_completion;
     manager->host.clear_inline_completion = mt_plugin_manager_clear_inline_completion;
+    manager->host.show_inline_diff = mt_plugin_manager_show_inline_diff;
+    manager->host.clear_inline_diff = mt_plugin_manager_clear_inline_diff;
+    manager->host.apply_inline_diff = mt_plugin_manager_apply_inline_diff;
     manager->host.request_plugin_removal = mt_plugin_manager_request_plugin_removal;
     manager->host.add_preference_switch = mt_plugin_manager_add_preference_switch;
     manager->host.get_is_code_document = mt_plugin_manager_get_is_code_document;
     manager->host.add_document_change_handler = mt_plugin_manager_add_document_change_handler;
     manager->host.set_extension_enabled = mt_plugin_manager_set_extension_enabled;
     manager->host.get_document_language_id = mt_plugin_manager_get_document_language_id;
+    manager->host.get_open_documents = mt_plugin_manager_get_open_documents;
     manager->host.has_plugin = mt_plugin_manager_has_plugin_host;
     manager->host.install_extension_async = mt_plugin_manager_install_extension_async_host;
     manager->host.install_extension_finish = mt_plugin_manager_install_extension_finish_host;

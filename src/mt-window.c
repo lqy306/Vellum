@@ -1158,6 +1158,7 @@ mt_window_buffer_changed(GtkTextBuffer *buffer, gpointer user_data)
         if (document != NULL && document == window->inline_completion_document)
         {
             mt_window_clear_inline_completion(window);
+    mt_window_clear_inline_diff(window);
         }
         mt_window_schedule_language_update(window);
         mt_window_properties_schedule_refresh(window);
@@ -1386,6 +1387,7 @@ mt_window_editor_scrolled(GtkAdjustment *adjustment, gpointer user_data)
         window->inline_completion_document != NULL)
     {
         mt_window_clear_inline_completion(window);
+    mt_window_clear_inline_diff(window);
     }
 }
 
@@ -1410,6 +1412,7 @@ mt_window_cursor_moved(GtkTextBuffer *buffer,
         /* 光标移动表示用户主动导航或编辑，幽灵补全不再与当前位置对应，
          * 必须立即移除，否则会像残影一样挂在旧坐标上。 */
         mt_window_clear_inline_completion(window);
+    mt_window_clear_inline_diff(window);
     }
     mt_window_update_position(window);
 }
@@ -1460,6 +1463,7 @@ mt_window_page_selected(AdwTabView *tab_view,
     if (window->inline_completion_document != mt_window_get_current_document(window))
     {
         mt_window_clear_inline_completion(window);
+    mt_window_clear_inline_diff(window);
     }
     mt_window_update_position(window);
     mt_window_update_language_label(window);
@@ -1822,6 +1826,7 @@ mt_window_close_page_requested(AdwTabView *tab_view,
     if (window != NULL && document == window->inline_completion_document)
     {
         mt_window_clear_inline_completion(window);
+    mt_window_clear_inline_diff(window);
     }
 
     if (document == NULL || !mt_document_is_modified(document))
@@ -4968,6 +4973,46 @@ mt_window_get_current_document(MtWindow *window)
     return g_object_get_data(G_OBJECT(page), MT_DOCUMENT_DATA_KEY);
 }
 
+gchar **
+mt_window_get_open_document_paths(MtWindow *window, gsize *count)
+{
+    GPtrArray *paths;
+    guint n;
+    guint i;
+
+    paths = g_ptr_array_new_with_free_func(g_free);
+    if (window != NULL && !window->disposed && ADW_IS_TAB_VIEW(window->tab_view))
+    {
+        n = adw_tab_view_get_n_pages(window->tab_view);
+        for (i = 0; i < n; i++)
+        {
+            AdwTabPage *page = adw_tab_view_get_nth_page(window->tab_view, i);
+            MtDocument *document;
+
+            if (page == NULL)
+            {
+                continue;
+            }
+            document = g_object_get_data(G_OBJECT(page), MT_DOCUMENT_DATA_KEY);
+            if (document != NULL)
+            {
+                GFile *file = mt_document_get_file(document);
+
+                if (file != NULL)
+                {
+                    g_ptr_array_add(paths, g_file_get_path(file));
+                }
+            }
+        }
+    }
+    if (count != NULL)
+    {
+        *count = paths->len;
+    }
+    g_ptr_array_add(paths, NULL);
+    return (gchar **)g_ptr_array_free(paths, FALSE);
+}
+
 void
 mt_window_insert_text(MtWindow *window, const gchar *text)
 {
@@ -4991,6 +5036,7 @@ mt_window_insert_text(MtWindow *window, const gchar *text)
     if (window->inline_completion_document == document)
     {
         mt_window_clear_inline_completion(window);
+    mt_window_clear_inline_diff(window);
     }
     buffer = GTK_TEXT_BUFFER(mt_document_get_buffer(document));
     gtk_text_buffer_get_iter_at_mark(buffer, &iter, gtk_text_buffer_get_insert(buffer));
@@ -5024,16 +5070,146 @@ mt_window_clear_inline_completion(MtWindow *window)
 }
 
 void
+mt_window_clear_inline_diff(MtWindow *window)
+{
+    if (window == NULL || window->disposed)
+    {
+        return;
+    }
+    g_clear_pointer(&window->inline_diff_old, g_free);
+    g_clear_pointer(&window->inline_diff_new, g_free);
+    window->inline_diff_offset = 0;
+    window->inline_diff_document = NULL;
+    if (window->inline_diff_widget != NULL)
+    {
+        gtk_widget_set_visible(window->inline_diff_widget, FALSE);
+    }
+}
+
+void
+mt_window_show_inline_diff(MtWindow *window,
+                           gint offset,
+                           const gchar *old_text,
+                           const gchar *new_text)
+{
+    MtDocument *document;
+    GtkTextBuffer *buffer;
+    GtkTextIter iter;
+    GtkWidget *view;
+    GtkWidget *box;
+    GtkWidget *lbl_old;
+    GtkWidget *lbl_new;
+    GdkRectangle rect;
+    gint x;
+    gint y;
+    PangoAttrList *attrs;
+    PangoAttribute *attr;
+
+    if (window == NULL || window->disposed || old_text == NULL || new_text == NULL)
+    {
+        return;
+    }
+    document = mt_window_get_current_document(window);
+    if (document == NULL)
+    {
+        return;
+    }
+    view = mt_document_get_view(document);
+    if (!GTK_IS_TEXT_VIEW(view) || gtk_widget_get_root(view) == NULL)
+    {
+        return;
+    }
+    buffer = GTK_TEXT_BUFFER(mt_document_get_buffer(document));
+    if (offset < 0 || offset > gtk_text_buffer_get_char_count(buffer))
+    {
+        return;
+    }
+
+    gtk_text_buffer_get_iter_at_offset(buffer, &iter, offset);
+    gtk_text_view_get_iter_location(GTK_TEXT_VIEW(view), &iter, &rect);
+    gtk_text_view_buffer_to_window_coords(GTK_TEXT_VIEW(view),
+                                          GTK_TEXT_WINDOW_TEXT,
+                                          rect.x, rect.y,
+                                          &x, &y);
+
+    mt_window_clear_inline_diff(window);
+
+    box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+    lbl_old = gtk_label_new(old_text);
+    lbl_new = gtk_label_new(new_text);
+    gtk_label_set_xalign(GTK_LABEL(lbl_old), 0.0f);
+    gtk_label_set_xalign(GTK_LABEL(lbl_new), 0.0f);
+
+    attrs = pango_attr_list_new();
+    attr = pango_attr_foreground_new(0xe01b, 0x2424, 0x2424);
+    pango_attr_list_insert(attrs, attr);
+    attr = pango_attr_strikethrough_new(TRUE);
+    pango_attr_list_insert(attrs, attr);
+    gtk_label_set_attributes(GTK_LABEL(lbl_old), attrs);
+    pango_attr_list_unref(attrs);
+
+    attrs = pango_attr_list_new();
+    attr = pango_attr_foreground_new(0x2ec2, 0x7e7e, 0x7e7e);
+    pango_attr_list_insert(attrs, attr);
+    gtk_label_set_attributes(GTK_LABEL(lbl_new), attrs);
+    pango_attr_list_unref(attrs);
+
+    gtk_box_append(GTK_BOX(box), lbl_old);
+    gtk_box_append(GTK_BOX(box), lbl_new);
+    gtk_text_view_add_overlay(GTK_TEXT_VIEW(view), box, x, y);
+    gtk_widget_set_opacity(box, 0.92);
+    gtk_widget_set_visible(box, TRUE);
+
+    window->inline_diff_widget = box;
+    window->inline_diff_document = document;
+    window->inline_diff_old = g_strdup(old_text);
+    window->inline_diff_new = g_strdup(new_text);
+    window->inline_diff_offset = offset;
+}
+
+void
+mt_window_apply_inline_diff(MtWindow *window)
+{
+    MtDocument *document;
+    GtkTextBuffer *buffer;
+    GtkTextIter start;
+    GtkTextIter end;
+    gint old_len;
+
+    if (window == NULL || window->disposed)
+    {
+        return;
+    }
+    if (window->inline_diff_document == NULL || window->inline_diff_old == NULL)
+    {
+        return;
+    }
+    document = window->inline_diff_document;
+    buffer = GTK_TEXT_BUFFER(mt_document_get_buffer(document));
+    old_len = (gint)g_utf8_strlen(window->inline_diff_old, -1);
+    gtk_text_buffer_get_iter_at_offset(buffer, &start, window->inline_diff_offset);
+    gtk_text_buffer_get_iter_at_offset(buffer, &end, window->inline_diff_offset + old_len);
+    gtk_text_buffer_delete(buffer, &start, &end);
+    gtk_text_buffer_insert(buffer, &start, window->inline_diff_new, -1);
+    mt_window_clear_inline_diff(window);
+}
+
+void
 mt_window_show_inline_completion(MtWindow *window, const gchar *text)
 {
     MtDocument *document;
     GtkTextBuffer *buffer;
     GtkTextIter cursor;
+    GtkTextIter line_start;
     GtkWidget *view;
     GdkRectangle rectangle;
+    GdkRectangle line_rect;
     gint x;
     gint y;
+    gint lx;
+    gint line_height;
     gchar **lines;
+    gchar **disp;
     gchar *preview;
 
     if (window == NULL || window->disposed || text == NULL || *text == '\0')
@@ -5054,50 +5230,78 @@ mt_window_show_inline_completion(MtWindow *window, const gchar *text)
     }
 
     mt_window_clear_inline_completion(window);
-    lines = g_strsplit(text, "\n", 2);
-    preview = g_strdup(lines[0] != NULL ? lines[0] : "");
-    g_strfreev(lines);
-    if (*preview == '\0')
-    {
-        g_free(preview);
-        return;
-    }
+    mt_window_clear_inline_diff(window);
 
     buffer = GTK_TEXT_BUFFER(mt_document_get_buffer(document));
     gtk_text_buffer_get_iter_at_mark(buffer,
                                      &cursor,
                                      gtk_text_buffer_get_insert(buffer));
     gtk_text_view_get_iter_location(GTK_TEXT_VIEW(view),
-                                     &cursor,
-                                     &rectangle);
+                                    &cursor,
+                                    &rectangle);
     gtk_text_view_buffer_to_window_coords(GTK_TEXT_VIEW(view),
                                           GTK_TEXT_WINDOW_TEXT,
                                           rectangle.x,
                                           rectangle.y,
                                           &x,
                                           &y);
+
+    gtk_text_buffer_get_iter_at_line(buffer, &line_start,
+                                     gtk_text_iter_get_line(&cursor));
+    gtk_text_view_get_iter_location(GTK_TEXT_VIEW(view), &line_start, &line_rect);
+    gtk_text_view_buffer_to_window_coords(GTK_TEXT_VIEW(view),
+                                          GTK_TEXT_WINDOW_TEXT,
+                                          line_rect.x,
+                                          line_rect.y,
+                                          &lx,
+                                          NULL);
+    line_height = rectangle.height > 0 ? rectangle.height : 16;
+
+    lines = g_strsplit(text, "\n", -1);
+    disp = lines;
+    if (lines[0] != NULL && lines[0][0] == '\0')
+    {
+        /* 建议以换行开头（如函数体紧随 `:`）：跳过空首行，从下一行显示。 */
+        disp = lines + 1;
+    }
+    while (disp[0] != NULL && disp[0][0] == '\0')
+    {
+        disp++;
+    }
+    if (disp[0] == NULL)
+    {
+        g_strfreev(lines);
+        return;
+    }
+
+    preview = g_strjoinv("\n", disp);
+
     if (document->inline_completion_label == NULL)
     {
         document->inline_completion_label = gtk_label_new(preview);
         gtk_widget_add_css_class(document->inline_completion_label,
                                  "vellum-inline-completion");
+        gtk_widget_add_css_class(document->inline_completion_label, "monospace");
         gtk_label_set_xalign(GTK_LABEL(document->inline_completion_label), 0.0f);
+        gtk_widget_set_opacity(document->inline_completion_label, 0.6);
         gtk_text_view_add_overlay(GTK_TEXT_VIEW(view),
-                                   document->inline_completion_label,
-                                   x + rectangle.width,
-                                   y);
+                                  document->inline_completion_label,
+                                  disp == lines ? x + rectangle.width : lx,
+                                  disp == lines ? y : y + line_height);
+        gtk_widget_set_visible(document->inline_completion_label, TRUE);
     }
     else
     {
         gtk_label_set_text(GTK_LABEL(document->inline_completion_label), preview);
         gtk_text_view_move_overlay(GTK_TEXT_VIEW(view),
                                    document->inline_completion_label,
-                                   x + rectangle.width,
-                                   y);
+                                   disp == lines ? x + rectangle.width : lx,
+                                   disp == lines ? y : y + line_height);
         gtk_widget_set_visible(document->inline_completion_label, TRUE);
     }
-    window->inline_completion_document = document;
     g_free(preview);
+    g_strfreev(lines);
+    window->inline_completion_document = document;
 }
 
 gchar *

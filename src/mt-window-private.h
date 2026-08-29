@@ -36,6 +36,11 @@ struct _MtWindow
     GtkWidget *external_change_bar;
     MtDocument *external_change_document;
     MtDocument *inline_completion_document;
+    MtDocument *inline_diff_document;
+    gchar *inline_diff_old;
+    gchar *inline_diff_new;
+    gint inline_diff_offset;
+    GtkWidget *inline_diff_widget;
     GtkCssProvider *css_provider;
     GdkDisplay *display;
     MtSettings *settings;

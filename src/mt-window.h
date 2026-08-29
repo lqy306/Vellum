@@ -31,10 +31,17 @@ MtDocument *mt_window_get_current_document(MtWindow *window);
 void mt_window_insert_text(MtWindow *window, const gchar *text);
 void mt_window_show_inline_completion(MtWindow *window, const gchar *text);
 void mt_window_clear_inline_completion(MtWindow *window);
+void mt_window_show_inline_diff(MtWindow *window, gint offset,
+                                const gchar *old_text, const gchar *new_text);
+void mt_window_clear_inline_diff(MtWindow *window);
+void mt_window_apply_inline_diff(MtWindow *window);
 gchar *mt_window_get_text_after_cursor(MtWindow *window);
 void mt_window_show_toast(MtWindow *window, const gchar *message);
 gchar *mt_window_get_current_file_path(MtWindow *window);
 void mt_window_open_file_path(MtWindow *window, const gchar *path);
+/* 返回当前窗口已打开文档的绝对文件路径（仅已保存文件）；count 可为 NULL。
+ * 以 NULL 结尾的 GStrv，调用者 g_strfreev 释放。 */
+gchar **mt_window_get_open_document_paths(MtWindow *window, gsize *count);
 gboolean mt_window_run_editor_command(MtWindow *window,
                                       MtPluginEditorCommand command);
 void mt_window_set_plugin_panel(MtWindow *window,
