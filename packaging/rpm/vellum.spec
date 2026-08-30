@@ -54,6 +54,7 @@ meson install -C build --destdir %{buildroot}
 %{_datadir}/icons/hicolor/scalable/apps/io.github.vellum.Vellum.svg
 %{_datadir}/locale/en/LC_MESSAGES/vellum.mo
 %{_datadir}/locale/zh_CN/LC_MESSAGES/vellum.mo
+%{_datadir}/vellum/extension-intros/*
 
 %changelog
 * Sat Aug 30 2026 Leo Lee <lqy.work.learning@gmail.com> - 1.0.4-1
