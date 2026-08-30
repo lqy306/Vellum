@@ -24,6 +24,14 @@
     <name>Vellum contributors</name>
   </developer>
   <releases>
+    <release version="1.0.4" date="2026-08-30">
+      <description>
+        <p>Extension sources: manage in Extensions window, default source can be removed (not forced), add/remove custom sources persisted to market-sources.ini.</p>
+        <p>Fix duplicate extension loading from system + user dirs causing action already exists warnings; reinstall clears removed mark so deleted extensions can be reinstalled.</p>
+        <p>Fix Add Source dialog transient to Extensions window to avoid freeze; About dialog shows Version.</p>
+        <p>Fix i18n: unify log messages to Chinese, translate plugin preference switches via fallback, add Extension Sources strings to zh_CN.</p>
+      </description>
+    </release>
     <release version="1.0.3" date="2026-08-28">
       <description>
         <p>Split editor core and extensions into separate repositories; marketplace fetches extensions on demand (source .vut or binary .so).</p>

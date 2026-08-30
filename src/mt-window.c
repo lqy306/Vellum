@@ -6379,6 +6379,27 @@ mt_window_action_extensions(GSimpleAction *action, GVariant *parameter, gpointer
             adw_preferences_group_add(source_group, label);
             adw_preferences_page_add(page, source_group);
         }
+
+        {
+            AdwPreferencesGroup *sources_group;
+            GtkWidget *add_button;
+
+            sources_group = ADW_PREFERENCES_GROUP(adw_preferences_group_new());
+            adw_preferences_group_set_title(sources_group, _("Extension Sources"));
+            adw_preferences_group_set_description(sources_group,
+                                                  _("Manage the catalogs Vellum checks for extensions. "
+                                                    "The official source can be turned off; additional sources are checked in order."));
+            add_button = gtk_button_new_with_label(_("Add Source…"));
+            gtk_widget_set_valign(add_button, GTK_ALIGN_CENTER);
+            g_object_set_data(G_OBJECT(add_button), "vellum-sources-group", sources_group);
+            g_signal_connect(add_button,
+                             "clicked",
+                             G_CALLBACK(mt_window_source_add_clicked),
+                             window);
+            adw_preferences_group_set_header_suffix(sources_group, add_button);
+            adw_preferences_page_add(page, sources_group);
+            mt_window_sources_group_rebuild(window, sources_group);
+        }
     }
 
     adw_preferences_window_add(extensions_window, page);
@@ -6781,6 +6802,7 @@ mt_window_action_about(GSimpleAction *action, GVariant *parameter, gpointer user
     GtkWidget *icon;
     GtkWidget *name;
     GtkWidget *description;
+    GtkWidget *version_label;
     GtkWidget *check_button;
     GtkWidget *result_label;
     GtkWidget *download_button;
@@ -6822,6 +6844,13 @@ mt_window_action_about(GSimpleAction *action, GVariant *parameter, gpointer user
     gtk_label_set_wrap(GTK_LABEL(description), TRUE);
     gtk_label_set_justify(GTK_LABEL(description), GTK_JUSTIFY_CENTER);
     gtk_box_append(GTK_BOX(content), description);
+
+    version_label = gtk_label_new(g_strdup_printf(_("Version %s"), VELLUM_VERSION));
+    gtk_widget_add_css_class(version_label, "dim-label");
+    gtk_widget_add_css_class(version_label, "caption");
+    gtk_widget_set_halign(version_label, GTK_ALIGN_CENTER);
+    gtk_widget_set_margin_top(version_label, 4);
+    gtk_box_append(GTK_BOX(content), version_label);
 
     check_button = gtk_button_new_with_label(_("Check for Updates"));
     gtk_widget_set_halign(check_button, GTK_ALIGN_CENTER);

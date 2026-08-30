@@ -7,11 +7,304 @@
 #include "mt-plugin-manager.h"
 
 #include <glib/gi18n.h>
+#include <libintl.h>
+
+/* 扩展提供的首选项文本（来自 Vellum-extensions 域）若未翻译，回退到 Vellum 主域或硬编码中文，
+ * 避免“AI Completion”这类英文与中文界面混排。 */
+static const gchar *
+mt_window_translate_plugin_string(const gchar *str)
+{
+    const gchar *translated;
+
+    if (str == NULL || *str == '\0')
+    {
+        return str;
+    }
+    translated = g_dgettext(GETTEXT_PACKAGE, str);
+    if (translated != NULL && translated != str && *translated != '\0' && g_strcmp0(translated, str) != 0)
+    {
+        return translated;
+    }
+    if (g_str_equal(str, "AI Completion"))
+    {
+        return "AI 补全";
+    }
+    if (g_str_equal(str, "Automatic AI completion"))
+    {
+        return "自动 AI 补全";
+    }
+    if (g_str_equal(str, "Wait for a short pause after typing, then request a completion without pressing a shortcut."))
+    {
+        return "输入后稍作停顿，无需按快捷键即可自动请求补全。";
+    }
+    return str;
+}
+
+/* —— 扩展安装源管理：在“扩展”页增删额外的扩展目录源 —— */
+
+void
+mt_window_sources_group_rebuild(MtWindow *window, AdwPreferencesGroup *group)
+{
+    GtkWidget *child;
+    GPtrArray *sources;
+    const gchar *default_base;
+    guint index;
+
+    child = gtk_widget_get_first_child(GTK_WIDGET(group));
+    while (child != NULL)
+    {
+        GtkWidget *next = gtk_widget_get_next_sibling(child);
+
+        if (ADW_IS_PREFERENCES_ROW(child))
+        {
+            adw_preferences_group_remove(group, child);
+        }
+        child = next;
+    }
+
+    if (window->plugin_manager == NULL)
+    {
+        AdwActionRow *row;
+
+        row = ADW_ACTION_ROW(adw_action_row_new());
+        adw_preferences_row_set_title(ADW_PREFERENCES_ROW(row),
+                                      _("Extensions are disabled"));
+        adw_preferences_group_add(group, GTK_WIDGET(row));
+        return;
+    }
+
+    default_base = mt_plugin_manager_marketplace_default_base();
+    sources = mt_plugin_manager_get_marketplace_sources(window->plugin_manager);
+    for (index = 0; index < sources->len; index++)
+    {
+        const gchar *url;
+        AdwActionRow *row;
+        GtkWidget *remove_button;
+
+        url = g_ptr_array_index(sources, index);
+        row = ADW_ACTION_ROW(adw_action_row_new());
+        adw_preferences_row_set_title(ADW_PREFERENCES_ROW(row), url);
+        if (g_strcmp0(url, default_base) == 0)
+        {
+            adw_action_row_set_subtitle(ADW_ACTION_ROW(row),
+                                        _("Default source (GitHub releases); remove it to disable"));
+        }
+        remove_button = gtk_button_new_with_label(_("Remove"));
+        gtk_widget_set_valign(remove_button, GTK_ALIGN_CENTER);
+        gtk_widget_add_css_class(remove_button, "destructive-action");
+        g_object_set_data_full(G_OBJECT(remove_button),
+                               "vellum-source-url",
+                               g_strdup(url),
+                               g_free);
+        g_object_set_data(G_OBJECT(remove_button),
+                          "vellum-sources-group",
+                          group);
+        if (g_strcmp0(url, default_base) == 0)
+        {
+            /* 官方默认源：直接“删除”即关闭（写入 default-enabled=false）。 */
+            g_signal_connect(remove_button,
+                             "clicked",
+                             G_CALLBACK(mt_window_default_source_remove_clicked),
+                             window);
+        }
+        else
+        {
+            g_signal_connect(remove_button,
+                             "clicked",
+                             G_CALLBACK(mt_window_source_remove_clicked),
+                             window);
+        }
+        adw_action_row_add_suffix(row, remove_button);
+        adw_preferences_group_add(group, GTK_WIDGET(row));
+    }
+    g_ptr_array_unref(sources);
+}
+
+void
+mt_window_default_source_remove_clicked(GtkButton *button, gpointer user_data)
+{
+    MtWindow *window;
+    AdwPreferencesGroup *group;
+
+    window = user_data;
+    group = g_object_get_data(G_OBJECT(button), "vellum-sources-group");
+    if (window->plugin_manager == NULL)
+    {
+        return;
+    }
+    /* 关闭官方默认源：不强制开启，刷新目录时即不再拉取。 */
+    mt_plugin_manager_set_default_source_enabled(window->plugin_manager, FALSE);
+    if (group != NULL)
+    {
+        mt_window_sources_group_rebuild(window, group);
+    }
+}
+
+void
+mt_window_source_remove_clicked(GtkButton *button, gpointer user_data)
+{
+    MtWindow *window;
+    AdwPreferencesGroup *group;
+    const gchar *url;
+    GPtrArray *sources;
+    GPtrArray *kept;
+    const gchar *default_base;
+    guint index;
+
+    window = user_data;
+    group = g_object_get_data(G_OBJECT(button), "vellum-sources-group");
+    url = g_object_get_data(G_OBJECT(button), "vellum-source-url");
+    if (window->plugin_manager == NULL || url == NULL || group == NULL)
+    {
+        return;
+    }
+    default_base = mt_plugin_manager_marketplace_default_base();
+    sources = mt_plugin_manager_get_marketplace_sources(window->plugin_manager);
+    kept = g_ptr_array_new_with_free_func(g_free);
+    for (index = 0; index < sources->len; index++)
+    {
+        const gchar *current;
+
+        current = g_ptr_array_index(sources, index);
+        if (g_strcmp0(current, default_base) == 0)
+        {
+            continue;
+        }
+        if (g_strcmp0(current, url) == 0)
+        {
+            continue;
+        }
+        g_ptr_array_add(kept, g_strdup(current));
+    }
+    mt_plugin_manager_set_user_sources(window->plugin_manager,
+                                       (gchar * const *)kept->pdata,
+                                       kept->len);
+    g_ptr_array_unref(kept);
+    g_ptr_array_unref(sources);
+    mt_window_sources_group_rebuild(window, group);
+}
+
+void
+mt_window_source_add_response(GtkDialog *dialog, gint response, gpointer user_data)
+{
+    MtWindow *window;
+    AdwPreferencesGroup *group;
+    GtkWidget *entry;
+    gchar *text;
+    GPtrArray *sources;
+    GPtrArray *combined;
+    const gchar *default_base;
+    guint index;
+
+    window = user_data;
+    if (response != GTK_RESPONSE_OK)
+    {
+        gtk_window_destroy(GTK_WINDOW(dialog));
+        return;
+    }
+    entry = g_object_get_data(G_OBJECT(dialog), "vellum-entry");
+    group = g_object_get_data(G_OBJECT(dialog), "vellum-sources-group");
+    text = (gchar *)gtk_editable_get_text(GTK_EDITABLE(entry));
+    if (text != NULL)
+    {
+        gchar *trimmed;
+
+        trimmed = g_strdup(text);
+        g_strstrip(trimmed);
+        if (*trimmed == '\0')
+        {
+            g_free(trimmed);
+            gtk_window_destroy(GTK_WINDOW(dialog));
+            return;
+        }
+        text = trimmed;
+    }
+    else
+    {
+        gtk_window_destroy(GTK_WINDOW(dialog));
+        return;
+    }
+    default_base = mt_plugin_manager_marketplace_default_base();
+    sources = mt_plugin_manager_get_marketplace_sources(window->plugin_manager);
+    combined = g_ptr_array_new_with_free_func(g_free);
+    for (index = 0; index < sources->len; index++)
+    {
+        const gchar *current;
+
+        current = g_ptr_array_index(sources, index);
+        if (g_strcmp0(current, default_base) == 0)
+        {
+            continue;
+        }
+        if (g_strcmp0(current, text) == 0)
+        {
+            continue;
+        }
+        g_ptr_array_add(combined, g_strdup(current));
+    }
+    g_ptr_array_add(combined, g_strdup(text));
+    mt_plugin_manager_set_user_sources(window->plugin_manager,
+                                       (gchar * const *)combined->pdata,
+                                       combined->len);
+    g_ptr_array_unref(combined);
+    g_ptr_array_unref(sources);
+    gtk_window_destroy(GTK_WINDOW(dialog));
+    if (group != NULL)
+    {
+        mt_window_sources_group_rebuild(window, group);
+    }
+    g_free((gchar *)text);
+}
+
+void
+mt_window_source_add_clicked(GtkButton *button, gpointer user_data)
+{
+    MtWindow *window;
+    AdwPreferencesGroup *group;
+    GtkWidget *dialog;
+    GtkWidget *content;
+    GtkWidget *box;
+    GtkWidget *entry;
+
+    window = user_data;
+    group = g_object_get_data(G_OBJECT(button), "vellum-sources-group");
+    dialog = gtk_dialog_new_with_buttons(_("Add Extension Source"),
+                                         (window->extensions_window != NULL ?
+                                          GTK_WINDOW(window->extensions_window) :
+                                          GTK_WINDOW(window->window)),
+                                         GTK_DIALOG_MODAL,
+                                         _("Cancel"), GTK_RESPONSE_CANCEL,
+                                         _("Add"), GTK_RESPONSE_OK,
+                                         NULL);
+    gtk_window_set_transient_for(GTK_WINDOW(dialog),
+                                 (window->extensions_window != NULL ?
+                                  GTK_WINDOW(window->extensions_window) :
+                                  GTK_WINDOW(window->window)));
+    gtk_window_set_default_size(GTK_WINDOW(dialog), 460, -1);
+    content = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
+    box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 12);
+    gtk_widget_set_margin_start(box, 18);
+    gtk_widget_set_margin_end(box, 18);
+    gtk_widget_set_margin_top(box, 18);
+    gtk_widget_set_margin_bottom(box, 18);
+    entry = gtk_entry_new();
+    gtk_entry_set_placeholder_text(GTK_ENTRY(entry),
+                                   "https://example.com/releases/latest/download");
+    gtk_box_append(GTK_BOX(box), entry);
+    gtk_box_append(GTK_BOX(content), box);
+    g_object_set_data(G_OBJECT(dialog), "vellum-entry", entry);
+    g_object_set_data(G_OBJECT(dialog), "vellum-sources-group", group);
+    g_signal_connect(dialog,
+                     "response",
+                     G_CALLBACK(mt_window_source_add_response),
+                     window);
+    gtk_window_present(GTK_WINDOW(dialog));
+}
 
 static void
 mt_window_preference_switch_active_changed(GObject *object,
-                                           GParamSpec *pspec,
-                                           gpointer user_data)
+                                            GParamSpec *pspec,
+                                            gpointer user_data)
 {
     AdwSwitchRow *row;
     MtWindow *window;
@@ -401,13 +694,16 @@ mt_window_action_preferences(GSimpleAction *action, GVariant *parameter, gpointe
             }
             if (index == 0)
             {
-                adw_preferences_group_set_title(plugin_group, item->group);
+                adw_preferences_group_set_title(plugin_group,
+                                                mt_window_translate_plugin_string(item->group));
             }
             row = ADW_SWITCH_ROW(adw_switch_row_new());
-            adw_preferences_row_set_title(ADW_PREFERENCES_ROW(row), item->title);
+            adw_preferences_row_set_title(ADW_PREFERENCES_ROW(row),
+                                          mt_window_translate_plugin_string(item->title));
             if (item->subtitle != NULL)
             {
-                adw_action_row_set_subtitle(ADW_ACTION_ROW(row), item->subtitle);
+                adw_action_row_set_subtitle(ADW_ACTION_ROW(row),
+                                            mt_window_translate_plugin_string(item->subtitle));
             }
             adw_switch_row_set_active(row,
                                       item->get_callback != NULL ?

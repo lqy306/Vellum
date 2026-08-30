@@ -1365,17 +1365,6 @@ msgstr ""
 #~ msgid "Requesting AI completion…"
 #~ msgstr "正在请求 AI 补全…"
 
-#~ msgid "AI Completion"
-#~ msgstr "AI 补全"
-
-#~ msgid "Automatic AI completion"
-#~ msgstr "自动 AI 补全"
-
-#~ msgid ""
-#~ "Wait for a short pause after typing, then request a completion without "
-#~ "pressing a shortcut."
-#~ msgstr "停止输入片刻后自动请求补全，无需按快捷键。"
-
 #~ msgid "AI Completion Settings"
 #~ msgstr "AI 补全设置"
 
@@ -1719,3 +1708,51 @@ msgstr ""
 
 #~ msgid "Replace with"
 #~ msgstr "替换为"
+
+#: src/mt-window.c src/mt-window-preferences.c
+msgid "Extension Sources"
+msgstr "扩展安装源"
+
+#: src/mt-window.c
+msgid "Manage the catalogs Vellum checks for extensions. The official source can be turned off; additional sources are checked in order."
+msgstr "管理 Vellum 检查扩展的目录源。官方源可以关闭；额外源按列表顺序依次检查。"
+
+#: src/mt-window-preferences.c
+msgid "Add Source…"
+msgstr "添加源…"
+
+#: src/mt-window-preferences.c
+msgid "Remove"
+msgstr "移除"
+
+#: src/mt-window-preferences.c
+msgid "Extensions are disabled"
+msgstr "扩展功能已禁用"
+
+#: src/mt-window-preferences.c
+msgid "Default source (GitHub releases)"
+msgstr "默认源（GitHub 发布页）"
+
+#: src/mt-window-preferences.c
+msgid "Default source (GitHub releases); remove it to disable"
+msgstr "默认源（GitHub 发布页）；移除即可关闭"
+
+#: src/mt-window-preferences.c
+msgid "Add Extension Source"
+msgstr "添加扩展源"
+
+#: src/mt-window.c
+msgid "Version %s"
+msgstr "版本 %s"
+
+#: Vellum-extensions:ai-completion
+msgid "AI Completion"
+msgstr "AI 补全"
+
+#: Vellum-extensions:ai-completion
+msgid "Automatic AI completion"
+msgstr "自动 AI 补全"
+
+#: Vellum-extensions:ai-completion
+msgid "Wait for a short pause after typing, then request a completion without pressing a shortcut."
+msgstr "输入后稍作停顿，无需按快捷键即可自动请求补全。"

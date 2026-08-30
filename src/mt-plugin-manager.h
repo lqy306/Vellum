@@ -58,8 +58,19 @@ gboolean mt_plugin_manager_marketplace_install_finish(MtPluginManager *manager,
                                                       GAsyncResult *result,
                                                       GError **error);
 gboolean mt_plugin_manager_marketplace_uninstall(MtPluginManager *manager,
-                                                 MtMarketplaceEntry *entry,
-                                                 GError **error);
+                                                  MtMarketplaceEntry *entry,
+                                                  GError **error);
+/* 默认扩展源地址（可用环境变量 VELLUM_MARKETPLACE_URL 覆盖）。 */
+const gchar *mt_plugin_manager_marketplace_default_base(void);
+/* 默认（官方）源是否启用；用户可在“扩展”页关闭，不强制开启。 */
+gboolean mt_plugin_manager_get_default_source_enabled(MtPluginManager *manager);
+void mt_plugin_manager_set_default_source_enabled(MtPluginManager *manager, gboolean enabled);
+/* 当前生效的全部扩展源（默认源在前，其余为用户在 market-sources.ini 中配置的）。 */
+GPtrArray *mt_plugin_manager_get_marketplace_sources(MtPluginManager *manager);
+/* 写入用户额外扩展源（不含默认源）；用于“扩展”页管理安装源。 */
+void mt_plugin_manager_set_user_sources(MtPluginManager *manager,
+                                         gchar * const *urls,
+                                         gsize count);
 guint mt_plugin_manager_get_count(MtPluginManager *manager);
 const MtPluginInfo *mt_plugin_manager_get_info(MtPluginManager *manager, guint index);
 const gchar *mt_plugin_manager_get_path(MtPluginManager *manager, guint index);

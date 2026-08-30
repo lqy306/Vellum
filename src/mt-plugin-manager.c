@@ -1110,9 +1110,29 @@ mt_plugin_manager_load_module(MtPluginManager *manager,
 
     if (g_hash_table_contains(manager->removed_ids, info->id))
     {
-        g_message("Vellum plugin removed by user: %s (%s)", info->name, info->id);
+        g_message("Vellum 插件已由用户移除：%s（%s）", info->name, info->id);
         g_module_close(module);
         return TRUE;
+    }
+
+    /* 同一扩展可能同时存在于系统目录与用户目录（引导下载），避免重复加载：
+     * 重复加载会让动作名冲突、后加载的插件激活失败。已加载的优先，跳过副本。 */
+    {
+        guint loaded_index;
+
+        for (loaded_index = 0; loaded_index < manager->plugins->len; loaded_index++)
+        {
+            MtLoadedPlugin *existing;
+
+            existing = g_ptr_array_index(manager->plugins, loaded_index);
+            if (existing->info != NULL && g_strcmp0(existing->info->id, info->id) == 0)
+            {
+                g_message("Vellum 插件“%s”（%s）已加载，跳过重复副本“%s”",
+                          info->name, info->id, path);
+                g_module_close(module);
+                return TRUE;
+            }
+        }
     }
 
     plugin = g_new0(MtLoadedPlugin, 1);
@@ -1130,7 +1150,7 @@ mt_plugin_manager_load_module(MtPluginManager *manager,
     if (!plugin->enabled)
     {
         g_ptr_array_add(manager->plugins, plugin);
-        g_message("Vellum plugin disabled by user: %s (%s)", info->name, info->id);
+        g_message("Vellum 插件已由用户禁用：%s（%s）", info->name, info->id);
         return TRUE;
     }
 
@@ -1148,7 +1168,7 @@ mt_plugin_manager_load_module(MtPluginManager *manager,
     }
     manager->loading_plugin = NULL;
     g_ptr_array_add(manager->plugins, plugin);
-    g_message("Loaded Vellum plugin: %s (%s)", info->name, info->id);
+    g_message("Vellum 插件已加载：%s（%s）", info->name, info->id);
 
     return TRUE;
 }
@@ -1551,7 +1571,7 @@ mt_marketplace_entry_free(gpointer data)
 }
 
 /* 默认源地址：可用环境变量覆盖（便于测试与私有源）。 */
-static const gchar *
+const gchar *
 mt_plugin_manager_marketplace_default_base(void)
 {
     const gchar *base;
@@ -1562,9 +1582,59 @@ mt_plugin_manager_marketplace_default_base(void)
 }
 
 /* 用户配置的额外源：~/.config/vellum/market-sources.ini 的 [Sources] urls=，
- * 分号分隔（与 disabled-languages 风格一致）。 */
-static GPtrArray *
-mt_plugin_manager_marketplace_sources(MtPluginManager *manager)
+ * 分号分隔（与 disabled-languages 风格一致）。[Sources] default-enabled 控制
+ * 是否包含官方默认源（可被用户在“扩展”页关闭，不强制开启）。 */
+gboolean
+mt_plugin_manager_get_default_source_enabled(MtPluginManager *manager)
+{
+    gchar *path;
+    GKeyFile *settings;
+    gboolean enabled;
+    GError *error;
+
+    (void)manager;
+    path = g_build_filename(g_get_user_config_dir(), "vellum", "market-sources.ini", NULL);
+    settings = g_key_file_new();
+    enabled = TRUE;
+    if (g_key_file_load_from_file(settings, path, G_KEY_FILE_NONE, NULL))
+    {
+        error = NULL;
+        if (g_key_file_has_key(settings, "Sources", "default-enabled", NULL))
+        {
+            enabled = g_key_file_get_boolean(settings, "Sources", "default-enabled", &error);
+            if (error != NULL)
+            {
+                enabled = TRUE;
+                g_clear_error(&error);
+            }
+        }
+    }
+    g_key_file_unref(settings);
+    g_free(path);
+
+    return enabled;
+}
+
+void
+mt_plugin_manager_set_default_source_enabled(MtPluginManager *manager,
+                                             gboolean enabled)
+{
+    gchar *path;
+    GKeyFile *settings;
+
+    (void)manager;
+    path = g_build_filename(g_get_user_config_dir(), "vellum", "market-sources.ini", NULL);
+    settings = g_key_file_new();
+    g_key_file_load_from_file(settings, path, G_KEY_FILE_NONE, NULL);
+    g_key_file_set_boolean(settings, "Sources", "default-enabled", enabled);
+    g_mkdir_with_parents(g_path_get_dirname(path), 0700);
+    g_key_file_save_to_file(settings, path, NULL);
+    g_key_file_unref(settings);
+    g_free(path);
+}
+
+GPtrArray *
+mt_plugin_manager_get_marketplace_sources(MtPluginManager *manager)
 {
     GPtrArray *sources;
     gchar *path;
@@ -1575,7 +1645,10 @@ mt_plugin_manager_marketplace_sources(MtPluginManager *manager)
 
     (void)manager;
     sources = g_ptr_array_new_with_free_func(g_free);
-    g_ptr_array_add(sources, g_strdup(mt_plugin_manager_marketplace_default_base()));
+    if (mt_plugin_manager_get_default_source_enabled(manager))
+    {
+        g_ptr_array_add(sources, g_strdup(mt_plugin_manager_marketplace_default_base()));
+    }
 
     path = g_build_filename(g_get_user_config_dir(), "vellum", "market-sources.ini", NULL);
     settings = g_key_file_new();
@@ -1608,6 +1681,51 @@ mt_plugin_manager_marketplace_sources(MtPluginManager *manager)
     g_free(path);
 
     return sources;
+}
+
+void
+mt_plugin_manager_set_user_sources(MtPluginManager *manager,
+                                   gchar * const *urls,
+                                   gsize count)
+{
+    gchar *path;
+    GKeyFile *key_file;
+    GPtrArray *clean;
+    gsize index;
+    gchar *value;
+
+    (void)manager;
+    path = g_build_filename(g_get_user_config_dir(), "vellum", "market-sources.ini", NULL);
+    key_file = g_key_file_new();
+    g_key_file_load_from_file(key_file, path, G_KEY_FILE_NONE, NULL);
+    clean = g_ptr_array_new_with_free_func(g_free);
+    for (index = 0; index < count; index++)
+    {
+        gchar *trimmed;
+
+        if (urls == NULL || urls[index] == NULL)
+        {
+            continue;
+        }
+        trimmed = g_strdup(urls[index]);
+        g_strstrip(trimmed);
+        if (*trimmed != '\0')
+        {
+            g_ptr_array_add(clean, trimmed);
+        }
+        else
+        {
+            g_free(trimmed);
+        }
+    }
+    value = g_strjoinv(";", (gchar **)clean->pdata);
+    g_key_file_set_string(key_file, "Sources", "urls", value == NULL ? "" : value);
+    g_mkdir_with_parents(g_path_get_dirname(path), 0700);
+    g_key_file_save_to_file(key_file, path, NULL);
+    g_free(value);
+    g_ptr_array_unref(clean);
+    g_key_file_unref(key_file);
+    g_free(path);
 }
 
 typedef struct
@@ -1810,7 +1928,7 @@ mt_plugin_manager_marketplace_refresh_async(MtPluginManager *manager,
     task = g_task_new(NULL, cancellable, callback, user_data);
     data = g_new0(MtMarketplaceRefreshData, 1);
     data->manager = manager;
-    data->sources = mt_plugin_manager_marketplace_sources(manager);
+    data->sources = mt_plugin_manager_get_marketplace_sources(manager);
     data->entries = g_ptr_array_new_with_free_func(mt_marketplace_entry_free);
     g_task_set_task_data(task, data, (GDestroyNotify)mt_marketplace_refresh_data_free);
     mt_plugin_manager_marketplace_refresh_next(task);
@@ -2408,6 +2526,14 @@ mt_plugin_manager_import(MtPluginManager *manager, GFile *source, GError **error
                                    &module_path,
                                    &extension_id,
                                    error);
+    /* 重新导入曾被删除的扩展：清除“已删除”标记，否则下面加载会被跳过，
+     * 并在日志中误报“用户卸载了扩展”，表现为装好立刻被卸载。 */
+    if (loaded && extension_id != NULL &&
+        g_hash_table_contains(manager->removed_ids, extension_id))
+    {
+        g_hash_table_remove(manager->removed_ids, extension_id);
+        mt_plugin_manager_save_state(manager, NULL);
+    }
     if (loaded && !mt_plugin_manager_load_module(manager, module_path, TRUE))
     {
         g_set_error(error,

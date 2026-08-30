@@ -78,5 +78,11 @@ void mt_window_font_scale_changed(AdwSpinRow *row, gpointer user_data);
 void mt_window_tab_width_changed(AdwSpinRow *row, gpointer user_data);
 void mt_window_clear_history_clicked(AdwActionRow *row, gpointer user_data);
 const gchar *mt_window_theme_label(const gchar *style_scheme);
+/* 扩展安装源管理（“扩展”页内）。 */
+void mt_window_sources_group_rebuild(MtWindow *window, AdwPreferencesGroup *group);
+void mt_window_source_remove_clicked(GtkButton *button, gpointer user_data);
+void mt_window_source_add_response(GtkDialog *dialog, gint response, gpointer user_data);
+void mt_window_source_add_clicked(GtkButton *button, gpointer user_data);
+void mt_window_default_source_remove_clicked(GtkButton *button, gpointer user_data);
 
 #endif
