@@ -16,10 +16,10 @@ meson compile -C build
 ./build/src/vellum
 ```
 
-本机（用户目录不含 libadwaita-1-dev / libsoup-3.0-dev / libjson-glib-dev 系统包）将所需开发包解压在持久目录 `~/.local` 之外的 **`/home/lqy/vellum-dev-deps`**（含 `pc/`、`root/`、`debs/`），构建时需显式提供 pkg-config 搜索路径：
+本机（用户目录不含 libadwaita-1-dev / libsoup-3.0-dev / libjson-glib-dev 系统包）将所需开发包解压在项目内的 **`.dev-deps`**（含 `pc/`、`root/`、`debs/`，已加入 `.gitignore` 不上传），构建时需显式提供 pkg-config 搜索路径：
 
 ```bash
-export PKG_CONFIG_PATH=/home/lqy/vellum-dev-deps/pc
+export PKG_CONFIG_PATH=$PWD/.dev-deps/pc
 meson setup --reconfigure --wipe build   # 依赖目录或 .pc 变化后需要
 ninja -C build
 ./build/src/vellum

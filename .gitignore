@@ -25,6 +25,9 @@
 *.swp
 .DS_Store
 
+# Local dev dependencies (not uploaded, project-local)
+/.dev-deps/
+
 # Internal refactor / capture scripts (not part of the distribution)
 /tools/add_*.py
 /tools/finish_*.py
