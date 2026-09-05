@@ -38,6 +38,8 @@ struct _MtDocument
     gboolean saving;
     /* 是否在代码文档中自动配对括号/引号（由“首选项 → 行为”同步）。 */
     gboolean auto_pair_brackets;
+    /* 拼写检查设置延迟同步用。 */
+    MtSettings *pending_settings;
 };
 
 MtDocument *mt_document_new(void);

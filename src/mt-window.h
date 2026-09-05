@@ -35,6 +35,16 @@ void mt_window_show_inline_diff(MtWindow *window, gint offset,
                                 const gchar *old_text, const gchar *new_text);
 void mt_window_clear_inline_diff(MtWindow *window);
 void mt_window_apply_inline_diff(MtWindow *window);
+/* 编译器报错的红色波浪下划线 + 悬停描述。offset/length 为字节偏移。 */
+void mt_window_show_error_underline(MtWindow *window, gint offset,
+                                    gint length, const gchar *message);
+void mt_window_clear_error_underlines(MtWindow *window);
+/* 断点：1-based 逻辑行号。set/clear 同步 gutter 标记。 */
+void mt_window_set_breakpoint(MtWindow *window, gint line);
+void mt_window_clear_breakpoint(MtWindow *window, gint line);
+void mt_window_clear_all_breakpoints(MtWindow *window);
+/* 滚动到指定 1-based 行并短暂高亮，用于错误跳转与断点定位。 */
+void mt_window_scroll_to_line(MtWindow *window, gint line);
 gchar *mt_window_get_text_after_cursor(MtWindow *window);
 void mt_window_show_toast(MtWindow *window, const gchar *message);
 gchar *mt_window_get_current_file_path(MtWindow *window);
@@ -69,6 +79,7 @@ void mt_window_action_shortcuts(GSimpleAction *action, GVariant *parameter, gpoi
 void mt_window_action_extensions(GSimpleAction *action, GVariant *parameter, gpointer user_data);
 void mt_window_action_about(GSimpleAction *action, GVariant *parameter, gpointer user_data);
 void mt_window_action_open_releases(GSimpleAction *action, GVariant *parameter, gpointer user_data);
+void mt_window_action_toggle_breakpoint(GSimpleAction *action, GVariant *parameter, gpointer user_data);
 
 G_END_DECLS
 

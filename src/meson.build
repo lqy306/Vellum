@@ -16,12 +16,25 @@ vellum_core_sources = files(
   'mt-application.c',
   'mt-document.c',
   'mt-plugin-manager.c',
+  'mt-plugin-manager-bootstrap.c',
+  'mt-plugin-manager-marketplace.c',
+  'mt-plugin-manager-lifecycle.c',
   'mt-settings.c',
   'mt-vut-package.c',
+  'mt-vut-package-parse.c',
+  'mt-vut-package-manifest.c',
   'mt-overview-map.c',
   'mt-window-shortcuts.c',
   'mt-window-preferences.c',
-  'mt-window.c'
+  'mt-window-about.c',
+  'mt-window-buffer.c',
+  'mt-window-core.c',
+  'mt-window-documents.c',
+  'mt-window-extensions.c',
+  'mt-window-find-replace.c',
+  'mt-window-properties-ui.c',
+  'mt-window-properties.c',
+  'mt-window-window.c'
 )
 
 vellum_executable = executable(

@@ -148,6 +148,11 @@ mt_document_create_spell_checker(void)
     gint i;
 
     provider = spelling_provider_get_default();
+    if (provider == NULL)
+    {
+        return NULL;
+    }
+
     default_code = spelling_provider_get_default_code(provider);
     language = NULL;
 
@@ -165,6 +170,11 @@ mt_document_create_spell_checker(void)
                 break;
             }
         }
+    }
+
+    if (language == NULL)
+    {
+        return NULL;
     }
 
     return spelling_checker_new(provider, language);
@@ -219,7 +229,19 @@ mt_document_context_menu_pressed(GtkGestureClick *gesture,
     popover = gtk_popover_menu_new_from_model(menu_model);
     rect = (GdkRectangle){ (gint)x, (gint)y, 1, 1 };
     gtk_popover_set_pointing_to(GTK_POPOVER(popover), &rect);
-    gtk_widget_set_parent(popover, document->view);
+    {
+        GtkRoot *root;
+
+        root = gtk_widget_get_root(document->view);
+        if (root != NULL)
+        {
+            gtk_widget_set_parent(popover, GTK_WIDGET(root));
+        }
+        else
+        {
+            gtk_widget_set_parent(popover, document->view);
+        }
+    }
     g_object_ref(popover);
     g_signal_connect(popover, "closed", G_CALLBACK(mt_document_spelling_popover_closed), NULL);
     gtk_popover_popup(GTK_POPOVER(popover));
@@ -282,11 +304,14 @@ mt_document_new(void)
                      document);
 
     document->spell_checker = mt_document_create_spell_checker();
-    document->spell_adapter = spelling_text_buffer_adapter_new(document->buffer,
-                                                               document->spell_checker);
-    gtk_widget_insert_action_group(document->view,
-                                   "spelling",
-                                   G_ACTION_GROUP(document->spell_adapter));
+    if (document->spell_checker != NULL)
+    {
+        document->spell_adapter = spelling_text_buffer_adapter_new(document->buffer,
+                                                                   document->spell_checker);
+        gtk_widget_insert_action_group(document->view,
+                                       "spelling",
+                                       G_ACTION_GROUP(document->spell_adapter));
+    }
 
     return document;
 }
@@ -337,6 +362,24 @@ mt_document_get_view(MtDocument *document)
     return document->view;
 }
 
+static gboolean
+mt_document_spell_check_idle(gpointer user_data)
+{
+    MtDocument *document = user_data;
+
+    if (document == NULL || document->spell_adapter == NULL)
+    {
+        return G_SOURCE_REMOVE;
+    }
+
+    spelling_text_buffer_adapter_set_enabled(document->spell_adapter,
+                                              mt_settings_get_spell_check(document->pending_settings));
+    document->pending_settings = NULL;
+    return G_SOURCE_REMOVE;
+}
+
+static gboolean mt_document_spell_check_idle(gpointer user_data);
+
 void
 mt_document_apply_editor_settings(MtDocument *document, MtSettings *settings)
 {
@@ -362,10 +405,12 @@ mt_document_apply_editor_settings(MtDocument *document, MtSettings *settings)
     {
         gtk_widget_set_visible(document->overview, mt_settings_get_show_overview(settings));
     }
+    /* 拼写检查的 set_enabled 会在主线程同步执行单词查询，
+     * 用 idle 延迟避免切换时卡顿。 */
     if (document->spell_adapter != NULL)
     {
-        spelling_text_buffer_adapter_set_enabled(document->spell_adapter,
-                                                 mt_settings_get_spell_check(settings));
+        document->pending_settings = settings;
+        g_idle_add(mt_document_spell_check_idle, document);
     }
     document->auto_pair_brackets = mt_settings_get_auto_pair_brackets(settings);
 }

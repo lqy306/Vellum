@@ -19,7 +19,7 @@ install_data(
   'extension-intros/word-count.ini',
   'extension-intros/link-check.ini',
   'extension-intros/project-sidebar.ini',
-  'extension-intros/build-run.ini',
+  'extension-intros/dev-experience.ini',
   'extension-intros/vim-mode.ini',
   'extension-intros/screenshot.ini',
   install_dir : join_paths(get_option('datadir'), 'vellum', 'extension-intros')

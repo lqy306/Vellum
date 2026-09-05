@@ -578,8 +578,8 @@ msgid "Project Sidebar"
 msgstr "项目侧边栏"
 
 #: src/mt-window.c:5687
-msgid "Build and Run"
-msgstr "构建与运行"
+msgid "Dev Experience"
+msgstr "开发体验"
 
 #: src/mt-window.c:5688
 msgid "Vi Mode"
@@ -611,8 +611,8 @@ msgid "Browse an explicitly selected project directory"
 msgstr "浏览你明确选择的项目目录"
 
 #: src/mt-window.c:5706
-msgid "Build or run user-configured commands in a separate tool window"
-msgstr "在独立工具窗口构建或运行用户配置的命令"
+msgid "Build, run and debug with compiler error underlines and breakpoints"
+msgstr "在独立工具窗口构建、运行和调试，带编译器报错下划线和断点"
 
 #: src/mt-window.c:5707
 msgid "Basic modal editing commands for Vi users"
@@ -1520,11 +1520,8 @@ msgstr ""
 #~ msgstr "已请求停止命令\n"
 
 #, c-format
-#~ msgid "Build & Run — %s"
-#~ msgstr "构建与运行 — %s"
-
-#~ msgid "Build & Run"
-#~ msgstr "构建与运行"
+#~ msgid "Dev Experience — %s"
+#~ msgstr "开发体验 — %s"
 
 #~ msgid "Build + Run"
 #~ msgstr "构建并运行"
@@ -1535,8 +1532,8 @@ msgstr ""
 #~ msgid "Clear Output"
 #~ msgstr "清除输出"
 
-#~ msgid "Hide Build Output"
-#~ msgstr "隐藏构建输出"
+#~ msgid "Hide Dev Experience Output"
+#~ msgstr "隐藏开发体验输出"
 
 #~ msgid ""
 #~ "Commands use direct argument parsing, not a shell. Available "
@@ -1553,8 +1550,8 @@ msgstr ""
 #~ msgid "Unable to save build settings: %s"
 #~ msgstr "无法保存构建设置：%s"
 
-#~ msgid "Build & Run Settings"
-#~ msgstr "构建与运行设置"
+#~ msgid "Dev Experience Settings"
+#~ msgstr "开发体验设置"
 
 #~ msgid "Explicit Commands"
 #~ msgstr "显式命令"
@@ -1578,8 +1575,8 @@ msgstr ""
 #~ msgid "Run Command"
 #~ msgstr "运行命令"
 
-#~ msgid "Save Build & Run Settings"
-#~ msgstr "保存构建与运行设置"
+#~ msgid "Save Dev Experience Settings"
+#~ msgstr "保存开发体验设置"
 
 #, c-format
 #~ msgid "Link test complete: %u reachable, %u failed"
@@ -1756,3 +1753,8 @@ msgstr "自动 AI 补全"
 #: Vellum-extensions:ai-completion
 msgid "Wait for a short pause after typing, then request a completion without pressing a shortcut."
 msgstr "输入后稍作停顿，无需按快捷键即可自动请求补全。"
+msgid "Build Profile (debug/release)"
+msgstr "构建配置（调试/发布）"
+
+msgid "Debugger (e.g. gdb)"
+msgstr "调试器（如 gdb）"

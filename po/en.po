@@ -581,8 +581,8 @@ msgid "Project Sidebar"
 msgstr "Project Sidebar"
 
 #: src/mt-window.c:5687
-msgid "Build and Run"
-msgstr "Build and Run"
+msgid "Dev Experience"
+msgstr "Dev Experience"
 
 #: src/mt-window.c:5688
 msgid "Vi Mode"
@@ -614,8 +614,8 @@ msgid "Browse an explicitly selected project directory"
 msgstr "Browse an explicitly selected project directory"
 
 #: src/mt-window.c:5706
-msgid "Build or run user-configured commands in a separate tool window"
-msgstr "Build or run user-configured commands in a separate tool window"
+msgid "Build, run and debug with compiler error underlines and breakpoints"
+msgstr "Build, run and debug with compiler error underlines and breakpoints"
 
 #: src/mt-window.c:5707
 msgid "Basic modal editing commands for Vi users"
@@ -1541,11 +1541,8 @@ msgstr "Add explicit English and Simplified Chinese language packs, custom edito
 #~ msgstr "Command stop requested\n"
 
 #, c-format
-#~ msgid "Build & Run — %s"
-#~ msgstr "Build & Run — %s"
-
-#~ msgid "Build & Run"
-#~ msgstr "Build & Run"
+#~ msgid "Dev Experience — %s"
+#~ msgstr "Dev Experience — %s"
 
 #~ msgid "Build + Run"
 #~ msgstr "Build + Run"
@@ -1556,8 +1553,8 @@ msgstr "Add explicit English and Simplified Chinese language packs, custom edito
 #~ msgid "Clear Output"
 #~ msgstr "Clear Output"
 
-#~ msgid "Hide Build Output"
-#~ msgstr "Hide Build Output"
+#~ msgid "Hide Dev Experience Output"
+#~ msgstr "Hide Dev Experience Output"
 
 #~ msgid ""
 #~ "Commands use direct argument parsing, not a shell. Available "
@@ -1578,8 +1575,8 @@ msgstr "Add explicit English and Simplified Chinese language packs, custom edito
 #~ msgid "Unable to save build settings: %s"
 #~ msgstr "Unable to save build settings: %s"
 
-#~ msgid "Build & Run Settings"
-#~ msgstr "Build & Run Settings"
+#~ msgid "Dev Experience Settings"
+#~ msgstr "Dev Experience Settings"
 
 #~ msgid "Explicit Commands"
 #~ msgstr "Explicit Commands"
@@ -1607,8 +1604,8 @@ msgstr "Add explicit English and Simplified Chinese language packs, custom edito
 #~ msgid "Run Command"
 #~ msgstr "Run Command"
 
-#~ msgid "Save Build & Run Settings"
-#~ msgstr "Save Build & Run Settings"
+#~ msgid "Save Dev Experience Settings"
+#~ msgstr "Save Dev Experience Settings"
 
 #, c-format
 #~ msgid "Link test complete: %u reachable, %u failed"
@@ -1742,3 +1739,8 @@ msgstr "Add explicit English and Simplified Chinese language packs, custom edito
 
 #~ msgid "Replace with"
 #~ msgstr "Replace with"
+msgid "Build Profile (debug/release)"
+msgstr "Build Profile (debug/release)"
+
+msgid "Debugger (e.g. gdb)"
+msgstr "Debugger (e.g. gdb)"
